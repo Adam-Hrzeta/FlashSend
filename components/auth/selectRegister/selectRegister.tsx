@@ -35,7 +35,7 @@ export default function SelectRegister() {
           <View style={styles.typeSelector}>
             <TouchableOpacity
               style={styles.typeButton}
-              onPress={() => router.push('/auth/registerBusiness')}
+              onPress={() => router.push('/auth/registerBusisness')}
             >
               <Text style={styles.typeButtonText}>Negocio</Text>
             </TouchableOpacity>

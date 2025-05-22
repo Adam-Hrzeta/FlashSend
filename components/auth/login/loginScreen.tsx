@@ -3,17 +3,31 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { ImageBackground, StyleSheet, TextInput, TouchableOpacity, View, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { router } from 'expo-router';
+import { supabase } from '@/lib/supabase'; // Asegúrate de importar correctamente
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert('Campos incompletos', 'Por favor completa todos los campos');
-    } else {
-      Alert.alert('¡Bienvenido!', `Sesión iniciada como ${email}`);
+      return;
     }
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      Alert.alert('Error de autenticación', error.message);
+      return;
+    }
+
+    // Aquí ya está autenticado correctamente
+    Alert.alert('¡Bienvenido!', `Sesión iniciada como ${email}`);
+    router.push('/profiles/busisnessProfile'); // Cambia esta ruta si tu perfil tiene otro nombre
   };
 
   return (
@@ -27,9 +41,7 @@ export default function LoginScreen() {
         style={styles.container}
       >
         <View style={styles.card}>
-          <ThemedText type="title" style={styles.title}>
-            Iniciar sesión
-          </ThemedText>
+          <ThemedText type="title" style={styles.title}>Iniciar sesión</ThemedText>
 
           <View style={styles.inputGroup}>
             <MaterialIcons name="email" size={22} color="#64B5F6" style={styles.icon} />
@@ -56,15 +68,14 @@ export default function LoginScreen() {
             />
           </View>
 
-          <TouchableOpacity style={styles.button} onPress={() => router.push('/dashboard/dasboard')}>
+          <TouchableOpacity style={styles.button} onPress={handleLogin}>
             <ThemedText style={styles.buttonText}>Entrar</ThemedText>
             <MaterialIcons name="login" size={20} color="white" />
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => router.push('/auth/registerBusiness')}>
             <ThemedText style={styles.registerText}>
-              ¿No tienes cuenta?{' '}
-              <ThemedText style={styles.registerBold}>Regístrate</ThemedText>
+              ¿No tienes cuenta? <ThemedText style={styles.registerBold}>Regístrate</ThemedText>
             </ThemedText>
           </TouchableOpacity>
         </View>
