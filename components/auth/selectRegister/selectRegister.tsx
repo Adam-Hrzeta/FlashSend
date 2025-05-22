@@ -1,31 +1,18 @@
 import { ThemedText } from '@/components/ThemedText';
-import { Ionicons } from '@expo/vector-icons'; 
+import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import {
-  ImageBackground,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ImageBackground, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 export default function SelectRegister() {
   const router = useRouter();
 
   return (
     <ImageBackground
-      source={require('../../../assets/Gif/fondo1.gif')}
+      source={require('../../../assets/images/fondoLogin.jpg')}
       style={styles.background}
       resizeMode="cover"
+      blurRadius={2}
     >
-      {/* Botón de regreso */}
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => router.push('/')}
-      >
-        <Ionicons name="arrow-back" size={24} color="white" />
-      </TouchableOpacity>
-
       <View style={styles.container}>
         <View style={styles.card}>
           <ThemedText type="title" style={styles.title}>
@@ -33,36 +20,46 @@ export default function SelectRegister() {
           </ThemedText>
 
           <View style={styles.typeSelector}>
+            {/* Botón Negocio - Color morado */}
             <TouchableOpacity
-              style={styles.typeButton}
+              style={[styles.typeButton, styles.businessButton]}
               onPress={() => router.push('/auth/registerBusiness')}
+              activeOpacity={0.8}
             >
-              <Text style={styles.typeButtonText}>Negocio</Text>
+              <MaterialIcons name="store" size={24} color="white" />
+              <ThemedText style={styles.typeButtonText}>Negocio</ThemedText>
             </TouchableOpacity>
 
+            {/* Botón Cliente - Color azul */}
             <TouchableOpacity
-              style={styles.typeButton}
+              style={[styles.typeButton, styles.clientButton]}
               onPress={() => router.push('/auth/registerClients')}
+              activeOpacity={0.8}
             >
-              <Text style={styles.typeButtonText}>Cliente</Text>
+              <MaterialIcons name="person" size={24} color="white" />
+              <ThemedText style={styles.typeButtonText}>Cliente</ThemedText>
             </TouchableOpacity>
 
+            {/* Botón Repartidor - Color verde */}
             <TouchableOpacity
-              style={styles.typeButton}
+              style={[styles.typeButton, styles.dealerButton]}
               onPress={() => router.push('/auth/registerDealers')}
+              activeOpacity={0.8}
             >
-              <Text style={styles.typeButtonText}>Repartidor</Text>
+              <MaterialIcons name="delivery-dining" size={24} color="white" />
+              <ThemedText style={styles.typeButtonText}>Repartidor</ThemedText>
             </TouchableOpacity>
           </View>
 
           <TouchableOpacity
             style={styles.loginLink}
             onPress={() => router.push('/')}
+            activeOpacity={0.6}
           >
-            <Text style={styles.loginLinkText}>
+            <ThemedText style={styles.loginLinkText}>
               ¿Ya estás registrado?{' '}
-              <Text style={styles.loginLinkBold}>Inicia sesión</Text>
-            </Text>
+              <ThemedText style={styles.loginLinkBold}>Inicia sesión</ThemedText>
+            </ThemedText>
           </TouchableOpacity>
         </View>
       </View>
@@ -73,58 +70,80 @@ export default function SelectRegister() {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
+    justifyContent: 'center',
   },
   container: {
     flex: 1,
     justifyContent: 'center',
-    padding: 20,
+    paddingHorizontal: 24,
   },
   card: {
-    backgroundColor: 'rgba(0,0,0,0.65)',
-    borderRadius: 28,
-    padding: 24,
+    backgroundColor: 'rgba(126, 87, 194, 0.8)',
+    borderRadius: 24,
+    padding: 32,
+    shadowColor: '#7E57C2',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(126, 87, 194, 0.2)',
   },
   title: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    color: '#CE93D8',
+    fontSize: 28,
+    fontWeight: '700',
+    color: 'white',
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 32,
+    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   typeSelector: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 20,
+    gap: 16,
+    marginBottom: 24,
   },
   typeButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: 18,
-    backgroundColor: '#9575CD',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    shadowColor: 'rgba(0, 0, 0, 0.2)',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  businessButton: {
+    backgroundColor: '#FF1493', // Morado
+  },
+  clientButton: {
+    backgroundColor: '#4285F4', // Azul
+  },
+  dealerButton: {
+    backgroundColor: '#34A853', // Verde
   },
   typeButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 16,
   },
   loginLink: {
-    marginTop: 20,
+    marginTop: 16,
   },
   loginLinkText: {
-    color: '#CE93D8',
     textAlign: 'center',
+    fontSize: 14,
+    color: 'white',
   },
   loginLinkBold: {
-    fontWeight: 'bold',
-    textDecorationLine: 'underline',
+    fontWeight: '600',
     color: '#E1BEE7',
-  },
-  backButton: {
-    position: 'absolute',
-    top: 50,
-    left: 20,
-    backgroundColor: 'rgba(149, 117, 205, 0.7)',
-    borderRadius: 20,
-    padding: 10,
-    zIndex: 1,
+    textDecorationLine: 'underline',
   },
 });
