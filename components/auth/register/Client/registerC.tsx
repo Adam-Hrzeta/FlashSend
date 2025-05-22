@@ -2,12 +2,10 @@ import { ThemedText } from '@/components/ThemedText';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Picker } from '@react-native-picker/picker';
 import { StyleSheet, TextInput, TouchableOpacity, View, Alert } from 'react-native';
 import { supabase } from '@/lib/supabase'; 
 
 export default function RegisterClientsScreen() {
-  const [selectedCategory, setSelectedCategory] = useState('comida');
   const [displayName, setDisplayName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -19,7 +17,6 @@ export default function RegisterClientsScreen() {
       password,
       options: {
         data: {
-          category: selectedCategory,
           display_name: displayName,
           phone: phone,
         },
@@ -34,10 +31,9 @@ export default function RegisterClientsScreen() {
     const userId = signUpData?.user?.id;
 
     if (userId) {
-      const { error: insertError } = await supabase.from('businesses').insert([
+      const { error: insertError } = await supabase.from('clients').insert([
         {
           user_id: userId,
-          category: selectedCategory,
           display_name: displayName,
           phone: phone,
           email: email,
@@ -45,7 +41,7 @@ export default function RegisterClientsScreen() {
       ]);
 
       if (insertError) {
-        Alert.alert('Error al guardar negocio', insertError.message);
+        Alert.alert('Error al guardar los datos', insertError.message);
         return;
       }
     }
@@ -59,10 +55,10 @@ export default function RegisterClientsScreen() {
     <View style={styles.container}>
       <Image source={require('../../../../assets/Gif/fondo1.gif')} style={styles.background} contentFit="cover" />
       <View style={styles.overlay}>
-        <ThemedText type="title" style={styles.title}>Registrar mi negocio</ThemedText>
+        <ThemedText type="title" style={styles.title}>Registrarme</ThemedText>
 
         <TextInput
-          placeholder="Nombre del propietario"
+          placeholder="Nombre Completo"
           placeholderTextColor="#ccc"
           style={styles.input}
           onChangeText={setDisplayName}
@@ -75,21 +71,6 @@ export default function RegisterClientsScreen() {
           keyboardType="phone-pad"
           onChangeText={setPhone}
         />
-
-        <View style={styles.pickerWrapper}>
-          <Picker
-            selectedValue={selectedCategory}
-            onValueChange={(itemValue) => setSelectedCategory(itemValue)}
-            style={styles.picker}
-            dropdownIconColor="black"
-          >
-            <Picker.Item label="Comida" value="comida" />
-            <Picker.Item label="Tecnología" value="tecnologia" />
-            <Picker.Item label="Ropa" value="ropa" />
-            <Picker.Item label="Hogar" value="hogar" />
-            <Picker.Item label="Salud" value="salud" />
-          </Picker>
-        </View>
 
         <TextInput
           placeholder="Correo electrónico"
