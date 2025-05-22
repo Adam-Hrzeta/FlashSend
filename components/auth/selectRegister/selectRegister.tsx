@@ -37,21 +37,21 @@ export default function SelectRegister() {
               style={styles.typeButton}
               onPress={() => router.push('/auth/registerBusiness')}
             >
-              <Text style={styles.typeButtonText}>NEGOCIO</Text>
+              <Text style={styles.typeButtonText}>Negocio</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.typeButton}
               onPress={() => router.push('/auth/registerClients')}
             >
-              <Text style={styles.typeButtonText}>CLIENTE</Text>
+              <Text style={styles.typeButtonText}>Cliente</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.typeButton}
               onPress={() => router.push('/')}
             >
-              <Text style={styles.typeButtonText}>ATENDER</Text>
+              <Text style={styles.typeButtonText}>Repartidor</Text>
             </TouchableOpacity>
           </View>
 

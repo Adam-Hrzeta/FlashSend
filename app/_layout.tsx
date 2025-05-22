@@ -2,8 +2,6 @@ import React, { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Drawer } from "expo-router/drawer";
 import { AntDesign, FontAwesome5, Fontisto, Ionicons, MaterialIcons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 export default function Layout() {
   
