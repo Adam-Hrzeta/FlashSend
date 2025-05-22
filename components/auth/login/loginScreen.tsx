@@ -56,7 +56,7 @@ export default function LoginScreen() {
             />
           </View>
 
-          <TouchableOpacity style={styles.button} onPress={handleLogin}>
+          <TouchableOpacity style={styles.button} onPress={() => router.push('/dashboard/dasboard')}>
             <ThemedText style={styles.buttonText}>Entrar</ThemedText>
             <MaterialIcons name="login" size={20} color="white" />
           </TouchableOpacity>
