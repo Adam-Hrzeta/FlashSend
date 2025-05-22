@@ -29,22 +29,31 @@ export default function TabLayout() {
       <Tabs.Screen
         name="login"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: 'Login',
         }}
       />
       <Tabs.Screen
         name="select"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: 'Selector de Usuario',
         }}
       />
       <Tabs.Screen
         name="registerBusiness"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Registro de Negocios',
+        }}
+      />
+      <Tabs.Screen
+        name="registerClients"
+        options={{
+          title: 'Registro de Clientes',
+        }}
+      />
+      <Tabs.Screen
+        name="registerDealers"
+        options={{
+          title: 'Registro de Repartidores',
         }}
       />
     </Tabs>
