@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { View, Text, Image, StyleSheet, ActivityIndicator } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 
 type Business = {
@@ -9,11 +8,10 @@ type Business = {
   phone: string;
   email: string;
   category: string;
-  //image_url?: string | null;
+  // image_url?: string | null;
 };
 
 export default function BusinessProfileScreen() {
-  const { id } = useLocalSearchParams(); // id del negocio recibido como parámetro
   const [business, setBusiness] = useState<Business | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -22,13 +20,26 @@ export default function BusinessProfileScreen() {
   }, []);
 
   const fetchBusiness = async () => {
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      console.error('No se pudo obtener el usuario');
+      setLoading(false);
+      return;
+    }
+
     const { data, error } = await supabase
       .from('businesses')
       .select('*')
-      .eq('id', id)
+      .eq('user_id', user.id)
       .single();
 
-    if (!error) {
+    if (error) {
+      console.error('Error al obtener el negocio:', error.message);
+    } else {
       setBusiness(data);
     }
 
@@ -53,14 +64,16 @@ export default function BusinessProfileScreen() {
 
   return (
     <View style={styles.container}>
-      {/* <Image
+      {/* 
+      <Image
         source={
           business.image_url
             ? { uri: business.image_url }
-            : require('@/assets/default_profile.png') // Ruta de imagen por defecto
+            : require('@/assets/default_profile.png')
         }
         style={styles.image}
-      /> */}
+      /> 
+      */}
       <Text style={styles.name}>{business.display_name}</Text>
       <Text style={styles.info}>📞 {business.phone}</Text>
       <Text style={styles.info}>📧 {business.email}</Text>
