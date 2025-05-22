@@ -73,7 +73,7 @@ export default function LoginScreen() {
             <MaterialIcons name="login" size={20} color="white" />
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => router.push('/auth/registerBusiness')}>
+          <TouchableOpacity onPress={() => router.push('/auth/registerBusisness')}>
             <ThemedText style={styles.registerText}>
               ¿No tienes cuenta? <ThemedText style={styles.registerBold}>Regístrate</ThemedText>
             </ThemedText>
