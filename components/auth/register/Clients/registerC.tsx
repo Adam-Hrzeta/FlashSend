@@ -1,9 +1,10 @@
 import { ThemedText } from '@/components/ThemedText';
+import { supabase } from '@/lib/supabase';
+import { MaterialIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, TextInput, TouchableOpacity, View, Alert } from 'react-native';
-import { supabase } from '@/lib/supabase'; 
+import { Alert, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function RegisterClientsScreen() {
   const [displayName, setDisplayName] = useState('');
@@ -50,104 +51,171 @@ export default function RegisterClientsScreen() {
     router.push('/auth/login');
   };
 
-
   return (
     <View style={styles.container}>
-      <Image source={require('../../../../assets/Gif/fondo1.gif')} style={styles.background} contentFit="cover" />
+      <Image
+        source={require('../../../../assets/images/fondoLogin.jpg')}
+        style={styles.background}
+        contentFit="cover"
+      />
       <View style={styles.overlay}>
-        <ThemedText type="title" style={styles.title}>Registrarme</ThemedText>
+        <View style={styles.card}>
+          <ThemedText type="title" style={styles.title}>Registrarme</ThemedText>
 
-        <TextInput
-          placeholder="Nombre Completo"
-          placeholderTextColor="#ccc"
-          style={styles.input}
-          onChangeText={setDisplayName}
-        />
+          <View style={styles.inputGroup}>
+            <MaterialIcons name="person" size={22} color="#FF69B4" style={styles.icon} />
+            <TextInput
+              placeholder="Nombre Completo"
+              placeholderTextColor="#A3A3A3"
+              style={styles.input}
+              onChangeText={setDisplayName}
+            />
+          </View>
 
-        <TextInput
-          placeholder="Teléfono"
-          placeholderTextColor="#ccc"
-          style={styles.input}
-          keyboardType="phone-pad"
-          onChangeText={setPhone}
-        />
+          <View style={styles.inputGroup}>
+            <MaterialIcons name="phone" size={22} color="#FF69B4" style={styles.icon} />
+            <TextInput
+              placeholder="Teléfono"
+              placeholderTextColor="#A3A3A3"
+              style={styles.input}
+              keyboardType="phone-pad"
+              onChangeText={setPhone}
+            />
+          </View>
 
-        <TextInput
-          placeholder="Correo electrónico"
-          placeholderTextColor="#ccc"
-          style={styles.input}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-        />
-        <TextInput
-          placeholder="Contraseña"
-          placeholderTextColor="#ccc"
-          secureTextEntry
-          style={styles.input}
-          onChangeText={setPassword}
-        />
+          <View style={styles.inputGroup}>
+            <MaterialIcons name="email" size={22} color="#FF69B4" style={styles.icon} />
+            <TextInput
+              placeholder="Correo electrónico"
+              placeholderTextColor="#A3A3A3"
+              style={styles.input}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+            />
+          </View>
 
-        <TouchableOpacity style={styles.button} onPress={handleRegister}>
-          <ThemedText style={styles.buttonText}>Registrar</ThemedText>
-        </TouchableOpacity>
+          <View style={styles.inputGroup}>
+            <MaterialIcons name="lock" size={22} color="#FF69B4" style={styles.icon} />
+            <TextInput
+              placeholder="Contraseña"
+              placeholderTextColor="#A3A3A3"
+              secureTextEntry
+              style={styles.input}
+              onChangeText={setPassword}
+            />
+          </View>
 
-        <TouchableOpacity onPress={() => router.push('/auth/login')}>
-          <ThemedText style={styles.linkText}>¿Ya tienes cuenta? Inicia sesión</ThemedText>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleRegister}
+            activeOpacity={0.8}
+          >
+            <ThemedText style={styles.buttonText}>Registrar</ThemedText>
+            <MaterialIcons name="arrow-forward" size={20} color="white" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => router.push('/auth/login')}
+            activeOpacity={0.6}
+          >
+            <ThemedText style={styles.linkText}>
+              ¿Ya tienes cuenta? <ThemedText style={styles.linkBold}>Inicia sesión</ThemedText>
+            </ThemedText>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
 }
-
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  background: { position: 'absolute', width: '100%', height: '100%' },
+  container: {
+    flex: 1
+  },
+  background: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    opacity: 0.9
+  },
   overlay: {
     flex: 1,
     justifyContent: 'center',
-    padding: 20,
-    backgroundColor: 'rgba(126, 87, 194, 0.7)',
+    padding: 24,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)'
+  },
+  card: {
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 20,
+    padding: 28,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 8,
+    borderWidth: 0,
   },
   title: {
-    color: 'white',
-    fontSize: 28,
+    fontSize: 26,
+    fontWeight: '800',
+    color: '#7E57C2', // Cambiado a morado
     textAlign: 'center',
-    marginBottom: 30,
-    fontWeight: 'bold',
+    marginBottom: 28,
+    letterSpacing: 0.3
+  },
+  inputGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 1)',
+    borderRadius: 14,
+    marginBottom: 18,
+    paddingHorizontal: 18,
+    height: 54,
+    borderWidth: 1.5,
+    borderColor: '#D1C4E9', // Cambiado a morado claro
+    elevation: 2
+  },
+  icon: {
+    marginRight: 12,
+    color: '#7E57C2' // Cambiado a morado
   },
   input: {
-    backgroundColor: 'white',
-    padding: 14,
-    borderRadius: 10,
-    marginBottom: 15,
-    fontSize: 16,
-  },
-  pickerWrapper: {
-    backgroundColor: 'white',
-    borderRadius: 10,
-    marginBottom: 15,
-    paddingLeft: 10,
-  },
-  picker: {
-    height: 50,
-    width: '100%',
+    flex: 1,
+    fontSize: 15,
+    color: '#5E35B1', // Cambiado a morado oscuro
+    fontWeight: '500',
+    paddingVertical: 0
   },
   button: {
-    backgroundColor: '#9C27B0',
-    padding: 14,
-    borderRadius: 25,
+    flexDirection: 'row',
+    backgroundColor: '#7E57C2', // Cambiado a morado
+    borderRadius: 14,
+    paddingVertical: 15,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 15,
+    gap: 10,
+    marginTop: 18,
+    marginBottom: 22,
+    elevation: 5,
+    shadowColor: '#7E57C2', // Cambiado a morado
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
   buttonText: {
     color: 'white',
-    fontWeight: '600',
+    fontWeight: '700',
+    fontSize: 16,
+    letterSpacing: 0.3
   },
   linkText: {
-    color: 'white',
     textAlign: 'center',
-    marginTop: 10,
-    textDecorationLine: 'underline',
+    fontSize: 14,
+    color: '#757575',
+    marginTop: 8
+  },
+  linkBold: {
+    fontWeight: '700',
+    color: '#7E57C2', // Cambiado a morado
+    textDecorationLine: 'underline'
   },
 });
