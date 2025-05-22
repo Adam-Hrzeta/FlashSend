@@ -49,7 +49,7 @@ export default function SelectRegister() {
 
             <TouchableOpacity
               style={styles.typeButton}
-              onPress={() => router.push('/')}
+              onPress={() => router.push('/auth/registerDealers')}
             >
               <Text style={styles.typeButtonText}>Repartidor</Text>
             </TouchableOpacity>
