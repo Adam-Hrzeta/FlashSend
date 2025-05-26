@@ -50,9 +50,17 @@ export default function Layout() {
       <Drawer.Screen
         name="dashboard"
         options={{
-          drawerLabel: "Dashboard",
-          title: "",
-          drawerIcon: ({ color }) => <FontAwesome5 name="user-friends" size={24} color={color} />,
+          drawerLabel: "Pantalla Principal",
+          title: "Pantalla Principal",
+          drawerIcon: ({ color }) => <AntDesign name="dashboard" size={24} color={color} />,
+        }}
+      />
+      <Drawer.Screen
+        name="profiles"
+        options={{
+          drawerLabel: "Perfiles",
+          title: "Perfiles de Usuario",
+          drawerIcon: ({ color }) => <AntDesign name="profile" size={24} color={color} />,
         }}
       />
       </Drawer>
