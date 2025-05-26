@@ -8,10 +8,10 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.menuContainer}>
-        <TouchableOpacity style={styles.menuButton} onPress={() => {router.push('/auth/login')}}>
+        <TouchableOpacity style={styles.menuButton} onPress={() => { router.push('/auth/login') }}>
           <ThemedText style={styles.menuText}>Iniciar sesión</ThemedText>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.menuButton, styles.registerButton]} onPress={() => {router.push('/auth/select')}}>
+        <TouchableOpacity style={[styles.menuButton, styles.registerButton]} onPress={() => { router.push('/auth/select') }}>
           <ThemedText style={[styles.menuText, styles.registerText]}>Registrarme</ThemedText>
         </TouchableOpacity>
       </View>
@@ -165,7 +165,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
     padding: 15,
-    paddingTop: 40,
     backgroundColor: 'white',
     borderBottomWidth: 1,
     borderBottomColor: '#EDE7F6',
