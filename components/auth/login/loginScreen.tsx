@@ -14,7 +14,6 @@ export default function LoginScreen() {
       Alert.alert('Campos incompletos', 'Por favor completa todos los campos');
       return;
     }
-
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -37,7 +36,6 @@ export default function LoginScreen() {
       blurRadius={2}
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}
       >
         <View style={styles.card}>
@@ -81,7 +79,7 @@ export default function LoginScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={() => router.push('/auth/registerBusisness')}
+              onPress={() => router.push('/auth/select')}
               activeOpacity={0.6}
             >
               <ThemedText style={styles.registerText}>

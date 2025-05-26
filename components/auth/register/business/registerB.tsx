@@ -64,12 +64,12 @@ export default function RegisterBusinessScreen() {
       />
       <View style={styles.overlay}>
         <View style={styles.card}>
-          <ThemedText type="title" style={styles.title}>Registrar mi negocio</ThemedText>
+          <ThemedText type="title" style={styles.title}>Registrar mi Negocio</ThemedText>
 
           <View style={styles.inputGroup}>
             <MaterialIcons name="person" size={22} color="#7E57C2" style={styles.icon} />
             <TextInput
-              placeholder="Nombre del propietario"
+              placeholder="Nombre del Negocio"
               placeholderTextColor="#A3A3A3"
               style={styles.input}
               onChangeText={setDisplayName}

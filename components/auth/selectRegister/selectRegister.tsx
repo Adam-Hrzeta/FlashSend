@@ -53,7 +53,7 @@ export default function SelectRegister() {
 
           <TouchableOpacity
             style={styles.loginLink}
-            onPress={() => router.push('/')}
+            onPress={() => router.push('/auth/login')}
             activeOpacity={0.6}
           >
             <ThemedText style={styles.loginLinkText}>
