@@ -3,7 +3,16 @@ import { supabase } from '@/lib/supabase';
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, ImageBackground, KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  Alert,
+  ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -15,25 +24,50 @@ export default function LoginScreen() {
       return;
     }
 
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { data: session, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (error) {
-      Alert.alert('Error de autenticación', error.message);
+    if (error || !session?.user) {
+      Alert.alert('Error de autenticación', error?.message || 'No se pudo iniciar sesión');
       return;
     }
 
-    Alert.alert('¡Bienvenido!', `Sesión iniciada como ${email}`);
+    const userId = session.user.id;
 
-    //aplicar logica de redirección según el rol del usuario
-    if (data.user?.user_metadata?.role === 'business') {
-    router.push('/profiles/busisnessProfile');
-  }; else {
-    data.user?.user_metadata?.role === 'client' ?
-    router.push('/profiles/clientProfile') :
-  }
+    try {
+      // Verificar si es CLIENTE
+      const { data: client } = await supabase
+        .from('clients')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+
+      if (client) {
+        router.push('/profiles/clientsProfile');
+        return;
+      }
+
+      // Verificar si es NEGOCIO
+      const { data: business } = await supabase
+        .from('businesses')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+
+      if (business) {
+        router.push('/profiles/busisnessProfile');
+        return;
+      }
+
+
+      Alert.alert('Acceso denegado', 'Tu cuenta no está asociada a un tipo de usuario válido');
+    } catch (err) {
+      Alert.alert('Error inesperado', 'Hubo un problema al verificar tu rol. Intenta de nuevo.');
+      console.error(err);
+    }
+  };
 
   return (
     <ImageBackground
@@ -47,7 +81,9 @@ export default function LoginScreen() {
         style={styles.container}
       >
         <View style={styles.card}>
-          <ThemedText type="title" style={styles.title}>Iniciar sesión</ThemedText>
+          <ThemedText type="title" style={styles.title}>
+            Iniciar sesión
+          </ThemedText>
 
           <View style={styles.inputContainer}>
             <View style={styles.inputGroup}>
@@ -91,7 +127,8 @@ export default function LoginScreen() {
               activeOpacity={0.6}
             >
               <ThemedText style={styles.registerText}>
-                ¿No tienes cuenta? <ThemedText style={styles.registerBold}>Regístrate aquí</ThemedText>
+                ¿No tienes cuenta?{' '}
+                <ThemedText style={styles.registerBold}>Regístrate aquí</ThemedText>
               </ThemedText>
             </TouchableOpacity>
           </View>
