@@ -26,8 +26,14 @@ export default function LoginScreen() {
     }
 
     Alert.alert('¡Bienvenido!', `Sesión iniciada como ${email}`);
+
+    //aplicar logica de redirección según el rol del usuario
+    if (data.user?.user_metadata?.role === 'business') {
     router.push('/profiles/busisnessProfile');
-  };
+  }; else {
+    data.user?.user_metadata?.role === 'client' ?
+    router.push('/profiles/clientProfile') :
+  }
 
   return (
     <ImageBackground
