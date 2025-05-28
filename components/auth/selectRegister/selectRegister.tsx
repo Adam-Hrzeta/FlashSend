@@ -120,13 +120,13 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   businessButton: {
-    backgroundColor: '#FF1493', // Morado
+    backgroundColor: '#FF1493', 
   },
   clientButton: {
-    backgroundColor: '#4285F4', // Azul
+    backgroundColor: '#4285F4',
   },
   dealerButton: {
-    backgroundColor: '#34A853', // Verde
+    backgroundColor: '#34A853',
   },
   typeButtonText: {
     color: 'white',

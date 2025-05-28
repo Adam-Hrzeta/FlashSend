@@ -37,30 +37,23 @@ export default function LoginScreen() {
     const userId = session.user.id;
 
     try {
-      // Verificar si es CLIENTE
-      const { data: client } = await supabase
-        .from('clients')
-        .select('*')
-        .eq('user_id', userId)
-        .single();
-
-      if (client) {
-        router.push('/profiles/clientsProfile');
-        return;
-      }
-
-      // Verificar si es NEGOCIO
       const { data: business } = await supabase
-        .from('businesses')
+        .from('entities')
         .select('*')
         .eq('user_id', userId)
         .single();
 
-      if (business) {
-        router.push('/profiles/busisnessProfile');
-        return;
+      switch (business?.type_user) {
+        case 'business':
+          router.push('/profiles/busisnessProfile');
+          break;
+        case 'client':
+          router.push('/profiles/clientsProfile');
+          break;
+        // case 'dealer':
+        //   router.push('/profiles/dealerProfile');
+        // break;
       }
-
 
       Alert.alert('Acceso denegado', 'Tu cuenta no está asociada a un tipo de usuario válido');
     } catch (err) {
