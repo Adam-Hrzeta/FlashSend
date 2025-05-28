@@ -1,17 +1,21 @@
+// Importaciones necesarias
+import { supabase } from '@/lib/supabase';
+import { MaterialIcons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
   ActivityIndicator,
-  TouchableOpacity,
   Alert,
+  Image,
+  Modal,
+  Pressable,
   ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import { MaterialIcons } from '@expo/vector-icons';
-import { supabase } from '@/lib/supabase';
 
 type Business = {
   id: string;
@@ -21,7 +25,6 @@ type Business = {
   category: string;
   description?: string;
   address?: string;
-  website?: string;
   image_url?: string | null;
 };
 
@@ -30,6 +33,12 @@ export default function BusinessProfileScreen() {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
 
+  const [username, setUsername] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
+
   useEffect(() => {
     fetchBusiness();
   }, []);
@@ -37,12 +46,7 @@ export default function BusinessProfileScreen() {
   const fetchBusiness = async () => {
     try {
       const { data: { user }, error: userError } = await supabase.auth.getUser();
-
-      if (userError || !user) {
-        console.error('No se pudo obtener el usuario');
-        setLoading(false);
-        return;
-      }
+      if (userError || !user) return;
 
       const { data, error } = await supabase
         .from('businesses')
@@ -50,26 +54,55 @@ export default function BusinessProfileScreen() {
         .eq('user_id', user.id)
         .single();
 
-      if (error) {
-        console.error('Error al obtener el negocio:', error.message);
-      } else {
+      if (!error && data) {
         setBusiness(data);
+        setUsername(data.display_name);
+        setPhone(data.phone);
+        setEmail(data.email);
       }
     } catch (error) {
-      console.error('Error inesperado:', error);
+      console.error('Error:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUpdateProfile = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const authUpdates: { email?: string; password?: string } = {};
+      if (email && email !== user.email) authUpdates.email = email;
+      if (password.trim()) authUpdates.password = password;
+
+      if (Object.keys(authUpdates).length > 0) {
+        const { error: authError } = await supabase.auth.updateUser(authUpdates);
+        if (authError) throw authError;
+      }
+
+      const { error: updateError } = await supabase
+        .from('businesses')
+        .update({ display_name: username, phone, email })
+        .eq('user_id', user.id);
+
+      if (updateError) throw updateError;
+
+      Alert.alert('Éxito', 'Perfil actualizado correctamente.');
+      setModalVisible(false);
+      fetchBusiness();
+      setPassword('');
+    } catch (e) {
+      Alert.alert('Error', 'No se pudo actualizar el perfil.');
     }
   };
 
   const handlePickImage = async () => {
     try {
       setUploading(true);
-      
-      // Solicitar permisos
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('Permisos requeridos', 'Necesitamos acceso a tu galería para cambiar la imagen');
+        Alert.alert('Permisos requeridos', 'Se requiere acceso a la galería');
         return;
       }
 
@@ -80,12 +113,11 @@ export default function BusinessProfileScreen() {
         aspect: [1, 1],
       });
 
-      if (!result.canceled && result.assets && result.assets[0].uri) {
+      if (!result.canceled && result.assets?.[0]?.uri) {
         await uploadImage(result.assets[0].uri);
       }
-    } catch (error) {
-      console.error('Error al seleccionar imagen:', error);
-      Alert.alert('Error', 'Ocurrió un error al seleccionar la imagen');
+    } catch (e) {
+      console.error('Error al seleccionar imagen', e);
     } finally {
       setUploading(false);
     }
@@ -93,56 +125,38 @@ export default function BusinessProfileScreen() {
 
   const uploadImage = async (uri: string) => {
     try {
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      
-      if (userError || !user) {
-        throw new Error('No se pudo autenticar al usuario');
-      }
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuario no autenticado');
 
-      // Extraer extensión del archivo
       const fileExt = uri.split('.').pop()?.toLowerCase() || 'jpg';
       const fileName = `business_avatar_${Date.now()}.${fileExt}`;
       const filePath = `${user.id}/${fileName}`;
       const fileType = `image/${fileExt === 'jpg' ? 'jpeg' : fileExt}`;
-
-      // Convertir a blob
       const response = await fetch(uri);
       const blob = await response.blob();
 
-      // Subir a Supabase Storage
       const { error: uploadError } = await supabase.storage
         .from('business-avatars')
-        .upload(filePath, blob, {
-          contentType: fileType,
-          upsert: true,
-        });
+        .upload(filePath, blob, { contentType: fileType, upsert: true });
 
-      if (uploadError) {
-        throw uploadError;
-      }
+      if (uploadError) throw uploadError;
 
-      // Obtener URL pública
-      const { data: { publicUrl } } = supabase.storage
+      const { data: { publicUrl } } = supabase
+        .storage
         .from('business-avatars')
         .getPublicUrl(filePath);
 
-      // Actualizar en la tabla de negocios
       const { error: updateError } = await supabase
         .from('businesses')
         .update({ image_url: publicUrl })
         .eq('user_id', user.id);
 
-      if (updateError) {
-        throw updateError;
-      }
+      if (updateError) throw updateError;
 
-      // Actualizar el estado local
       setBusiness(prev => prev ? { ...prev, image_url: publicUrl } : null);
-      
       Alert.alert('Éxito', 'Imagen actualizada correctamente');
-    } catch (error) {
-      console.error('Error al subir imagen:', error);
-      Alert.alert('Error', 'No se pudo actualizar la imagen. Por favor intenta nuevamente.');
+    } catch (e) {
+      Alert.alert('Error', 'No se pudo actualizar la imagen.');
     }
   };
 
@@ -163,101 +177,155 @@ export default function BusinessProfileScreen() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.scroll}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Perfil del Negocio</Text>
-      </View>
-      
-      <View style={styles.profileContainer}>
-        <TouchableOpacity 
-          onPress={handlePickImage}
-          disabled={uploading}
-          style={styles.imageContainer}
-        >
-          {uploading ? (
-            <View style={styles.imageLoading}>
-              <ActivityIndicator size="small" color="#FFF" />
-            </View>
-          ) : (
-            <>
-              <Image
-                source={
-                  business.image_url
-                    ? { uri: business.image_url }
-                    : require('../../assets/images/default_profile.png')
-                }
-                style={styles.image}
-              />
-              <View style={styles.editIcon}>
-                <MaterialIcons name="edit" size={20} color="#FFF" />
+    <>
+      <ScrollView contentContainerStyle={styles.scroll}>
+        <View style={styles.header}>
+          <Image
+            source={require('../../assets/Gif/fondoP3.gif')}
+            style={styles.headerBackground}
+            resizeMode="cover"
+          />
+        </View>
+
+        <View style={styles.profileRow}>
+          <TouchableOpacity
+            onPress={handlePickImage}
+            disabled={uploading}
+            style={styles.imageContainer}
+          >
+            {uploading ? (
+              <View style={styles.imageLoading}>
+                <ActivityIndicator size="small" color="#FFF" />
               </View>
-            </>
-          )}
-        </TouchableOpacity>
-        
-        <Text style={styles.name}>{business.display_name}</Text>
-        <Text style={styles.category}>{business.category}</Text>
-        
+            ) : (
+              <>
+                <Image
+                  source={
+                    business.image_url
+                      ? { uri: business.image_url }
+                      : require('../../assets/images/default_profile.png')
+                  }
+                  style={styles.image}
+                />
+                <View style={styles.editIcon}>
+                  <MaterialIcons name="edit" size={20} color="#FFF" />
+                </View>
+              </>
+            )}
+          </TouchableOpacity>
+
+          <View style={styles.infoColumn}>
+            <Text style={styles.name}>{username}</Text>
+            <Text style={styles.category}>{business.category}</Text>
+          </View>
+        </View>
+
+        <Text style={styles.sectionTitle}>Información del Perfil</Text>
+
         <View style={styles.card}>
           <View style={styles.infoSection}>
-            <MaterialIcons name="phone" size={20} color="#4A6FA5" />
-            <View style={styles.infoText}>
-              <Text style={styles.label}>Teléfono</Text>
-              <Text style={styles.value}>{business.phone}</Text>
-            </View>
+            <MaterialIcons name="person" size={20} color="#4A6FA5" />
+            <Text style={styles.value}>{username}</Text>
           </View>
-          
+
           <View style={styles.divider} />
-          
+
+          <View style={styles.infoSection}>
+            <MaterialIcons name="phone" size={20} color="#4A6FA5" />
+            <Text style={styles.value}>{phone}</Text>
+          </View>
+
+          <View style={styles.divider} />
+
           <View style={styles.infoSection}>
             <MaterialIcons name="email" size={20} color="#4A6FA5" />
-            <View style={styles.infoText}>
-              <Text style={styles.label}>Correo electrónico</Text>
-              <Text style={styles.value}>{business.email}</Text>
+            <Text style={styles.value}>{business.email}</Text>
+          </View>
+
+          <View style={styles.divider} />
+
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => setModalVisible(true)}
+          >
+            <Text style={styles.buttonText}>Modificar información</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalTitle}>Editar Información</Text>
+
+            <View style={styles.infoSection}>
+              <MaterialIcons name="person" size={20} color="#4A6FA5" />
+              <TextInput
+                style={styles.modalInput}
+                placeholder="Nombre de usuario"
+                value={username}
+                onChangeText={setUsername}
+              />
+            </View>
+
+            <View style={styles.infoSection}>
+              <MaterialIcons name="phone" size={20} color="#4A6FA5" />
+              <TextInput
+                style={styles.modalInput}
+                placeholder="Teléfono"
+                keyboardType="phone-pad"
+                value={phone}
+                onChangeText={setPhone}
+              />
+            </View>
+
+            <View style={styles.infoSection}>
+              <MaterialIcons name="email" size={20} color="#4A6FA5" />
+              <TextInput
+                style={styles.modalInput}
+                placeholder="Correo electrónico"
+                keyboardType="email-address"
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+              />
+            </View>
+
+            <View style={styles.infoSection}>
+              <MaterialIcons name="lock" size={20} color="#4A6FA5" />
+              <TextInput
+                style={styles.modalInput}
+                placeholder="Nueva contraseña"
+                secureTextEntry
+                value={password}
+                onChangeText={setPassword}
+              />
+            </View>
+
+            <View style={styles.modalButtonsRow}>
+              <Pressable
+                style={[styles.modalButton, styles.modalCancelButton]}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.modalCancelText}>Cancelar</Text>
+              </Pressable>
+
+              <Pressable
+                style={[styles.modalButton, styles.modalSaveButton]}
+                onPress={handleUpdateProfile}
+              >
+                <Text style={styles.modalSaveText}>Guardar</Text>
+              </Pressable>
             </View>
           </View>
-          
-          {business.address && (
-            <>
-              <View style={styles.divider} />
-              <View style={styles.infoSection}>
-                <MaterialIcons name="location-on" size={20} color="#4A6FA5" />
-                <View style={styles.infoText}>
-                  <Text style={styles.label}>Dirección</Text>
-                  <Text style={styles.value}>{business.address}</Text>
-                </View>
-              </View>
-            </>
-          )}
-          
-          {business.website && (
-            <>
-              <View style={styles.divider} />
-              <View style={styles.infoSection}>
-                <MaterialIcons name="public" size={20} color="#4A6FA5" />
-                <View style={styles.infoText}>
-                  <Text style={styles.label}>Sitio web</Text>
-                  <Text style={[styles.value, styles.link]}>{business.website}</Text>
-                </View>
-              </View>
-            </>
-          )}
-          
-          {business.description && (
-            <>
-              <View style={styles.divider} />
-              <View style={styles.infoSection}>
-                <MaterialIcons name="description" size={20} color="#4A6FA5" />
-                <View style={styles.infoText}>
-                  <Text style={styles.label}>Descripción</Text>
-                  <Text style={styles.value}>{business.description}</Text>
-                </View>
-              </View>
-            </>
-          )}
         </View>
-      </View>
-    </ScrollView>
+      </Modal>
+    </>
   );
 }
 
@@ -269,36 +337,35 @@ const styles = StyleSheet.create({
   },
   header: {
     height: 120,
-    backgroundColor: '#4A6FA5',
+    position: 'relative',
     justifyContent: 'flex-end',
-    paddingBottom: 20,
-    paddingHorizontal: 20,
   },
-  headerTitle: {
-    color: '#FFF',
-    fontSize: 24,
-    fontWeight: '600',
+  headerBackground: {
+    width: '100%',
+    height: '100%',
   },
-  profileContainer: {
+  profileRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: -50,
+    paddingHorizontal: 20,
+    marginTop: -97,
+    marginBottom: 20,
   },
   imageContainer: {
     position: 'relative',
-    marginBottom: 10,
   },
   image: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 90,
+    height: 90,
+    borderRadius: 45,
     borderWidth: 3,
     borderColor: '#FFF',
     backgroundColor: '#E1E5EA',
   },
   imageLoading: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 90,
+    height: 90,
+    borderRadius: 45,
     backgroundColor: 'rgba(0,0,0,0.3)',
     justifyContent: 'center',
     alignItems: 'center',
@@ -310,67 +377,118 @@ const styles = StyleSheet.create({
     bottom: 0,
     right: 0,
     backgroundColor: '#4A6FA5',
-    borderRadius: 15,
-    width: 30,
-    height: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#FFF',
+    borderRadius: 12,
+    padding: 4,
+  },
+  infoColumn: {
+    marginLeft: 16,
+    flex: 1,
   },
   name: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#2C3E50',
-    marginTop: 5,
+    color: '#FFFF',
   },
   category: {
+    fontSize: 14,
+    color: '#ffff',
+  },
+  sectionTitle: {
     fontSize: 16,
-    color: '#7F8C8D',
-    marginBottom: 20,
+    fontWeight: 'bold',
+    color: '#4A6FA5',
+    marginHorizontal: 20,
+    marginBottom: 10,
   },
   card: {
+    backgroundColor: '#FFF',
+    marginHorizontal: 20,
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  infoSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  value: {
+    marginLeft: 8,
+    color: '#333',
+    fontSize: 14,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#EEE',
+    marginVertical: 10,
+  },
+  button: {
+    marginTop: 10,
+    backgroundColor: '#4A6FA5',
+    padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#FFF',
+    fontWeight: 'bold',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: '#00000099',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalView: {
     backgroundColor: '#FFF',
     borderRadius: 12,
     padding: 20,
     width: '90%',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 3 },
-    shadowRadius: 6,
-    elevation: 5,
   },
-  infoSection: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginVertical: 8,
-  },
-  infoText: {
-    marginLeft: 15,
-    flex: 1,
-  },
-  label: {
-    fontSize: 14,
-    color: '#7F8C8D',
-    marginBottom: 2,
-  },
-  value: {
-    fontSize: 16,
-    color: '#2C3E50',
-    lineHeight: 22,
-  },
-  link: {
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
     color: '#4A6FA5',
+    marginBottom: 15,
   },
-  divider: {
-    height: 1,
-    backgroundColor: '#ECF0F1',
-    marginVertical: 12,
+  modalInput: {
+    flex: 1,
+    marginLeft: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#CCC',
+    paddingVertical: 4,
+    color: '#333',
+  },
+  modalButtonsRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginTop: 20,
+  },
+  modalButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginLeft: 10,
+  },
+  modalCancelButton: {
+    backgroundColor: '#EEE',
+  },
+  modalSaveButton: {
+    backgroundColor: '#4A6FA5',
+  },
+  modalCancelText: {
+    color: '#333',
+  },
+  modalSaveText: {
+    color: '#FFF',
+    fontWeight: 'bold',
   },
   center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F8F9FA',
   },
 });
