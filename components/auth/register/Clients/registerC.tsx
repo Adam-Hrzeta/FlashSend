@@ -11,6 +11,7 @@ export default function RegisterClientsScreen() {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const type_user = 'client'; 
 
   const handleRegister = async () => {
     const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
@@ -20,6 +21,7 @@ export default function RegisterClientsScreen() {
         data: {
           display_name: displayName,
           phone: phone,
+          type_user: type_user,
         },
       },
     });
@@ -32,12 +34,13 @@ export default function RegisterClientsScreen() {
     const userId = signUpData?.user?.id;
 
     if (userId) {
-      const { error: insertError } = await supabase.from('clients').insert([
+      const { error: insertError } = await supabase.from('entities').insert([
         {
           user_id: userId,
           display_name: displayName,
           phone: phone,
           email: email,
+          type_user: type_user,
         },
       ]);
 

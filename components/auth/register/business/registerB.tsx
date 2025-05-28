@@ -13,6 +13,7 @@ export default function RegisterBusinessScreen() {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const type_user = 'business'; 
 
   const handleRegister = async () => {
     const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
@@ -23,6 +24,7 @@ export default function RegisterBusinessScreen() {
           category: selectedCategory,
           display_name: displayName,
           phone: phone,
+          type_user: type_user,
         },
       },
     });
@@ -35,13 +37,14 @@ export default function RegisterBusinessScreen() {
     const userId = signUpData?.user?.id;
 
     if (userId) {
-      const { error: insertError } = await supabase.from('businesses').insert([
+      const { error: insertError } = await supabase.from('entities').insert([
         {
           user_id: userId,
           category: selectedCategory,
           display_name: displayName,
           phone: phone,
           email: email,
+          type_user: type_user,
         },
       ]);
 
@@ -100,8 +103,7 @@ export default function RegisterBusinessScreen() {
                 <Picker.Item label="Comida" value="comida" />
                 <Picker.Item label="Tecnología" value="tecnologia" />
                 <Picker.Item label="Ropa" value="ropa" />
-                <Picker.Item label="Hogar" value="hogar" />
-                <Picker.Item label="Salud" value="salud" />
+                <Picker.Item label="Farmacia" value="hogar" />
               </Picker>
             </View>
           </View>
