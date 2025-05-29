@@ -1,5 +1,4 @@
 import { ThemedText } from '@/components/ThemedText';
-import { supabase } from '@/lib/supabase';
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -18,47 +17,25 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = async () => {
+  const handleLogin = () => {
     if (!email || !password) {
       Alert.alert('Campos incompletos', 'Por favor completa todos los campos');
       return;
     }
 
-    const { data: session, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    // Simulación de login exitoso
+    Alert.alert(
+      'Inicio de sesión simulado', 
+      `Credenciales ingresadas:\nEmail: ${email}\nContraseña: ${password}`
+    );
 
-    if (error || !session?.user) {
-      Alert.alert('Error de autenticación', error?.message || 'No se pudo iniciar sesión');
-      return;
-    }
-
-    const userId = session.user.id;
-
-    try {
-      const { data: business } = await supabase
-        .from('entities')
-        .select('*')
-        .eq('user_id', userId)
-        .single();
-
-      switch (business?.type_user) {
-        case 'business':
-          router.push('/profiles/busisnessProfile');
-          break;
-        case 'client':
-          router.push('/profiles/clientsProfile');
-          break;
-        // case 'dealer':
-        //   router.push('/profiles/dealerProfile');
-        // break;
-      }
-
-      Alert.alert('Acceso denegado', 'Tu cuenta no está asociada a un tipo de usuario válido');
-    } catch (err) {
-      Alert.alert('Error inesperado', 'Hubo un problema al verificar tu rol. Intenta de nuevo.');
-      console.error(err);
+    // Simulamos la navegación según el tipo de usuario
+    const randomUserType = Math.random() > 0.5 ? 'business' : 'client';
+    
+    if (randomUserType === 'business') {
+      router.push('/profiles/busisnessProfile');
+    } else {
+      router.push('/profiles/clientsProfile');
     }
   };
 

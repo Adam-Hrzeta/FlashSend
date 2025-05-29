@@ -15,9 +15,9 @@ export default function TabLayout() {
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
-        tabBarStyle: {
-          display: 'none', // oculta el tabBar por defecto
-        },
+        // tabBarStyle: {
+        //   display: 'none', 
+        // },
       }}
     >
       <Tabs.Screen

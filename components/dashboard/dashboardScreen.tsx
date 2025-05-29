@@ -1,6 +1,5 @@
-import { supabase } from '@/lib/supabase';
 import { Picker } from '@react-native-picker/picker';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   Dimensions,
   FlatList,
@@ -12,34 +11,43 @@ import {
   View,
 } from 'react-native';
 
-type Business = {
-  id: string;
-  user_id: string;
-  category: string;
-  display_name: string;
-  phone: string;
-  description: string;
-};
-
 export default function DashboardScreen() {
-  const [businesses, setBusinesses] = useState<Business[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState('');
   const [searchText, setSearchText] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  
+  // Datos de ejemplo en lugar de los que vendrían de Supabase
+  const [businesses] = useState([
+    {
+      id: '1',
+      display_name: 'Ejemplo Tech',
+      description: 'Soluciones tecnológicas para tu negocio',
+      category: 'tecnologia',
+      phone: '555-1234',
+    },
+    {
+      id: '2',
+      display_name: 'Restaurante Delicia',
+      description: 'Comida casera y deliciosa',
+      category: 'comida',
+      phone: '555-5678',
+    },
+    // Puedes agregar más datos de ejemplo aquí
+  ]);
 
-  useEffect(() => {
-    const fetchBusinesses = async () => {
-      const { data, error } = await supabase.from('businesses').select('*');
-      if (error) console.error('Error fetching businesses:', error);
-      else setBusinesses(data as Business[]);
-    };
-    fetchBusinesses();
-  }, []);
-
-  const filteredBusinesses = businesses.filter((b) => {
-    const matchesCategory = selectedCategory ? b.category === selectedCategory : true;
-    const matchesSearch = b.display_name.toLowerCase().includes(searchText.toLowerCase());
-    return matchesCategory && matchesSearch;
+  const filteredBusinesses = businesses.filter(business => {
+    const matchesSearch = business.display_name.toLowerCase().includes(searchText.toLowerCase()) || 
+                         business.description.toLowerCase().includes(searchText.toLowerCase());
+    const matchesCategory = selectedCategory === '' || business.category === selectedCategory;
+    return matchesSearch && matchesCategory;
   });
+
+  type Business = {
+    id: string;
+    display_name: string;
+    description: string;
+    category: string;
+    phone: string;
+  };
 
   const renderBusinessCard = ({ item }: { item: Business }) => (
     <TouchableOpacity style={styles.card} activeOpacity={0.9}>
@@ -70,7 +78,6 @@ export default function DashboardScreen() {
             <Text style={styles.contactIcon}>📞</Text>
             <Text style={styles.contactText}>{item.phone}</Text>
           </View>
-
         </View>
       </View>
     </TouchableOpacity>
@@ -208,7 +215,7 @@ const styles = StyleSheet.create({
   },
   categoryPicker: {
     height: 56,
-    minWidth: 200,  // Añadido para mejor usabilidad
+    minWidth: 200,
     backgroundColor: '#FFFFFF',
     color: '#2D3748',
     borderRadius: 8,

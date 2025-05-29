@@ -1,5 +1,4 @@
 import { ThemedText } from '@/components/ThemedText';
-import { supabase } from '@/lib/supabase';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 import { Image } from 'expo-image';
@@ -13,48 +12,13 @@ export default function RegisterBusinessScreen() {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const type_user = 'business'; 
 
-  const handleRegister = async () => {
-    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          category: selectedCategory,
-          display_name: displayName,
-          phone: phone,
-          type_user: type_user,
-        },
-      },
-    });
-
-    if (signUpError) {
-      Alert.alert('Error', signUpError.message);
-      return;
-    }
-
-    const userId = signUpData?.user?.id;
-
-    if (userId) {
-      const { error: insertError } = await supabase.from('entities').insert([
-        {
-          user_id: userId,
-          category: selectedCategory,
-          display_name: displayName,
-          phone: phone,
-          email: email,
-          type_user: type_user,
-        },
-      ]);
-
-      if (insertError) {
-        Alert.alert('Error al guardar negocio', insertError.message);
-        return;
-      }
-    }
-
-    Alert.alert('Registro exitoso', 'Por favor verifica tu correo');
+  const handleRegister = () => {
+    // Simulación de registro exitoso
+    Alert.alert(
+      'Registro simulado', 
+      `Negocio registrado con:\nNombre: ${displayName}\nTeléfono: ${phone}\nCategoría: ${selectedCategory}\nEmail: ${email}`
+    );
     router.push('/auth/login');
   };
 
@@ -223,7 +187,7 @@ const styles = StyleSheet.create({
     height: 50,
     color: '#5E35B1',
     backgroundColor: 'transparent',
-    borderWidth: 0, // Elimina el borde del Picker
+    borderWidth: 0,
   },
   button: {
     flexDirection: 'row',
