@@ -21,12 +21,6 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="clientProfile"
-        options={{
-          title: 'Perfil de Cliente',
-        }}
-      />
-      <Tabs.Screen
         name="busisnessProfile"
         options={{
           title: 'Perfil de Negocio',

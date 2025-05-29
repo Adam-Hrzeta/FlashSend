@@ -1,6 +1,4 @@
-// Importaciones necesarias
 import { ThemedText } from '@/components/ThemedText';
-import { supabase } from '@/lib/supabase';
 import { FontAwesome5, MaterialIcons, Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
@@ -43,6 +41,40 @@ type Product = {
   image_url?: string;
 };
 
+// Datos de ejemplo para simular la base de datos
+const mockBusinessData: Business = {
+  id: '1',
+  user_id: 'user1',
+  display_name: 'Mi Negocio Ejemplo',
+  phone: '555-1234',
+  email: 'negocio@ejemplo.com',
+  category: 'comida',
+  availability: 'Lunes a Viernes 9am-6pm',
+  delivery_type: 'pickup',
+  ubicacion: 'Ciudad Ejemplo',
+  description: 'Este es un negocio de ejemplo para demostración',
+  type_user: 'business',
+  avatar_url: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'
+};
+
+const mockProducts: Product[] = [
+  {
+    id: '1',
+    business_id: 'user1',
+    name: 'Producto 1',
+    description: 'Descripción del producto 1',
+    price: 10.99,
+    image_url: 'https://via.placeholder.com/150'
+  },
+  {
+    id: '2',
+    business_id: 'user1',
+    name: 'Producto 2',
+    description: 'Descripción del producto 2',
+    price: 15.50
+  }
+];
+
 export default function BusinessProfileScreen() {
   const [business, setBusiness] = useState<Business | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
@@ -65,66 +97,20 @@ export default function BusinessProfileScreen() {
   const [productImage, setProductImage] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchBusiness();
-    fetchProducts();
+    // Simulamos la carga de datos
+    const timer = setTimeout(() => {
+      setBusiness(mockBusinessData);
+      setProducts(mockProducts);
+      setUsername(mockBusinessData.display_name);
+      setPhone(mockBusinessData.phone);
+      setEmail(mockBusinessData.email);
+      setDescription(mockBusinessData.description || '');
+      setLoading(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
   }, []);
 
-  const fetchBusiness = async () => {
-    try {
-      setLoading(true);
-      
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError || !user) {
-        throw userError || new Error('No authenticated user');
-      }
-
-      const { data, error } = await supabase
-        .from('entities')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('type_user', 'business')
-        .single();
-
-      if (error) throw error;
-
-      if (data) {
-        setBusiness(data);
-        setUsername(data.display_name);
-        setPhone(data.phone);
-        setEmail(data.email);
-        setDescription(data.description || '');
-      } else {
-        Alert.alert('Error', 'No business profile found for this user');
-        router.back();
-      }
-    } catch (error) {
-      console.error('Error fetching business profile:', error);
-      Alert.alert('Error', 'Failed to load business profile');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchProducts = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('No authenticated user');
-
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('business_id', user.id);
-
-      if (error) throw error;
-
-      setProducts(data || []);
-    } catch (error) {
-      console.error('Error fetching products:', error);
-      Alert.alert('Error', 'Failed to load products');
-    }
-  };
-
-  // Cómo subir una imagen de perfil a Supabase Storage
   const uploadAvatar = async () => {
     try {
       setUploading(true);
@@ -146,52 +132,13 @@ export default function BusinessProfileScreen() {
 
       if (result.canceled) return;
 
-      const { uri } = result.assets[0];
-      const filename = uri.split('/').pop();
-      const match = /\.(\w+)$/.exec(filename || '');
-      const type = match ? `image/${match[1]}` : 'image';
-
-      // Convertir imagen a blob
-      const blob = await new Promise<Blob>((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.onload = function() {
-          resolve(xhr.response);
-        };
-        xhr.onerror = function() {
-          reject(new Error('Failed to upload image'));
-        };
-        xhr.responseType = 'blob';
-        xhr.open('GET', uri, true);
-        xhr.send(null);
-      });
-
-      // Subir imagen a Supabase Storage
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('No authenticated user');
-
-      const filePath = `business-avatars/${user.id}/${new Date().getTime()}.${type.split('/')[1]}`;
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, blob, { contentType: type });
-
-      if (uploadError) throw uploadError;
-
-      // Obtener URL pública de la imagen
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
-
-      // Actualizar perfil con la nueva URL de la imagen
-      const { error: updateError } = await supabase
-        .from('entities')
-        .update({ avatar_url: publicUrl })
-        .eq('user_id', user.id);
-
-      if (updateError) throw updateError;
-
-      // Actualizar estado local
-      setBusiness(prev => prev ? { ...prev, avatar_url: publicUrl } : null);
-      Alert.alert('Éxito', 'Imagen de perfil actualizada');
+      // Simulamos la actualización de la imagen
+      setBusiness(prev => prev ? { 
+        ...prev, 
+        avatar_url: result.assets[0].uri 
+      } : null);
+      
+      Alert.alert('Éxito', 'Imagen de perfil actualizada (simulado)');
     } catch (error) {
       console.error('Error uploading avatar:', error);
       Alert.alert('Error', 'No se pudo actualizar la imagen de perfil');
@@ -207,36 +154,17 @@ export default function BusinessProfileScreen() {
     }
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('No authenticated user');
-
-      const authUpdates: { email?: string; password?: string } = {};
-      if (email && email !== user.email) authUpdates.email = email;
-      if (password.trim()) authUpdates.password = password;
-
-      if (Object.keys(authUpdates).length > 0) {
-        const { error: authError } = await supabase.auth.updateUser(authUpdates);
-        if (authError) throw authError;
-      }
-
-      // Update business profile in 'entities' table
-      const { error: updateError } = await supabase
-        .from('entities')
-        .update({ 
-          display_name: username,
-          phone,
-          email,
-          description,
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', user.id)
-        .eq('type_user', 'business');
-
-      if (updateError) throw updateError;
-
-      Alert.alert('Éxito', 'Perfil actualizado correctamente');
+      // Simulamos la actualización del perfil
+      setBusiness(prev => prev ? { 
+        ...prev,
+        display_name: username,
+        phone,
+        email,
+        description
+      } : null);
+      
+      Alert.alert('Éxito', 'Perfil actualizado correctamente (simulado)');
       setModalVisible(false);
-      fetchBusiness();
       setPassword('');
     } catch (error) {
       console.error('Update error:', error);
@@ -251,30 +179,26 @@ export default function BusinessProfileScreen() {
     }
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('No authenticated user');
-
       const price = parseFloat(productPrice);
       if (isNaN(price)) {
         throw new Error('Precio inválido');
       }
 
-      const { error } = await supabase
-        .from('products')
-        .insert({
-          business_id: user.id,
-          name: productName,
-          description: productDescription,
-          price: price,
-          image_url: productImage || null
-        });
+      // Simulamos la adición de un nuevo producto
+      const newProduct: Product = {
+        id: Date.now().toString(),
+        business_id: 'user1',
+        name: productName,
+        description: productDescription,
+        price: price,
+        image_url: productImage || undefined
+      };
 
-      if (error) throw error;
-
-      Alert.alert('Éxito', 'Producto agregado correctamente');
+      setProducts(prev => [...prev, newProduct]);
+      
+      Alert.alert('Éxito', 'Producto agregado correctamente (simulado)');
       setProductModalVisible(false);
       resetProductForm();
-      fetchProducts();
     } catch (error) {
       console.error('Error adding product:', error);
       Alert.alert('Error', 'No se pudo agregar el producto');
@@ -552,7 +476,6 @@ export default function BusinessProfileScreen() {
             <TouchableOpacity 
               style={styles.uploadImageButton}
               onPress={async () => {
-                // Similar a la función uploadAvatar pero para productos
                 try {
                   const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
                   if (status !== 'granted') {
