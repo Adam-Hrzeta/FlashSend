@@ -13,14 +13,34 @@ export default function RegisterBusinessScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleRegister = () => {
-    // Simulación de registro exitoso
-    Alert.alert(
-      'Registro simulado', 
-      `Negocio registrado con:\nNombre: ${displayName}\nTeléfono: ${phone}\nCategoría: ${selectedCategory}\nEmail: ${email}`
-    );
-    router.push('/auth/login');
-  };
+  // ...existing code...
+const handleRegister = async () => {
+  try {
+    const response = await fetch('http://192.168.1.120:5000/api/auth/registro', { // Usa la IP de tu backend
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nombre: displayName,
+        correo: email,
+        contrasena: password,
+        telefono: phone,
+        direccion: '', // Puedes agregar un input para dirección si lo necesitas
+        descripcion: '', // Puedes agregar un input para descripción si lo necesitas
+        categoria: selectedCategory // Si tu backend espera este campo
+      }),
+    });
+    const data = await response.json();
+    if (response.ok) {
+      Alert.alert('Registro exitoso', data.mensaje || '¡Negocio registrado!');
+      router.push('/auth/login');
+    } else {
+      Alert.alert('Error', data.mensaje || 'No se pudo registrar');
+    }
+  } catch (error) {
+    Alert.alert('Error', 'No se pudo conectar al servidor');
+  }
+};
+// ...existing code...
 
   return (
     <View style={styles.container}>
