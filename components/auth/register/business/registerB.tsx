@@ -13,10 +13,9 @@ export default function RegisterBusinessScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // ...existing code...
 const handleRegister = async () => {
   try {
-    const response = await fetch('http://192.168.1.120:5000/api/auth/registro', { // Usa la IP de tu backend
+    const response = await fetch('http://192.168.1.120:5000/api/auth/registro', { // Usa la IP del backend o del web server
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -24,9 +23,9 @@ const handleRegister = async () => {
         correo: email,
         contrasena: password,
         telefono: phone,
-        direccion: '', // Puedes agregar un input para dirección si lo necesitas
-        descripcion: '', // Puedes agregar un input para descripción si lo necesitas
-        categoria: selectedCategory // Si tu backend espera este campo
+        direccion: '', 
+        descripcion: '',
+        categoria: selectedCategory 
       }),
     });
     const data = await response.json();
@@ -40,7 +39,6 @@ const handleRegister = async () => {
     Alert.alert('Error', 'No se pudo conectar al servidor');
   }
 };
-// ...existing code...
 
   return (
     <View style={styles.container}>

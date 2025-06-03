@@ -14,28 +14,37 @@ import {
 } from 'react-native';
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [correo, setEmail] = useState('');
+  const [contrasena, setPassword] = useState('');
 
-  const handleLogin = () => {
-    if (!email || !password) {
+  const handleLogin = async () => {
+    if (!correo || !contrasena) {
       Alert.alert('Campos incompletos', 'Por favor completa todos los campos');
       return;
     }
 
-    // Simulación de login exitoso
-    Alert.alert(
-      'Inicio de sesión simulado', 
-      `Credenciales ingresadas:\nEmail: ${email}\nContraseña: ${password}`
-    );
+    try {
+      const response = await fetch('http://192.168.1.120:5000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ correo, contrasena }),
+      });
 
-    // Simulamos la navegación según el tipo de usuario
-    const randomUserType = Math.random() > 0.5 ? 'business' : 'client';
-    
-    if (randomUserType === 'business') {
-      router.push('/profiles/busisnessProfile');
-    } else {
-      router.push('/profiles/clientsProfile');
+      const data = await response.json();
+
+      if (response.ok) {
+        if (data.userType === 'business') {
+          router.push('/profiles/busisnessProfile');
+        } else {
+          router.push('/');
+        }
+      } else {
+        Alert.alert('Error', data.message || 'Credenciales incorrectas');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo conectar al servidor');
     }
   };
 
@@ -64,7 +73,7 @@ export default function LoginScreen() {
                 style={styles.input}
                 keyboardType="email-address"
                 autoCapitalize="none"
-                value={email}
+                value={correo}
                 onChangeText={setEmail}
               />
             </View>
@@ -76,7 +85,7 @@ export default function LoginScreen() {
                 placeholderTextColor="#A3A3A3"
                 style={styles.input}
                 secureTextEntry
-                value={password}
+                value={contrasena}
                 onChangeText={setPassword}
               />
             </View>
