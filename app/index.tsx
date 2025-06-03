@@ -146,7 +146,7 @@ export default function HomeScreen() {
             />
           </View>
 
-          <TouchableOpacity style={[styles.orderButton, styles.businessButton]}>
+          <TouchableOpacity style={[styles.orderButton, styles.businessButton]} onPress={() => router.push('/auth/registerBusiness')}>
             <ThemedText style={styles.buttonText}>Registrar mi negocio</ThemedText>
             <MaterialIcons name="store" size={20} color="white" />
           </TouchableOpacity>

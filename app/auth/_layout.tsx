@@ -37,18 +37,6 @@ export default function TabLayout() {
           title: 'Registro de Negocios',
         }}
       />
-      <Tabs.Screen
-        name="registerClients"
-        options={{
-          title: 'Registro de Clientes',
-        }}
-      />
-      <Tabs.Screen
-        name="registerDealers"
-        options={{
-          title: 'Registro de Repartidores',
-        }}
-      />
     </Tabs>
   );
 }
