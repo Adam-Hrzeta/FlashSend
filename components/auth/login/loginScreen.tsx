@@ -29,13 +29,13 @@ export default function LoginScreen() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ correo, contrasena }),
+        body: JSON.stringify({ correo, contrasena, }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        if (data.userType === 'business') {
+        if (data.tipo_usuario === 'negocio') {
           router.push('/profiles/busisnessProfile');
         } else {
           router.push('/');

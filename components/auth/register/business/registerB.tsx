@@ -7,38 +7,38 @@ import { useState } from 'react';
 import { Alert, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function RegisterBusinessScreen() {
-  const [selectedCategory, setSelectedCategory] = useState('comida');
-  const [displayName, setDisplayName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [categoria, setCategoria] = useState('comida');
+  const [nombre, setNombre] = useState('');
+  const [telefono, setTelefono] = useState('');
+  const [correo, setCorreo] = useState('');
+  const [contrasena, setContrasena] = useState('');
 
-const handleRegister = async () => {
-  try {
-    const response = await fetch('http://192.168.1.120:5000/api/auth/registro', { // Usa la IP del backend o del web server
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        nombre: displayName,
-        correo: email,
-        contrasena: password,
-        telefono: phone,
-        direccion: '', 
-        descripcion: '',
-        categoria: selectedCategory 
-      }),
-    });
-    const data = await response.json();
-    if (response.ok) {
-      Alert.alert('Registro exitoso', data.mensaje || '¡Negocio registrado!');
-      router.push('/auth/login');
-    } else {
-      Alert.alert('Error', data.mensaje || 'No se pudo registrar');
+  const handleRegister = async () => {
+    try {
+      const response = await fetch('http://192.168.1.120:5000/api/auth/registro', { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre,
+          correo,
+          contrasena,
+          telefono,
+          direccion: '', 
+          descripcion: '',
+          categoria 
+        }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        Alert.alert('Registro exitoso', data.mensaje || '¡Negocio registrado!');
+        router.push('/auth/login');
+      } else {
+        Alert.alert('Error', data.mensaje || 'No se pudo registrar');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo conectar al servidor');
     }
-  } catch (error) {
-    Alert.alert('Error', 'No se pudo conectar al servidor');
-  }
-};
+  };
 
   return (
     <View style={styles.container}>
@@ -57,7 +57,7 @@ const handleRegister = async () => {
               placeholder="Nombre del Negocio"
               placeholderTextColor="#A3A3A3"
               style={styles.input}
-              onChangeText={setDisplayName}
+              onChangeText={setNombre}
             />
           </View>
 
@@ -68,7 +68,7 @@ const handleRegister = async () => {
               placeholderTextColor="#A3A3A3"
               style={styles.input}
               keyboardType="phone-pad"
-              onChangeText={setPhone}
+              onChangeText={setTelefono}
             />
           </View>
 
@@ -76,8 +76,8 @@ const handleRegister = async () => {
             <View style={styles.inputGroup}>
               <MaterialIcons name="category" size={22} color="#7E57C2" style={styles.icon} />
               <Picker
-                selectedValue={selectedCategory}
-                onValueChange={(itemValue) => setSelectedCategory(itemValue)}
+                selectedValue={categoria}
+                onValueChange={(itemValue) => setCategoria(itemValue)}
                 style={styles.picker}
                 dropdownIconColor="#7E57C2"
                 mode="dropdown"
@@ -96,7 +96,7 @@ const handleRegister = async () => {
               placeholder="Correo electrónico"
               placeholderTextColor="#A3A3A3"
               style={styles.input}
-              onChangeText={setEmail}
+              onChangeText={setCorreo}
               keyboardType="email-address"
             />
           </View>
@@ -108,7 +108,7 @@ const handleRegister = async () => {
               placeholderTextColor="#A3A3A3"
               secureTextEntry
               style={styles.input}
-              onChangeText={setPassword}
+              onChangeText={setContrasena}
             />
           </View>
 

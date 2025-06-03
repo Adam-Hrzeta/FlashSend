@@ -1,52 +1,102 @@
-// BusinessProfileScreen.tsx
-import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, FlatList, Modal, TextInput, Pressable } from 'react-native';
-import { MaterialIcons, Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, Image, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+
+// Tipos TypeScript interfaces para el negocio y el producto
+interface Negocio {
+  id: number;
+  nombre: string;
+  categoria: string;
+  telefono: string;
+  correo: string;
+  descripcion: string;
+  cover_photo: string;
+  avatar: string;
+}
+
+interface Producto {
+  id: number;
+  nombre: string;
+  descripcion: string;
+  precio: number;
+  imagen_url: string;
+}
 
 export default function BusinessProfileScreen() {
+  const [negocio, setNegocio] = useState<Negocio | null>(null);
+  const [productos, setProductos] = useState<Producto[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Estados para los modales
+  const [modalEditarVisible, setModalEditarVisible] = useState(false);
+  const [modalAgregarVisible, setModalAgregarVisible] = useState(false);
+
+  useEffect(() => {
+    fetch('http://192.168.1.120:5000/api/negocio/profile')
+      .then(res => res.json())
+      .then(data => {
+        setNegocio(data.negocio);
+        setProductos(data.productos);
+        setLoading(false);
+      })
+      .catch(err => {
+        setLoading(false);
+        console.log(err);
+      });
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#4267B2" />
+      </View>
+    );
+  }
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Image source={{ uri: 'https://via.placeholder.com/400x150' }} style={styles.coverPhoto} />
+        <Image source={{ uri: negocio?.cover_photo }} style={styles.coverPhoto} />
         <View style={styles.avatarWrap}>
-          <Image source={{ uri: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png' }} style={styles.avatar} />
+          <Image source={{ uri: negocio?.avatar }} style={styles.avatar} />
         </View>
-        <Text style={styles.title}>Nombre del Negocio</Text>
-        <Text style={styles.subtitle}>Categoría</Text>
+        <Text style={styles.title}>{negocio?.nombre}</Text>
+        <Text style={styles.subtitle}>{negocio?.categoria}</Text>
       </View>
 
       <View style={styles.actionButtons}>
-        <TouchableOpacity style={styles.actionButton}>
+        <TouchableOpacity style={styles.actionButton} onPress={() => setModalEditarVisible(true)}>
           <MaterialIcons name="edit" size={20} color="#4267B2" />
           <Text style={styles.actionButtonText}>Editar</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.actionButton}>
+        <TouchableOpacity style={styles.actionButton} onPress={() => setModalAgregarVisible(true)}>
           <Ionicons name="add-circle" size={20} color="#4267B2" />
           <Text style={styles.actionButtonText}>Agregar Producto</Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.infoCard}>
-        <Text>Teléfono</Text>
-        <Text>Correo electrónico</Text>
-        <Text>Descripción del negocio</Text>
+        <Text>{negocio?.telefono}</Text>
+        <Text>{negocio?.correo}</Text>
+        <Text>{negocio?.descripcion}</Text>
       </View>
 
       <Text style={styles.sectionTitle}>Productos</Text>
       <FlatList
         horizontal
-        data={[1, 2, 3]}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={() => (
+        data={productos}
+        keyExtractor={item => item.id.toString()}
+        renderItem={({ item }) => (
           <View style={styles.productCard}>
-            <Image source={{ uri: 'https://via.placeholder.com/150' }} style={styles.productImage} />
-            <Text>Nombre Producto</Text>
-            <Text>$00.00</Text>
+            <Image source={{ uri: item.imagen_url }} style={styles.productImage} />
+            <Text>{item.nombre}</Text>
+            <Text>${item.precio.toFixed(2)}</Text>
           </View>
         )}
       />
 
       {/* Modal Editar Perfil */}
-      <Modal visible={false} transparent animationType="slide">
+      <Modal visible={modalEditarVisible} transparent animationType="slide">
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.sectionTitle}>Editar Perfil</Text>
@@ -55,13 +105,13 @@ export default function BusinessProfileScreen() {
             <TextInput placeholder="Correo" style={styles.input} />
             <TextInput placeholder="Descripción" style={styles.input} />
             <Pressable style={styles.modalButton}><Text style={styles.modalButtonText}>Guardar</Text></Pressable>
-            <Pressable><Text>Cancelar</Text></Pressable>
+            <Pressable onPress={() => setModalEditarVisible(false)}><Text>Cancelar</Text></Pressable>
           </View>
         </View>
       </Modal>
 
       {/* Modal Agregar Producto */}
-      <Modal visible={false} transparent animationType="slide">
+      <Modal visible={modalAgregarVisible} transparent animationType="slide">
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.sectionTitle}>Nuevo Producto</Text>
@@ -69,7 +119,7 @@ export default function BusinessProfileScreen() {
             <TextInput placeholder="Descripción" style={styles.input} />
             <TextInput placeholder="Precio" style={styles.input} keyboardType="numeric" />
             <Pressable style={styles.modalButton}><Text style={styles.modalButtonText}>Agregar</Text></Pressable>
-            <Pressable><Text>Cancelar</Text></Pressable>
+            <Pressable onPress={() => setModalAgregarVisible(false)}><Text>Cancelar</Text></Pressable>
           </View>
         </View>
       </Modal>
