@@ -33,7 +33,7 @@ export default function SelectRegister() {
             {/* Botón Cliente - Color azul */}
             <TouchableOpacity
               style={[styles.typeButton, styles.clientButton]}
-              onPress={() => router.push('/auth/registerClients')}
+              onPress={() => router.push('/auth/registerClient')}
               activeOpacity={0.8}
             >
               <MaterialIcons name="person" size={24} color="white" />
