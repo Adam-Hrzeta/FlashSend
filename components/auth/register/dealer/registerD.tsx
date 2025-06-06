@@ -6,7 +6,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Platform, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
-export default function RegisterClientScreen() {
+export default function RegisterDealerScreen() {
   const [nombre, setNombre] = useState('');
   const [telefono, setTelefono] = useState('');
   const [correo, setCorreo] = useState('');
@@ -16,7 +16,7 @@ export default function RegisterClientScreen() {
 
   const handleRegister = async () => {
     try {
-      const response = await fetch('http://192.168.1.120:5000/api/auth/registro_Cliente', {
+      const response = await fetch('http://192.168.1.120:5000/api/auth/registro_Repartidor', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -29,7 +29,7 @@ export default function RegisterClientScreen() {
       });
       const data = await response.json();
       if (response.ok) {
-        Alert.alert('Registro exitoso', data.mensaje || '¡Cliente registrado!');
+        Alert.alert('Registro exitoso', data.mensaje || '¡Dealer registrado!');
         router.push('/auth/login');
       } else {
         Alert.alert('Error', data.error || 'No se pudo registrar');
@@ -48,7 +48,7 @@ export default function RegisterClientScreen() {
       />
       <View style={styles.overlay}>
         <View style={styles.card}>
-          <ThemedText type="title" style={styles.title}>Registrar Cliente</ThemedText>
+          <ThemedText type="title" style={styles.title}>Registrar Repartidor</ThemedText>
 
           <View style={styles.inputGroup}>
             <MaterialIcons name="person" size={22} color="#7E57C2" style={styles.icon} />

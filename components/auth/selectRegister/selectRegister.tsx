@@ -43,7 +43,7 @@ export default function SelectRegister() {
             {/* Botón Repartidor - Color verde */}
             <TouchableOpacity
               style={[styles.typeButton, styles.dealerButton]}
-              onPress={() => router.push('/auth/registerDealers')}
+              onPress={() => router.push('/auth/registerDealer')}
               activeOpacity={0.8}
             >
               <MaterialIcons name="delivery-dining" size={24} color="white" />
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   businessButton: {
-    backgroundColor: '#FF1493', 
+    backgroundColor: '#FF1493',
   },
   clientButton: {
     backgroundColor: '#4285F4',
