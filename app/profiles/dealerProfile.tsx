@@ -1,5 +1,5 @@
 import DealerProfileScreen from "@/components/profiles/profileD";
 
-export default function BusinessProfile(){
+export default function DealerProfile(){
  return(<DealerProfileScreen/>);
 }

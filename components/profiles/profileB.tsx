@@ -1,8 +1,8 @@
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Image, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-// Tipos TypeScript interfaces para el negocio y el producto
 interface Negocio {
   id: number;
   nombre: string;
@@ -26,28 +26,44 @@ export default function BusinessProfileScreen() {
   const [negocio, setNegocio] = useState<Negocio | null>(null);
   const [productos, setProductos] = useState<Producto[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Estados para los modales
   const [modalEditarVisible, setModalEditarVisible] = useState(false);
   const [modalAgregarVisible, setModalAgregarVisible] = useState(false);
 
   useEffect(() => {
-    fetch('http://192.168.1.120:5000/api/negocio/profile')
-      .then(res => res.json())
-      .then(data => {
-        setNegocio(data.negocio);
-        setProductos(data.productos);
-        setLoading(false);
+    const fetchNegocio = async () => {
+      const token = await AsyncStorage.getItem('access_token');
+      fetch('http://192.168.1.120:5000/api/negocio/profile', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       })
-      .catch(err => {
-        setLoading(false);
-        console.log(err);
-      });
+        .then(async res => {
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            throw new Error(data?.mensaje || 'No autorizado');
+          }
+          return res.json();
+        })
+        .then(data => {
+          setNegocio(data.negocio);
+          setProductos(data.productos);
+          setLoading(false);
+        })
+        .catch(err => {
+          setError('No tienes permiso para ver este perfil.');
+          setLoading(false);
+        });
+    };
+    fetchNegocio();
   }, []);
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#4267B2" />
       </View>
     );
@@ -147,4 +163,5 @@ const styles = StyleSheet.create({
   input: { borderBottomWidth: 1, marginBottom: 10, padding: 5 },
   modalButton: { backgroundColor: '#4267B2', padding: 10, borderRadius: 5, marginTop: 10, alignItems: 'center' },
   modalButtonText: { color: '#fff' },
+  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 });

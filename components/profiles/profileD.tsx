@@ -1,113 +1,88 @@
-import { View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import { ThemedText } from '@/components/ThemedText';
-import { MaterialIcons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useUserType } from '@/utils/userType';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-// Simulación de datos recibidos (podrías traerlos desde tu backend)
-const perfilEjemplo = {
-  nombre: 'Juan Pérez',
-  correo: 'juanperez@example.com',
-  telefono: '5551234567',
-  fechaNacimiento: '1990-06-15',
-};
-
-export default function PerfilRepartidor() {
-  const [perfil] = useState(perfilEjemplo);
-
-  useEffect(() => {
-  }, []);
-
-  const cerrarSesion = () => {
-    Alert.alert('Cerrar sesión', '¿Estás seguro?', [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Sí', onPress: () => router.push('/auth/login') },
-    ]);
-  };
-
-  return (
-    <View style={styles.container}>
-      <ThemedText type="title" style={styles.title}>Mi Perfil</ThemedText>
-
-      <View style={styles.card}>
-        <InfoItem icon="person" label="Nombre" value={perfil.nombre} />
-        <InfoItem icon="email" label="Correo" value={perfil.correo} />
-        <InfoItem icon="phone" label="Teléfono" value={perfil.telefono} />
-        <InfoItem icon="cake" label="Nacimiento" value={perfil.fechaNacimiento} />
-      </View>
-
-      <TouchableOpacity style={styles.logoutButton} onPress={cerrarSesion}>
-        <MaterialIcons name="logout" size={20} color="white" />
-        <ThemedText style={styles.logoutText}>Cerrar sesión</ThemedText>
-      </TouchableOpacity>
-    </View>
-  );
+interface Repartidor {
+  id: number;
+  nombre: string;
+  correo: string;
+  telefono: string;
+  avatar: string;
+  fecha_nacimiento: string;
+  tipo_servicio: string;
+  disponibilidad: string;
 }
 
-function InfoItem({ icon, label, value }: { icon: any; label: string; value: string }) {
-  return (
-    <View style={styles.infoItem}>
-      <MaterialIcons name={icon} size={22} color="#7E57C2" />
-      <View style={{ marginLeft: 12 }}>
-        <ThemedText style={styles.label}>{label}</ThemedText>
-        <ThemedText style={styles.value}>{value}</ThemedText>
+export default function DealerProfileScreen() {
+  const { userType, loading: loadingUserType } = useUserType();
+  const [repartidor, setRepartidor] = useState<Repartidor | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchRepartidor = async () => {
+      const token = await AsyncStorage.getItem('access_token');
+      fetch('http://192.168.1.120:5000/api/repartidor/profileRepartidor', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+        .then(async res => {
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            throw new Error(data?.mensaje || 'No autorizado');
+          }
+          return res.json();
+        })
+        .then(data => {
+          setRepartidor(data.repartidor);
+          setLoading(false);
+        })
+        .catch(err => {
+          setError('No tienes permiso para ver este perfil.');
+          setLoading(false);
+        });
+    };
+    fetchRepartidor();
+  }, []);
+
+  if (loadingUserType || loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#4267B2" />
       </View>
-    </View>
+    );
+  }
+
+  return (
+    <ScrollView style={styles.container}>
+      <View style={styles.header}>
+        <Image source={{ uri: repartidor?.avatar }} style={styles.avatar} />
+        <Text style={styles.title}>{repartidor?.nombre}</Text>
+        <Text style={styles.subtitle}>{repartidor?.correo}</Text>
+        <Text style={styles.subtitle}>{repartidor?.telefono}</Text>
+      </View>
+      <View style={styles.infoCard}>
+        <Text style={styles.infoText}>Nombre: {repartidor?.nombre}</Text>
+        <Text style={styles.infoText}>Tipo de servicio: {repartidor?.tipo_servicio}</Text>
+        <Text style={styles.infoText}>Disponibilidad: {repartidor?.disponibilidad}</Text>
+        <Text style={styles.infoText}>Fecha de nacimiento: {repartidor?.fecha_nacimiento}</Text>
+        <Text style={styles.infoText}>Correo: {repartidor?.correo}</Text>
+        <Text style={styles.infoText}>Teléfono: {repartidor?.telefono}</Text>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 24,
-    backgroundColor: '#F5F5F5',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#7E57C2',
-    textAlign: 'center',
-    marginBottom: 24,
-  },
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 24,
-    shadowColor: '#B39DDB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  infoItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 14,
-    color: '#7E57C2',
-    fontWeight: '600',
-  },
-  value: {
-    fontSize: 16,
-    color: '#424242',
-  },
-  logoutButton: {
-    marginTop: 40,
-    flexDirection: 'row',
-    backgroundColor: '#7E57C2',
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 10,
-    elevation: 4,
-  },
-  logoutText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
+  container: { flex: 1, padding: 15 },
+  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  header: { alignItems: 'center', marginBottom: 20 },
+  avatar: { width: 100, height: 100, borderRadius: 50, marginBottom: 10 },
+  title: { fontSize: 24, fontWeight: 'bold' },
+  subtitle: { fontSize: 16, color: '#666', marginBottom: 10 },
+  infoCard: { backgroundColor: '#eee', padding: 15, borderRadius: 10, marginBottom: 15 },
+  infoText: { fontSize: 16, marginBottom: 5 },
 });

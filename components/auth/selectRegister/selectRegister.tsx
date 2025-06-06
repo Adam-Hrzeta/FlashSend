@@ -43,7 +43,7 @@ export default function SelectRegister() {
             {/* Botón Repartidor - Color verde */}
             <TouchableOpacity
               style={[styles.typeButton, styles.dealerButton]}
-              onPress={() => router.push('/auth/registerDealer' as any)}
+              onPress={() => router.push('/auth/registerDealer')}
               activeOpacity={0.8}
             >
               <MaterialIcons name="delivery-dining" size={24} color="white" />

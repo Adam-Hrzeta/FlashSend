@@ -1,5 +1,5 @@
 import ClientProfileScreen from "@/components/profiles/profileC";
 
-export default function BusinessProfile(){
+export default function ClientProfile(){
  return(<ClientProfileScreen/>);
 }
