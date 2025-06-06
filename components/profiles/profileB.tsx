@@ -1,5 +1,4 @@
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Image, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
@@ -26,18 +25,13 @@ export default function BusinessProfileScreen() {
   const [negocio, setNegocio] = useState<Negocio | null>(null);
   const [productos, setProductos] = useState<Producto[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Estados para los modales
   const [modalEditarVisible, setModalEditarVisible] = useState(false);
   const [modalAgregarVisible, setModalAgregarVisible] = useState(false);
 
   useEffect(() => {
     const fetchNegocio = async () => {
-      const token = await AsyncStorage.getItem('access_token');
-      fetch('http://192.168.1.120:5000/api/negocio/profile', {
+      fetch('http://192.168.1.120:5000/api/negocio/profileNegocio', {
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       })
@@ -53,8 +47,7 @@ export default function BusinessProfileScreen() {
           setProductos(data.productos);
           setLoading(false);
         })
-        .catch(err => {
-          setError('No tienes permiso para ver este perfil.');
+        .catch(() => {
           setLoading(false);
         });
     };

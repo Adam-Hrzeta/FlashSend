@@ -1,4 +1,3 @@
-import { useUserType } from '@/utils/userType';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -15,7 +14,6 @@ interface Repartidor {
 }
 
 export default function DealerProfileScreen() {
-  const { userType, loading: loadingUserType } = useUserType();
   const [repartidor, setRepartidor] = useState<Repartidor | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -48,7 +46,7 @@ export default function DealerProfileScreen() {
     fetchRepartidor();
   }, []);
 
-  if (loadingUserType || loading) {
+  if (loading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#4267B2" />
