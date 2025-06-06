@@ -43,6 +43,12 @@ export default function TabLayout() {
           title: 'Registro de Clientes',
         }}
       />
+      <Tabs.Screen
+        name="registerDealer"
+        options={{
+          title: 'Registro de repartidores',
+        }}
+      />
     </Tabs>
   );
 }

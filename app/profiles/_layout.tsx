@@ -26,6 +26,18 @@ export default function TabLayout() {
           title: 'Perfil de Negocio',
         }}
       />
+      <Tabs.Screen
+        name="ClientProfile"
+        options={{
+          title: 'Perfil de cliente',
+        }}
+      />
+      <Tabs.Screen
+        name="DealerProfile"
+        options={{
+          title: 'Perfil de repartidor',
+        }}
+      />
     </Tabs>
   );
 }

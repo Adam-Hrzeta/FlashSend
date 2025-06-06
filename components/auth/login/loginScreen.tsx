@@ -37,6 +37,10 @@ export default function LoginScreen() {
       if (response.ok) {
         if (data.tipo_usuario === 'negocio') {
           router.push('/profiles/busisnessProfile');
+        } else if (data.tipo_usuario === 'cliente') {
+          router.push('/profiles/clientProfile'); 
+        } else if (data.tipo_usuario === 'repartidor') {
+          router.push('/profiles/dealerProfile'); 
         } else {
           router.push('/');
         }
