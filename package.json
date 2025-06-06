@@ -19,7 +19,6 @@
     "@react-navigation/drawer": "^7.3.12",
     "@react-navigation/elements": "^2.3.8",
     "@react-navigation/native": "^7.1.6",
-    "@supabase/supabase-js": "^2.49.8",
     "expo-blur": "~14.1.4",
     "expo-constants": "~17.1.6",
     "expo-dev-client": "~5.1.8",
@@ -41,9 +40,7 @@
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.10.0",
-    "react-native-web": "^0.20.0",
-    "react-native-websocket": "^1.0.2",
-    "react-native-webview": "13.13.5"
+    "react-native-web": "^0.20.0"
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",
