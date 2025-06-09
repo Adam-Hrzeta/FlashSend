@@ -1,6 +1,7 @@
 import { ThemedText } from '@/components/ThemedText';
 import { API_BASE_URL } from '@/constants/ApiConfig';
 import { MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
@@ -67,6 +68,12 @@ export default function LoginScreen() {
       const data = await response.json();
 
       if (response.ok) {
+        // Guarda el token en AsyncStorage (esto reemplaza el anterior)
+        await AsyncStorage.setItem('access_token', data.access_token);
+
+        // Opcional: puedes guardar el tipo de usuario si lo necesitas
+        // await AsyncStorage.setItem('tipo_usuario', data.tipo_usuario);
+
         if (data.tipo_usuario === 'negocio') {
           router.push('/profiles/busisnessProfile');
         } else if (data.tipo_usuario === 'cliente') {
@@ -77,7 +84,7 @@ export default function LoginScreen() {
           router.push('/');
         }
       } else {
-        Alert.alert('Error', data.message || 'Credenciales incorrectas');
+        Alert.alert('Error', data.message || data.error || 'Credenciales incorrectas');
       }
     } catch (error) {
       Alert.alert('Error', 'No se pudo conectar al servidor');

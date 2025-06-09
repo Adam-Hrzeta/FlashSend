@@ -20,33 +20,35 @@ export default function ClientProfileScreen() {
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editData, setEditData] = useState<Partial<Cliente>>({});
 
-  useEffect(() => {
-    const fetchCliente = async () => {
-      const token = await AsyncStorage.getItem('access_token');
-      fetch(`${API_BASE_URL}/api/cliente/profileCliente`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+  const fetchCliente = async () => {
+    setLoading(true);
+    setError(null);
+    const token = await AsyncStorage.getItem('access_token');
+    fetch(`${API_BASE_URL}/api/cliente/profileCliente`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(async res => {
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data?.mensaje || 'No autorizado');
         }
+        return res.json();
       })
-        .then(async res => {
-          if (!res.ok) {
-            const data = await res.json().catch(() => ({}));
-            throw new Error(data?.mensaje || 'No autorizado');
-          }
-          return res.json();
-        })
-        .then(data => {
-          setCliente(data.cliente);
-          setEditData(data.cliente);
-          setLoading(false);
-        })
-        .catch(() => {
-          setError('No tienes permiso para ver este perfil.');
-          setLoading(false);
-        });
-    };
+      .then(data => {
+        setCliente(data.cliente);
+        setEditData(data.cliente);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError('No tienes permiso para ver este perfil.');
+        setLoading(false);
+      });
+  };
 
+  useEffect(() => {
     fetchCliente();
   }, []);
 
@@ -73,6 +75,7 @@ export default function ClientProfileScreen() {
       })
       .then(data => {
         setCliente(data.cliente);
+        setEditData(data.cliente);
         setEditModalVisible(false);
         Alert.alert('Perfil actualizado');
       })
