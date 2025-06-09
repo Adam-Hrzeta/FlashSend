@@ -2,9 +2,9 @@ import { API_BASE_URL } from '@/constants/ApiConfig';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-interface Cliente {
+export interface Cliente {
   id: number;
   nombre: string;
   correo: string;
@@ -17,6 +17,8 @@ export default function ClientProfileScreen() {
   const [cliente, setCliente] = useState<Cliente | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editData, setEditData] = useState<Partial<Cliente>>({});
 
   useEffect(() => {
     const fetchCliente = async () => {
@@ -36,15 +38,48 @@ export default function ClientProfileScreen() {
         })
         .then(data => {
           setCliente(data.cliente);
+          setEditData(data.cliente);
           setLoading(false);
         })
-        .catch(err => {
+        .catch(() => {
           setError('No tienes permiso para ver este perfil.');
           setLoading(false);
         });
     };
+
     fetchCliente();
   }, []);
+
+  const handleEdit = () => {
+    setEditModalVisible(true);
+  };
+
+  const handleSaveEdit = async () => {
+    const token = await AsyncStorage.getItem('access_token');
+    fetch(`${API_BASE_URL}/api/cliente/editarPerfil`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(editData)
+    })
+      .then(async res => {
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data?.mensaje || 'Error al editar');
+        }
+        return res.json();
+      })
+      .then(data => {
+        setCliente(data.cliente);
+        setEditModalVisible(false);
+        Alert.alert('Perfil actualizado');
+      })
+      .catch(() => {
+        Alert.alert('Error', 'No se pudo actualizar el perfil');
+      });
+  };
 
   if (loading) {
     return (
@@ -61,17 +96,18 @@ export default function ClientProfileScreen() {
           <Image source={{ uri: cliente?.avatar }} style={styles.avatar} />
         </View>
         <View style={styles.infoSide}>
-          <Text style={styles.title}>
-            <MaterialIcons name="person" size={22} color="#fff" /> {cliente?.nombre}
+          <Text style={styles.nameOnly}>
+            {cliente?.nombre}
           </Text>
-          <Text style={styles.subtitle}>
-            <MaterialIcons name="email" size={18} color="#FFD6F6" /> {cliente?.correo}
-          </Text>
-          <Text style={styles.subtitle}>
-            <MaterialIcons name="phone" size={18} color="#FFD6F6" /> {cliente?.telefono}
+          <Text style={styles.emailOnly}>
+            {cliente?.correo}
           </Text>
         </View>
       </View>
+      <TouchableOpacity style={styles.editButton} onPress={handleEdit}>
+        <MaterialIcons name="edit" size={20} color="#7E57C2" />
+        <Text style={styles.editButtonText}>Editar información</Text>
+      </TouchableOpacity>
       <View style={styles.infoCard}>
         <Text style={styles.infoText}>
           <MaterialIcons name="badge" size={18} color="#7E57C2" /> Nombre: {cliente?.nombre}
@@ -86,7 +122,78 @@ export default function ClientProfileScreen() {
           <MaterialIcons name="phone" size={18} color="#7E57C2" /> Teléfono: {cliente?.telefono}
         </Text>
       </View>
+      <Text style={styles.historyTitle}>Historial de pedidos</Text>
+      <Text style={styles.emptyPedidos}>No hay pedidos.</Text>
       {error && <Text style={styles.errorText}>{error}</Text>}
+
+      {/* Modal para editar información */}
+      <Modal
+        visible={editModalVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setEditModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContentCustom}>
+            <View style={styles.modalIconCircle}>
+              <MaterialIcons name="edit" size={38} color="#fff" />
+            </View>
+            <Text style={styles.modalTitleCustom}>Editar información</Text>
+            <View style={styles.inputRow}>
+              <MaterialIcons name="person" size={20} color="#BA68C8" style={styles.inputIcon} />
+              <TextInput
+                style={styles.inputCustom}
+                placeholder="Nombre"
+                placeholderTextColor="#BA68C8"
+                value={editData.nombre}
+                onChangeText={text => setEditData({ ...editData, nombre: text })}
+              />
+            </View>
+            <View style={styles.inputRow}>
+              <MaterialIcons name="email" size={20} color="#BA68C8" style={styles.inputIcon} />
+              <TextInput
+                style={styles.inputCustom}
+                placeholder="Correo"
+                placeholderTextColor="#BA68C8"
+                value={editData.correo}
+                onChangeText={text => setEditData({ ...editData, correo: text })}
+                keyboardType="email-address"
+              />
+            </View>
+            <View style={styles.inputRow}>
+              <MaterialIcons name="phone" size={20} color="#BA68C8" style={styles.inputIcon} />
+              <TextInput
+                style={styles.inputCustom}
+                placeholder="Teléfono"
+                placeholderTextColor="#BA68C8"
+                value={editData.telefono}
+                onChangeText={text => setEditData({ ...editData, telefono: text })}
+                keyboardType="phone-pad"
+              />
+            </View>
+            <View style={styles.inputRow}>
+              <MaterialIcons name="cake" size={20} color="#BA68C8" style={styles.inputIcon} />
+              <TextInput
+                style={styles.inputCustom}
+                placeholder="Fecha de nacimiento"
+                placeholderTextColor="#BA68C8"
+                value={editData.fecha_nacimiento}
+                onChangeText={text => setEditData({ ...editData, fecha_nacimiento: text })}
+              />
+            </View>
+            <TouchableOpacity style={styles.modalButton} onPress={handleSaveEdit}>
+              <Text style={styles.modalButtonText}>
+                <MaterialIcons name="save" size={18} color="#fff" /> Guardar
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cancelButtonCustom} onPress={() => setEditModalVisible(false)}>
+              <Text style={styles.cancelButtonText}>
+                <MaterialIcons name="close" size={18} color="#7E57C2" /> Cancelar
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -145,15 +252,15 @@ const styles = StyleSheet.create({
     gap: 2,
     paddingLeft: 10,
   },
-  title: {
-    fontSize: 24,
+  nameOnly: {
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#fff',
     marginBottom: 2,
     textAlign: 'left',
     letterSpacing: 1.1,
   },
-  subtitle: {
+  emailOnly: {
     fontSize: 16,
     color: '#FFD6F6',
     marginBottom: 6,
@@ -185,5 +292,151 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 10,
     fontWeight: 'bold',
+  },
+  editButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-end',
+    marginRight: 24,
+    marginBottom: 8,
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    elevation: 2,
+    shadowColor: '#7E57C2',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.13,
+    shadowRadius: 4,
+  },
+  editButtonText: {
+    color: '#7E57C2',
+    fontWeight: 'bold',
+    marginLeft: 6,
+    fontSize: 15,
+  },
+  historyTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#7E57C2',
+    marginLeft: 18,
+    marginBottom: 10,
+    marginTop: 8,
+  },
+  emptyPedidos: {
+    color: '#B39DDB',
+    textAlign: 'center',
+    marginTop: 10,
+    fontStyle: 'italic',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(126,87,194,0.22)',
+    padding: 16,
+  },
+  modalContentCustom: {
+    width: '90%',
+    backgroundColor: '#fff',
+    padding: 28,
+    borderRadius: 20,
+    elevation: 12,
+    shadowColor: '#7E57C2',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.22,
+    shadowRadius: 24,
+    alignItems: 'center',
+  },
+  modalIconCircle: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#7E57C2',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+    elevation: 6,
+    shadowColor: '#7E57C2',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+  },
+  modalTitleCustom: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#7E57C2',
+    marginBottom: 18,
+    textAlign: 'center',
+    letterSpacing: 0.7,
+  },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 10,
+    backgroundColor: '#F8F5FF',
+    borderRadius: 10,
+    paddingHorizontal: 8,
+  },
+  inputIcon: {
+    marginRight: 8,
+  },
+  inputCustom: {
+    flex: 1,
+    borderBottomWidth: 1.7,
+    borderBottomColor: '#BA68C8',
+    padding: 10,
+    fontSize: 17,
+    color: '#5E35B1',
+    fontWeight: '500',
+    backgroundColor: 'transparent',
+  },
+  modalButton: {
+    backgroundColor: '#7E57C2',
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    borderRadius: 16,
+    marginTop: 18,
+    alignItems: 'center',
+    elevation: 4,
+    width: '100%',
+    marginBottom: 8,
+  },
+  modalButtonText: {
+    color: '#fff',
+    fontWeight: '800',
+    fontSize: 17,
+    letterSpacing: 0.7,
+    textAlign: 'center',
+  },
+  cancelButtonCustom: {
+    marginTop: 0,
+    paddingVertical: 10,
+    width: '100%',
+    alignItems: 'center',
+    borderRadius: 12,
+  },
+  cancelButtonText: {
+    color: '#7E57C2',
+    fontWeight: '700',
+    fontSize: 16,
+    letterSpacing: 0.5,
+  },
+  saveButton: {
+    backgroundColor: '#7E57C2',
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+  },
+  cancelButton: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#7E57C2',
   },
 });
