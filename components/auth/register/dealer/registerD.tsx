@@ -1,4 +1,5 @@
 import { ThemedText } from '@/components/ThemedText';
+import { API_BASE_URL } from '@/constants/ApiConfig';
 import { MaterialIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Image } from 'expo-image';
@@ -11,12 +12,18 @@ export default function RegisterDealerScreen() {
   const [telefono, setTelefono] = useState('');
   const [correo, setCorreo] = useState('');
   const [contrasena, setContrasena] = useState('');
+  const [repetirContrasena, setRepetirContrasena] = useState('');
   const [fechaNacimiento, setFechaNacimiento] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const handleRegister = async () => {
+    if (contrasena !== repetirContrasena) {
+      Alert.alert('Error', 'Las contraseñas no coinciden');
+      return;
+    }
+
     try {
-      const response = await fetch('http://192.168.1.120:5000/api/auth/registro_Repartidor', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/registro_Repartidor`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -94,6 +101,18 @@ export default function RegisterDealerScreen() {
               style={styles.input}
               onChangeText={setContrasena}
               value={contrasena}
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <MaterialIcons name="lock" size={22} color="#7E57C2" style={styles.icon} />
+            <TextInput
+              placeholder="Repetir contraseña"
+              placeholderTextColor="#A3A3A3"
+              secureTextEntry
+              style={styles.input}
+              onChangeText={setRepetirContrasena}
+              value={repetirContrasena}
             />
           </View>
 

@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/constants/ApiConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -19,7 +20,7 @@ export default function ClientProfileScreen() {
   useEffect(() => {
     const fetchCliente = async () => {
       const token = await AsyncStorage.getItem('access_token');
-      fetch('http://192.168.1.120:5000/api/cliente/profileCliente', {
+      fetch(`${API_BASE_URL}/api/cliente/profileCliente`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

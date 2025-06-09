@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/constants/ApiConfig';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Image, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -30,7 +31,7 @@ export default function BusinessProfileScreen() {
 
   useEffect(() => {
     const fetchNegocio = async () => {
-      fetch('http://192.168.1.120:5000/api/negocio/profileNegocio', {
+      fetch(`${API_BASE_URL}/api/negocio/profileNegocio`, {
         headers: {
           'Content-Type': 'application/json'
         }
