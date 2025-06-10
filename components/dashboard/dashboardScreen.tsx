@@ -1,6 +1,7 @@
 import { Picker } from '@react-native-picker/picker';
-import { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   Dimensions,
   FlatList,
   Image,
@@ -10,82 +11,106 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { API_BASE_URL } from '../../constants/ApiConfig';
 
-const categoryEmojis: Record<string, string> = {
+const categoryEmojis = {
   tecnologia: '💻',
   comida: '🍔',
   ropa: '🧥',
   hogar: '🏡',
   salud: '🩺',
-};
+} as const;
 
-const categoryColors: Record<string, string> = {
+const categoryColors = {
   tecnologia: '#a18cd1',
   comida: '#b9a6e9',
   ropa: '#6c63ff',
   hogar: '#8f8ce7',
   salud: '#7c6ee6',
-};
+} as const;
+
+interface Negocio {
+  id: number;
+  nombre: string;
+  descripcion?: string;
+  tipo_entrega: string;
+  avatar?: string;
+  telefono?: string;
+}
 
 export default function DashboardScreen() {
   const [searchText, setSearchText] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [businesses, setBusinesses] = useState<Negocio[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
-  const [businesses] = useState([
-    {
-      id: '1',
-      display_name: 'Ejemplo Tech',
-      description: 'Soluciones tecnológicas para tu negocio',
-      category: 'tecnologia',
-      phone: '555-1234',
-      image: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
-    },
-    {
-      id: '2',
-      display_name: 'Restaurante Delicia',
-      description: 'Comida casera y deliciosa',
-      category: 'comida',
-      phone: '555-5678',
-      image: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
-    },
-    // Puedes agregar más datos de ejemplo aquí
-  ]);
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/dashboard_negocios`)
+      .then(res => res.json())
+      .then(data => {
+        setBusinesses(data.negocios || []);
+        setLoading(false);
+        setFetchError(null);
+      })
+      .catch(() => {
+        setLoading(false);
+        setFetchError('No se pudo cargar la lista de negocios.');
+      });
+  }, []);
 
   const filteredBusinesses = businesses.filter(business => {
-    const matchesSearch = business.display_name.toLowerCase().includes(searchText.toLowerCase()) ||
-      business.description.toLowerCase().includes(searchText.toLowerCase());
-    const matchesCategory = selectedCategory === '' || business.category === selectedCategory;
+    const matchesSearch =
+      business.nombre.toLowerCase().includes(searchText.toLowerCase()) ||
+      (business.descripcion || '').toLowerCase().includes(searchText.toLowerCase());
+    const matchesCategory = selectedCategory === '' || business.tipo_entrega === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
-  const renderBusinessCard = ({ item }: { item: typeof businesses[0] }) => (
+  const renderBusinessCard = ({ item }: { item: Negocio }) => (
     <TouchableOpacity style={styles.card} activeOpacity={0.93}>
       <View style={styles.cardHeader}>
         <Image
-          source={{ uri: item.image }}
+          source={{ uri: item.avatar || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png' }}
           style={styles.image}
         />
         <View style={[
           styles.categoryTag,
-          { backgroundColor: categoryColors[item.category] || '#b5c6e0' }
+          { backgroundColor: categoryColors[item.tipo_entrega as keyof typeof categoryColors] || '#b5c6e0' }
         ]}>
           <Text style={styles.categoryText}>
-            {categoryEmojis[item.category] || '🏷️'} {item.category.charAt(0).toUpperCase() + item.category.slice(1)}
+            {categoryEmojis[item.tipo_entrega as keyof typeof categoryEmojis] || '🏷️'} {item.tipo_entrega?.charAt(0).toUpperCase() + item.tipo_entrega?.slice(1)}
           </Text>
         </View>
       </View>
       <View style={styles.cardBody}>
-        <Text style={styles.businessName}>{item.display_name}</Text>
+        <Text style={styles.businessName}>{item.nombre}</Text>
         <Text style={styles.businessDescription} numberOfLines={2}>
-          {item.description}
+          {item.descripcion}
         </Text>
       </View>
       <View style={styles.cardFooter}>
         <Text style={styles.contactIcon}>📞</Text>
-        <Text style={styles.contactText}>{item.phone}</Text>
+        <Text style={styles.contactText}>{item.telefono}</Text>
       </View>
     </TouchableOpacity>
   );
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#a18cd1" />
+      </View>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ color: '#a18cd1', fontSize: 16, fontWeight: '600', textAlign: 'center' }}>{fetchError}</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -123,7 +148,7 @@ export default function DashboardScreen() {
 
       <FlatList
         data={filteredBusinesses}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={renderBusinessCard}
         numColumns={2}
         contentContainerStyle={styles.businessList}
