@@ -38,7 +38,7 @@ interface Negocio {
   telefono?: string;
 }
 
-export default function DashboardScreen() {
+export default function Busisness_dashboardScreen() {
   const [searchText, setSearchText] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [businesses, setBusinesses] = useState<Negocio[]>([]);
