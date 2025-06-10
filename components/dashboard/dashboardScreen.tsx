@@ -46,12 +46,16 @@ export default function DashboardScreen() {
   const [fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/dashboard_negocios`)
+    fetch(`${API_BASE_URL}/api/dashboard/dashboard_negocios`)
       .then(res => res.json())
       .then(data => {
-        setBusinesses(data.negocios || []);
+        if (data.status === 'success' && Array.isArray(data.negocios)) {
+          setBusinesses(data.negocios);
+          setFetchError(null);
+        } else {
+          setFetchError('No se pudo cargar la lista de negocios.');
+        }
         setLoading(false);
-        setFetchError(null);
       })
       .catch(() => {
         setLoading(false);
