@@ -24,7 +24,7 @@ export default function ClientProfileScreen() {
     setLoading(true);
     setError(null);
     const token = await AsyncStorage.getItem('access_token');
-    fetch(`${API_BASE_URL}/api/cliente/profileCliente`, {
+    fetch(`${API_BASE_URL}/api/perfilCliente/perfilCliente`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
@@ -58,7 +58,7 @@ export default function ClientProfileScreen() {
 
   const handleSaveEdit = async () => {
     const token = await AsyncStorage.getItem('access_token');
-    fetch(`${API_BASE_URL}/api/cliente/editarPerfil`, {
+    fetch(`${API_BASE_URL}/api/perfilCliente/editarPerfil`, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${token}`,

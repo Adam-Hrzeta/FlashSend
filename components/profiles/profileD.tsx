@@ -52,7 +52,7 @@ export default function DealerProfileScreen() {
   useEffect(() => {
     const fetchRepartidor = async () => {
       const token = await AsyncStorage.getItem('access_token');
-      fetch(`${API_BASE_URL}/api/repartidor/profileRepartidor`, {
+      fetch(`${API_BASE_URL}/api/perfilRepartidor/perfilRepartidor`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -85,7 +85,7 @@ export default function DealerProfileScreen() {
 
   const handleSaveEdit = async () => {
     const token = await AsyncStorage.getItem('access_token');
-    fetch(`${API_BASE_URL}/api/repartidor/editarPerfil`, {
+    fetch(`${API_BASE_URL}/api/perfilRepartidor/editarPerfil`, { // CORREGIDO
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -117,7 +117,7 @@ export default function DealerProfileScreen() {
     // Actualiza el backend
     const update = async () => {
       const token = await AsyncStorage.getItem('access_token');
-      await fetch(`${API_BASE_URL}/api/repartidor/editarPerfil`, {
+      await fetch(`${API_BASE_URL}/api/perfilRepartidor/editarPerfil`, { // CORREGIDO
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

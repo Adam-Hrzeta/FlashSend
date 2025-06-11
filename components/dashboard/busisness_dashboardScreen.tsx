@@ -46,7 +46,7 @@ export default function Busisness_dashboardScreen() {
   const [fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/dashboard/dashboard_negocios`)
+    fetch(`${API_BASE_URL}/api/dashboard_mostrar_negocios/dashboard_negocios`)
       .then(res => res.json())
       .then(data => {
         if (data.status === 'success' && Array.isArray(data.negocios)) {

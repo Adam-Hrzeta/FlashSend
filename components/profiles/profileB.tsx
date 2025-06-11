@@ -29,7 +29,7 @@ export default function NegocioProfileScreen() {
     setError(null);
     try {
       const token = await AsyncStorage.getItem('access_token');
-      const response = await fetch(`${API_BASE_URL}/api/negocio/profileNegocio`, {
+      const response = await fetch(`${API_BASE_URL}/api/perfilNegocio/perfilNegocio`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -62,7 +62,7 @@ export default function NegocioProfileScreen() {
   const handleSaveEdit = async () => {
     try {
       const token = await AsyncStorage.getItem('access_token');
-      const response = await fetch(`${API_BASE_URL}/api/negocio/editarPerfil`, {
+      const response = await fetch(`${API_BASE_URL}/api/perfilNegocio/editarPerfil`, { // <--- CORREGIDO
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
