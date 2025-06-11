@@ -29,7 +29,6 @@ export default function TabLayout() {
         name="publicBusinessProfile"
         options={{
           title: 'Perfil Negocio',
-          href: null, // Oculta de la barra de tabs
         }}
       />
     </Tabs>
