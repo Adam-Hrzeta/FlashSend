@@ -48,7 +48,7 @@ export default function Layout() {
         }}
       />
       <Drawer.Screen
-        name="dashboard"
+        name="dashboardClient"
         options={{
           drawerLabel: "Negocios y Servicios",
           title: "Negocios y Servicios",

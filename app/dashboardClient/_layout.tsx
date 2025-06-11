@@ -20,7 +20,7 @@ export default function TabLayout() {
         },
       }}>
       <Tabs.Screen
-        name="busisness_dashboard"
+        name="busisnessDashboard"
         options={{
           title: 'Pantalla Principal',
         }}
