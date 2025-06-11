@@ -1,4 +1,5 @@
 import { Picker } from '@react-native-picker/picker';
+import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -39,6 +40,7 @@ interface Negocio {
 }
 
 export default function BusisnessDashboardScreen() {
+  const navigation = useNavigation();
   const [searchText, setSearchText] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [businesses, setBusinesses] = useState<Negocio[]>([]);
@@ -72,7 +74,13 @@ export default function BusisnessDashboardScreen() {
   });
 
   const renderBusinessCard = ({ item }: { item: Negocio }) => (
-    <TouchableOpacity style={styles.card} activeOpacity={0.93}>
+    <TouchableOpacity style={styles.card} activeOpacity={0.93}
+      onPress={() => {
+        // Navegar a la nueva screen de perfil público de negocio
+        // @ts-ignore
+        navigation.navigate('publicBusinessProfile', { negocioId: item.id });
+      }}
+    >
       <View style={styles.cardHeader}>
         <Image
           source={{ uri: item.avatar || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png' }}

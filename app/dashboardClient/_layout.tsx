@@ -1,9 +1,9 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
 import { HapticTab } from '@/components/HapticTab';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { Tabs } from 'expo-router';
+import React from 'react';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -23,6 +23,13 @@ export default function TabLayout() {
         name="busisnessDashboard"
         options={{
           title: 'Pantalla Principal',
+        }}
+      />
+      <Tabs.Screen
+        name="publicBusinessProfile"
+        options={{
+          title: 'Perfil Negocio',
+          href: null, // Oculta de la barra de tabs
         }}
       />
     </Tabs>
