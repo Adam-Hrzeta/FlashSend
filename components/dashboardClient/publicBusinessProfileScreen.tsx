@@ -24,7 +24,7 @@ export default function PublicBusinessProfileScreen() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/producto/public_profile/${negocioId}`)
+    fetch(`${API_BASE_URL}/api/negocioyProductos/negocioyProductos/${negocioId}`)
       .then(res => res.json())
       .then(data => {
         if (data.status === 'success') {
