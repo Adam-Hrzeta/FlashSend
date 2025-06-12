@@ -56,9 +56,9 @@ export default function ClientProfileScreen() {
     setEditModalVisible(true);
   };
 
-  const handleSaveEdit = async () => {
+   const handleSaveEdit = async () => {
     const token = await AsyncStorage.getItem('access_token');
-    fetch(`${API_BASE_URL}/api/perfilCliente/editarPerfil`, {
+    fetch(`${API_BASE_URL}/api/perfilCliente/editarPerfil`, { // CORREGIDO
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -75,7 +75,6 @@ export default function ClientProfileScreen() {
       })
       .then(data => {
         setCliente(data.cliente);
-        setEditData(data.cliente);
         setEditModalVisible(false);
         Alert.alert('Perfil actualizado');
       })

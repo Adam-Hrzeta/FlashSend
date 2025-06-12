@@ -59,31 +59,31 @@ export default function NegocioProfileScreen() {
     setEditModalVisible(true);
   };
 
-  const handleSaveEdit = async () => {
-    try {
-      const token = await AsyncStorage.getItem('access_token');
-      const response = await fetch(`${API_BASE_URL}/api/perfilNegocio/editarPerfil`, { // <--- CORREGIDO
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(editData)
+   const handleSaveEdit = async () => {
+    const token = await AsyncStorage.getItem('access_token');
+    fetch(`${API_BASE_URL}/api/perfilNegocio/editarPerfil`, { // CORREGIDO
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(editData)
+    })
+      .then(async res => {
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data?.mensaje || 'Error al editar');
+        }
+        return res.json();
+      })
+      .then(data => {
+        setNegocio(data.negocio);
+        setEditModalVisible(false);
+        Alert.alert('Perfil actualizado');
+      })
+      .catch(() => {
+        Alert.alert('Error', 'No se pudo actualizar el perfil');
       });
-
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        throw new Error(data?.error || 'Error al editar');
-      }
-
-      const data = await response.json();
-      setNegocio(data.negocio);
-      setEditData(data.negocio);
-      setEditModalVisible(false);
-      Alert.alert('Éxito', 'Perfil actualizado correctamente');
-    } catch (err) {
-      Alert.alert('Error', err.message || 'No se pudo actualizar el perfil');
-    }
   };
 
   if (loading) {
