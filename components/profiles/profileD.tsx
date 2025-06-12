@@ -317,16 +317,6 @@ export default function DealerProfileScreen() {
                 keyboardType="phone-pad"
               />
             </View>
-            <View style={styles.inputRow}>
-              <MaterialIcons name="cake" size={20} color="#BA68C8" style={styles.inputIcon} />
-              <TextInput
-                style={styles.inputCustom}
-                placeholder="Fecha de nacimiento"
-                placeholderTextColor="#BA68C8"
-                value={editData.fecha_nacimiento}
-                onChangeText={text => setEditData({ ...editData, fecha_nacimiento: text })}
-              />
-            </View>
             <TouchableOpacity style={styles.modalButton} onPress={handleSaveEdit}>
               <Text style={styles.modalButtonText}>
                 <MaterialIcons name="save" size={18} color="#fff" /> Guardar
