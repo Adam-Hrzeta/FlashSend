@@ -1,18 +1,19 @@
 import { API_BASE_URL } from '@/constants/ApiConfig';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  Modal,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Image,
+    Modal,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 
 interface Repartidor {
@@ -218,7 +219,7 @@ export default function DealerProfileScreen() {
           </TouchableOpacity>
         </View>
         {tipoServicio === 'Aliado' && (
-          <>
+          <View>
             {/* Buscador de negocios solo de a mentis */}
             <Text style={[styles.infoText, { marginTop: 14, fontWeight: 'bold' }]}>Buscar negocios para aliarse</Text>
             <View style={styles.inputRow}>
@@ -247,7 +248,6 @@ export default function DealerProfileScreen() {
               </Text>
             </TouchableOpacity>
             {buscando && <ActivityIndicator color="#7E57C2" style={{ marginTop: 8 }} />}
-            {/* Solo de a mentis, no muestra resultados reales */}
             {negociosEncontrados.length === 0 && !buscando ? (
               <Text style={styles.emptyPedidos}>No se encontraron negocios.</Text>
             ) : (
@@ -267,7 +267,7 @@ export default function DealerProfileScreen() {
                 </View>
               ))
             )}
-          </>
+          </View>
         )}
       </View>
       {error && <Text style={styles.errorText}>{error}</Text>}
@@ -330,6 +330,24 @@ export default function DealerProfileScreen() {
           </View>
         </View>
       </Modal>
+
+      <TouchableOpacity
+        style={{backgroundColor: '#7E57C2', padding: 12, borderRadius: 10, margin: 16, alignItems: 'center'}}
+        onPress={async () => {
+          const token = await AsyncStorage.getItem('access_token');
+          if (token) {
+            await fetch(`${API_BASE_URL}/api/auth/logout`, {
+              method: 'POST',
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+          }
+          await AsyncStorage.removeItem('access_token');
+          Alert.alert('Sesión cerrada');
+          router.replace('/');
+        }}
+      >
+        <Text style={{color: '#fff', fontWeight: 'bold'}}>Cerrar sesión</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }

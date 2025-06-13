@@ -1,10 +1,10 @@
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { Drawer } from "expo-router/drawer";
 import { AntDesign, FontAwesome5 } from "@expo/vector-icons";
-import { useColorScheme } from "react-native";
-import { useEffect } from "react";
-import { SplashScreen } from "expo-router";
 import { useFonts } from "expo-font";
+import { SplashScreen } from "expo-router";
+import { Drawer } from "expo-router/drawer";
+import { useEffect } from "react";
+import { useColorScheme } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function Layout() {
   const colorScheme = useColorScheme();
@@ -21,6 +21,7 @@ export default function Layout() {
   if (!loaded) {
     return null;
   }
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Drawer
@@ -31,38 +32,38 @@ export default function Layout() {
           },
         }}
       >
-      <Drawer.Screen
-        name="index"
-        options={{
-          drawerLabel: "Inicio",
-          title: "",
-          drawerIcon: ({ color }) => <AntDesign name="home" size={24} color={color} />,
-        }}
-      />
-      <Drawer.Screen
-        name="auth"
-        options={{
-          drawerLabel: "Autenticación",
-          title: "Autenticación del tipo de Usuario",
-          drawerIcon: ({ color }) => <FontAwesome5 name="user-friends" size={24} color={color} />,
-        }}
-      />
-      <Drawer.Screen
-        name="dashboardClient"
-        options={{
-          drawerLabel: "Negocios y Servicios",
-          title: "Negocios y Servicios",
-          drawerIcon: ({ color }) => <AntDesign name="appstore-o" size={24} color={color} />,
-        }}
-      />
-      <Drawer.Screen
-        name="profiles"
-        options={{
-          drawerLabel: "Perfiles",
-          title: "Perfiles de Usuario",
-          drawerIcon: ({ color }) => <AntDesign name="profile" size={24} color={color} />,
-        }}
-      />
+        <Drawer.Screen
+          name="index"
+          options={{
+            drawerLabel: "Inicio",
+            title: "",
+            drawerIcon: ({ color }) => <AntDesign name="home" size={24} color={color} />,
+          }}
+        />
+        <Drawer.Screen
+          name="auth"
+          options={{
+            drawerLabel: "Autenticación",
+            title: "Autenticación del tipo de Usuario",
+            drawerIcon: ({ color }) => <FontAwesome5 name="user-friends" size={24} color={color} />,
+          }}
+        />
+        <Drawer.Screen
+          name="dashboardClient"
+          options={{
+            drawerLabel: "Negocios y Servicios",
+            title: "Negocios y Servicios",
+            drawerIcon: ({ color }) => <AntDesign name="appstore-o" size={24} color={color} />,
+          }}
+        />
+        <Drawer.Screen
+          name="profiles"
+          options={{
+            drawerLabel: "Perfiles",
+            title: "Perfiles de Usuario",
+            drawerIcon: ({ color }) => <AntDesign name="profile" size={24} color={color} />,
+          }}
+        />
       </Drawer>
     </GestureHandlerRootView>
   );

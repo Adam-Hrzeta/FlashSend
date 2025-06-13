@@ -1,6 +1,7 @@
 import { API_BASE_URL } from '@/constants/ApiConfig';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router, useFocusEffect } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
@@ -52,6 +53,13 @@ export default function ClientProfileScreen() {
     fetchCliente();
   }, []);
 
+  // Recargar perfil cada vez que la pantalla recibe foco
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchCliente();
+    }, [])
+  );
+
   const handleEdit = () => {
     setEditModalVisible(true);
   };
@@ -83,10 +91,47 @@ export default function ClientProfileScreen() {
       });
   };
 
+  // Cierre de sesión: limpiar estado y redirigir
+  const handleLogout = async () => {
+    const token = await AsyncStorage.getItem('access_token');
+    if (token) {
+      await fetch(`${API_BASE_URL}/api/auth/logout`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+    }
+    await AsyncStorage.removeItem('access_token');
+    setCliente(null);
+    setError(null);
+    Alert.alert('Sesión cerrada');
+    router.replace('/');
+  };
+
+  // Si no hay token, no mostrar perfil
+  useEffect(() => {
+    const checkToken = async () => {
+      const token = await AsyncStorage.getItem('access_token');
+      if (!token) {
+        setCliente(null);
+        setError(null);
+      }
+    };
+    checkToken();
+  }, []);
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#7E57C2" />
+      </View>
+    );
+  }
+
+  // Si no hay cliente y no hay error, mostrar mensaje de no autenticado
+  if (!cliente && !error) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={styles.errorText}>No has iniciado sesión.</Text>
       </View>
     );
   }
@@ -196,6 +241,12 @@ export default function ClientProfileScreen() {
           </View>
         </View>
       </Modal>
+      <TouchableOpacity
+        style={{backgroundColor: '#7E57C2', padding: 12, borderRadius: 10, margin: 16, alignItems: 'center'}}
+        onPress={handleLogout}
+      >
+        <Text style={{color: '#fff', fontWeight: 'bold'}}>Cerrar sesión</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }

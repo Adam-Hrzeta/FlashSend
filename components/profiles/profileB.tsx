@@ -1,6 +1,7 @@
 import { API_BASE_URL } from '@/constants/ApiConfig';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
@@ -45,7 +46,11 @@ export default function NegocioProfileScreen() {
       setNegocio(data.negocio);
       setEditData(data.negocio);
     } catch (err) {
-      setError(err.message || 'No tienes permiso para ver este perfil.');
+      setError(
+        typeof err === 'object' && err !== null && 'message' in err
+          ? String((err as { message?: string }).message)
+          : 'No tienes permiso para ver este perfil.'
+      );
     } finally {
       setLoading(false);
     }
@@ -245,6 +250,24 @@ export default function NegocioProfileScreen() {
           </View>
         </View>
       </Modal>
+
+      <TouchableOpacity
+        style={{backgroundColor: '#7E57C2', padding: 12, borderRadius: 10, margin: 16, alignItems: 'center'}}
+        onPress={async () => {
+          const token = await AsyncStorage.getItem('access_token');
+          if (token) {
+            await fetch(`${API_BASE_URL}/api/auth/logout`, {
+              method: 'POST',
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+          }
+          await AsyncStorage.removeItem('access_token');
+          Alert.alert('Sesión cerrada');
+          router.replace('/');
+        }}
+      >
+        <Text style={{color: '#fff', fontWeight: 'bold'}}>Cerrar sesión</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
