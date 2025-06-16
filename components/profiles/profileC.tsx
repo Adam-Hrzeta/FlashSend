@@ -1,6 +1,7 @@
 import { API_BASE_URL } from '@/constants/ApiConfig';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as ImagePicker from 'expo-image-picker';
 import { router, useFocusEffect } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -20,6 +21,7 @@ export default function ClientProfileScreen() {
   const [error, setError] = useState<string | null>(null);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editData, setEditData] = useState<Partial<Cliente>>({});
+  const [uploading, setUploading] = useState(false);
 
   const fetchCliente = async () => {
     setLoading(true);
@@ -91,6 +93,46 @@ export default function ClientProfileScreen() {
       });
   };
 
+  const handlePickImage = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) {
+      Alert.alert('Permiso requerido', 'Se necesita permiso para acceder a la galería.');
+      return;
+    }
+    const pickerResult = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.7, base64: false });
+    if (!pickerResult.canceled && pickerResult.assets && pickerResult.assets.length > 0) {
+      uploadProfileImage(pickerResult.assets[0].uri);
+    }
+  };
+
+  const uploadProfileImage = async (uri: string) => {
+    setUploading(true);
+    const token = await AsyncStorage.getItem('access_token');
+    const formData = new FormData();
+    formData.append('image', {
+      uri,
+      name: 'profile.jpg',
+      type: 'image/jpeg',
+    } as any);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/perfilCliente/upload_profile_image`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+        body: formData,
+      });
+      if (!response.ok) throw new Error('Error al subir la imagen');
+      Alert.alert('Éxito', 'Imagen de perfil actualizada');
+      fetchCliente();
+    } catch (e) {
+      Alert.alert('Error', 'No se pudo subir la imagen');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   // Cierre de sesión: limpiar estado y redirigir
   const handleLogout = async () => {
     const token = await AsyncStorage.getItem('access_token');
@@ -140,8 +182,14 @@ export default function ClientProfileScreen() {
     <ScrollView style={styles.container}>
       <View style={styles.headerRow}>
         <View style={styles.avatarCircle}>
-          <Image source={{ uri: cliente?.avatar }} style={styles.avatar} />
+          {cliente?.avatar && (
+            <Image source={{ uri: cliente.avatar + `&t=${Date.now()}` }} style={styles.avatar} />
+          )}
+          <TouchableOpacity style={styles.uploadButton} onPress={handlePickImage}>
+            <MaterialIcons name="photo-library" size={22} color="#7E57C2" />
+          </TouchableOpacity>
         </View>
+        {uploading && <ActivityIndicator size="small" color="#7E57C2" style={{marginTop: 8}} />}
         <View style={styles.infoSide}>
           <Text style={styles.nameOnly}>
             {cliente?.nombre}
@@ -491,5 +539,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#7E57C2',
+  },
+  uploadButton: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 6,
+    elevation: 2,
+    margin: 2,
   },
 });

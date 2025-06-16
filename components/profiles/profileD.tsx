@@ -1,19 +1,20 @@
 import { API_BASE_URL } from '@/constants/ApiConfig';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Image,
-    Modal,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Image,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 interface Repartidor {
@@ -49,6 +50,7 @@ export default function DealerProfileScreen() {
   const [busquedaCategoria, setBusquedaCategoria] = useState('');
   const [negociosEncontrados, setNegociosEncontrados] = useState<Negocio[]>([]);
   const [buscando, setBuscando] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     const fetchRepartidor = async () => {
@@ -149,6 +151,46 @@ export default function DealerProfileScreen() {
     Alert.alert('Solicitud enviada', 'Esto es solo de a mentis, no se envió nada.');
   };
 
+  const handlePickImage = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) {
+      Alert.alert('Permiso requerido', 'Se necesita permiso para acceder a la galería.');
+      return;
+    }
+    const pickerResult = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.7, base64: false });
+    if (!pickerResult.canceled && pickerResult.assets && pickerResult.assets.length > 0) {
+      uploadProfileImage(pickerResult.assets[0].uri);
+    }
+  };
+
+  const uploadProfileImage = async (uri: string) => {
+    setUploading(true);
+    const token = await AsyncStorage.getItem('access_token');
+    const formData = new FormData();
+    formData.append('image', {
+      uri,
+      name: 'profile.jpg',
+      type: 'image/jpeg',
+    } as any);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/perfilRepartidor/upload_profile_image`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+        body: formData,
+      });
+      if (!response.ok) throw new Error('Error al subir la imagen');
+      Alert.alert('Éxito', 'Imagen de perfil actualizada');
+      fetchRepartidor();
+    } catch (e) {
+      Alert.alert('Error', 'No se pudo subir la imagen');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -161,8 +203,14 @@ export default function DealerProfileScreen() {
     <ScrollView style={styles.container}>
       <View style={styles.headerRow}>
         <View style={styles.avatarCircle}>
-          <Image source={{ uri: repartidor?.avatar }} style={styles.avatar} />
+          {repartidor?.avatar && (
+            <Image source={{ uri: repartidor.avatar + `&t=${Date.now()}` }} style={styles.avatar} />
+          )}
+          <TouchableOpacity style={styles.uploadButton} onPress={handlePickImage}>
+            <MaterialIcons name="photo-library" size={22} color="#7E57C2" />
+          </TouchableOpacity>
         </View>
+        {uploading && <ActivityIndicator size="small" color="#7E57C2" style={{marginTop: 8}} />}
         <View style={styles.infoSide}>
           <Text style={styles.nameOnly}>
             {repartidor?.nombre}
@@ -581,5 +629,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 10,
     fontStyle: 'italic',
+  },
+  uploadButton: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 6,
+    elevation: 2,
+    margin: 2,
   },
 });
