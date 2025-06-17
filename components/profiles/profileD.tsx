@@ -210,7 +210,7 @@ export default function DealerProfileScreen() {
             <MaterialIcons name="photo-library" size={22} color="#7E57C2" />
           </TouchableOpacity>
         </View>
-        {uploading && <ActivityIndicator size="small" color="#7E57C2" style={{marginTop: 8}} />}
+        {uploading && <ActivityIndicator size="small" color="#7E57C2" style={{ marginTop: 8 }} />}
         <View style={styles.infoSide}>
           <Text style={styles.nameOnly}>
             {repartidor?.nombre}
@@ -380,7 +380,7 @@ export default function DealerProfileScreen() {
       </Modal>
 
       <TouchableOpacity
-        style={{backgroundColor: '#7E57C2', padding: 12, borderRadius: 10, margin: 16, alignItems: 'center'}}
+        style={{ backgroundColor: '#7E57C2', padding: 12, borderRadius: 10, margin: 16, alignItems: 'center' }}
         onPress={async () => {
           const token = await AsyncStorage.getItem('access_token');
           if (token) {
@@ -394,7 +394,7 @@ export default function DealerProfileScreen() {
           router.replace('/');
         }}
       >
-        <Text style={{color: '#fff', fontWeight: 'bold'}}>Cerrar sesión</Text>
+        <Text style={{ color: '#fff', fontWeight: 'bold' }}>Cerrar sesión</Text>
       </TouchableOpacity>
     </ScrollView>
   );

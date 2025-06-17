@@ -1,7 +1,14 @@
 import { API_BASE_URL } from '@/constants/ApiConfig';
 import { useRoute } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 interface NegocioPublico {
   id: number;
@@ -41,34 +48,103 @@ export default function PublicBusinessProfileScreen() {
   }, [negocioId]);
 
   if (loading) {
-    return <View style={styles.center}><ActivityIndicator size="large" color="#a18cd1" /></View>;
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color="#b497ff" />
+      </View>
+    );
   }
   if (error || !negocio) {
-    return <View style={styles.center}><Text style={styles.error}>{error || 'Error desconocido'}</Text></View>;
+    return (
+      <View style={styles.center}>
+        <Text style={styles.error}>{error || 'Error desconocido'}</Text>
+      </View>
+    );
   }
 
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Image source={{ uri: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png' }} style={styles.avatar} />
+        <Image
+          source={{ uri: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png' }}
+          style={styles.avatar}
+        />
         <Text style={styles.name}>{negocio.nombre}</Text>
         <Text style={styles.category}>{negocio.categoria}</Text>
         <Text style={styles.description}>{negocio.descripcion}</Text>
-        <Text style={styles.info}>Tel: {negocio.telefono}</Text>
-        <Text style={styles.info}>Dirección: {negocio.direccion}</Text>
+        <View style={styles.infoBox}>
+          <Text style={styles.info}>📞 Tel: {negocio.telefono || 'No disponible'}</Text>
+          <Text style={styles.info}>📍 Dirección: {negocio.direccion || 'No disponible'}</Text>
+        </View>
       </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  error: { color: '#a18cd1', fontSize: 16, fontWeight: '600' },
-  header: { alignItems: 'center', padding: 20, backgroundColor: '#f3f3fa' },
-  avatar: { width: 90, height: 90, borderRadius: 45, marginBottom: 10 },
-  name: { fontSize: 24, fontWeight: 'bold', color: '#6c63ff' },
-  category: { fontSize: 16, color: '#7c6ee6', marginBottom: 5 },
-  description: { fontSize: 14, color: '#444', marginBottom: 5, textAlign: 'center' },
-  info: { fontSize: 13, color: '#888' },
+  container: {
+    flex: 1,
+    backgroundColor: '#F8F5FF', // Lila clarito
+  },
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F8F5FF',
+  },
+  error: {
+    color: '#b497ff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  header: {
+    alignItems: 'center',
+    padding: 24,
+    backgroundColor: '#ffffffaa',
+    margin: 20,
+    borderRadius: 20,
+    shadowColor: '#caaaff',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  avatar: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 12,
+    borderWidth: 2,
+    borderColor: '#d8c3ff',
+  },
+  name: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    color: '#6c63ff',
+    marginBottom: 4,
+  },
+  category: {
+    fontSize: 16,
+    color: '#a18cd1',
+    fontWeight: '600',
+    marginBottom: 6,
+  },
+  description: {
+    fontSize: 15,
+    color: '#5a5a5a',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  infoBox: {
+    backgroundColor: '#efe7fd',
+    padding: 12,
+    borderRadius: 12,
+    width: '100%',
+    marginTop: 10,
+  },
+  info: {
+    fontSize: 14,
+    color: '#6b5b95',
+    marginBottom: 6,
+  },
 });
