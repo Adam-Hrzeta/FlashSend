@@ -1,10 +1,10 @@
 import { API_BASE_URL } from '@/constants/ApiConfig';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import ImagePickerComponent from './modal-foto/imagenpiker';
 
 export interface Negocio {
   id: number;
@@ -26,6 +26,7 @@ export default function NegocioProfileScreen() {
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editData, setEditData] = useState<Partial<Negocio>>({});
   const [uploading, setUploading] = useState(false);
+  const [isUpdatingPhoto, setIsUpdatingPhoto] = useState(false);
 
   const fetchNegocio = async () => {
     setLoading(true);
@@ -93,43 +94,51 @@ export default function NegocioProfileScreen() {
       });
   };
 
-  const handlePickImage = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permissionResult.granted) {
-      Alert.alert('Permiso requerido', 'Se necesita permiso para acceder a la galería.');
-      return;
-    }
-    const pickerResult = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.7, base64: false });
-    if (!pickerResult.canceled && pickerResult.assets && pickerResult.assets.length > 0) {
-      uploadProfileImage(pickerResult.assets[0].uri);
-    }
-  };
-
-  const uploadProfileImage = async (uri: string) => {
-    setUploading(true);
-    const token = await AsyncStorage.getItem('access_token');
-    const formData = new FormData();
-    formData.append('image', {
-      uri,
-      name: 'profile.jpg',
-      type: 'image/jpeg',
-    } as any);
+  const handleImageSelected = async (uri: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/perfilNegocio/upload_profile_image`, {
+      setIsUpdatingPhoto(true);
+      const token = await AsyncStorage.getItem('access_token');
+
+      const formData = new FormData();
+      formData.append('image', {
+        uri,
+        type: 'image/jpeg',
+        name: `avatar_${Date.now()}.jpg`
+      } as any);
+
+      const uploadResponse = await fetch(`${API_BASE_URL}/api/perfilNegocio/upload_profile_image`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
         },
         body: formData,
       });
-      if (!response.ok) throw new Error('Error al subir la imagen');
-      Alert.alert('Éxito', 'Imagen de perfil actualizada');
-      fetchNegocio();
-    } catch (e) {
-      Alert.alert('Error', 'No se pudo subir la imagen');
+
+      if (!uploadResponse.ok) {
+        const data = await uploadResponse.json().catch(() => ({}));
+        throw new Error(data?.mensaje || 'Error al actualizar la foto');
+      }
+
+      const profileRes = await fetch(`${API_BASE_URL}/api/perfilNegocio/perfilNegocio`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!profileRes.ok) {
+        throw new Error('Error al refrescar perfil');
+      }
+
+      const profileData = await profileRes.json();
+      setNegocio(profileData.negocio);
+
+      Alert.alert('Éxito', 'Foto de perfil actualizada correctamente');
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Error', 'No se pudo actualizar la foto de perfil');
     } finally {
-      setUploading(false);
+      setIsUpdatingPhoto(false);
     }
   };
 
@@ -156,8 +165,11 @@ export default function NegocioProfileScreen() {
           {negocio?.avatar && (
             <Image source={{ uri: negocio.avatar + `&t=${Date.now()}` }} style={styles.avatar} />
           )}
-          <TouchableOpacity style={styles.uploadButton} onPress={handlePickImage}>
-            <MaterialIcons name="photo-library" size={22} color="#7E57C2" />
+          <TouchableOpacity 
+            style={styles.uploadButton}
+            onPress={() => !isUpdatingPhoto && setEditModalVisible(true)}
+          >
+            <MaterialIcons name="camera-alt" size={24} color="#7E57C2" />
           </TouchableOpacity>
         </View>
         {uploading && <ActivityIndicator size="small" color="#7E57C2" style={{marginTop: 8}} />}
@@ -217,6 +229,11 @@ export default function NegocioProfileScreen() {
             </View>
             <Text style={styles.modalTitleCustom}>Editar información</Text>
             
+            <View style={styles.imagePickerContainer}>
+              <Text style={styles.imagePickerLabel}>Cambiar foto de perfil</Text>
+              <ImagePickerComponent onImageSelected={handleImageSelected} />
+            </View>
+
             <View style={styles.inputRow}>
               <MaterialIcons name="person" size={20} color="#BA68C8" style={styles.inputIcon} />
               <TextInput
@@ -554,5 +571,15 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.13,
     shadowRadius: 4,
+  },
+  imagePickerContainer: {
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  imagePickerLabel: {
+    fontSize: 16,
+    color: '#7E57C2',
+    marginBottom: 10,
+    fontWeight: 'bold',
   },
 });
