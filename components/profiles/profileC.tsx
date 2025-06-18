@@ -6,6 +6,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { router, useFocusEffect } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import ImagePickerComponent from './modal-foto/imagenpiker'
+
 
 export interface Cliente {
   id: number;
@@ -24,6 +26,7 @@ export default function ClientProfileScreen() {
   const [editData, setEditData] = useState<Partial<Cliente>>({});
   const [uploading, setUploading] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [isUpdatingPhoto, setIsUpdatingPhoto] = useState(false);
 
   const fetchCliente = async () => {
     setLoading(true);
@@ -169,6 +172,8 @@ export default function ClientProfileScreen() {
     checkToken();
   }, []);
 
+  
+
   // MOSTRAR la fecha sumando 1 día para el usuario
   const formatDate = (dateString?: string) => {
     if (!dateString) return '';
@@ -176,6 +181,54 @@ export default function ClientProfileScreen() {
     if (isNaN(date.getTime())) return '';
     date.setDate(date.getDate() + 1); // AÑADIMOS un día para mostrar
     return new Intl.DateTimeFormat('es-ES').format(date);
+  };
+
+  const handleImageSelected = async (uri: string) => {
+    try {
+      setIsUpdatingPhoto(true);
+      const token = await AsyncStorage.getItem('access_token');
+
+      const formData = new FormData();
+      formData.append('image', {
+        uri,
+        type: 'image/jpeg',
+        name: `avatar_${Date.now()}.jpg`
+      } as any);
+
+      const uploadResponse = await fetch(`${API_BASE_URL}/api/perfilCliente/upload_profile_image`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!uploadResponse.ok) {
+        const data = await uploadResponse.json().catch(() => ({}));
+        throw new Error(data?.mensaje || 'Error al actualizar la foto');
+      }
+
+      const profileRes = await fetch(`${API_BASE_URL}/api/perfilCliente/perfilCliente`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!profileRes.ok) {
+        throw new Error('Error al refrescar perfil');
+      }
+
+      const profileData = await profileRes.json();
+      setCliente(profileData.cliente);
+
+      Alert.alert('Éxito', 'Foto de perfil actualizada correctamente');
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Error', 'No se pudo actualizar la foto de perfil');
+    } finally {
+      setIsUpdatingPhoto(false);
+    }
   };
 
   return loading ? (
@@ -193,8 +246,11 @@ export default function ClientProfileScreen() {
           {cliente?.avatar && (
             <Image source={{ uri: cliente.avatar + `&t=${Date.now()}` }} style={styles.avatar} />
           )}
-          <TouchableOpacity style={styles.uploadButton} onPress={handlePickImage}>
-            <MaterialIcons name="photo-library" size={22} color="#7E57C2" />
+          <TouchableOpacity 
+            style={styles.uploadButton}
+            onPress={() => !isUpdatingPhoto && setEditModalVisible(true)}
+          >
+            <MaterialIcons name="camera-alt" size={24} color="#7E57C2" />
           </TouchableOpacity>
         </View>
         {uploading && <ActivityIndicator size="small" color="#7E57C2" style={{ marginTop: 8 }} />}
@@ -245,6 +301,13 @@ export default function ClientProfileScreen() {
               <MaterialIcons name="edit" size={38} color="#fff" />
             </View>
             <Text style={styles.modalTitleCustom}>Editar información</Text>
+
+            {/* Sección de foto de perfil */}
+            <View style={styles.imagePickerContainer}>
+              <Text style={styles.imagePickerLabel}>Cambiar foto de perfil</Text>
+              <ImagePickerComponent onImageSelected={handleImageSelected} />
+            </View>
+
             <View style={styles.inputRow}>
               <MaterialIcons name="person" size={20} color="#BA68C8" style={styles.inputIcon} />
               <TextInput
@@ -316,6 +379,26 @@ export default function ClientProfileScreen() {
           </View>
         </View>
       </Modal>
+
+       {/* Botón para cerrar sesión ------------------------------*/}
+      <TouchableOpacity
+        style={{ backgroundColor: '#7E57C2', padding: 12, borderRadius: 10, margin: 16, alignItems: 'center' }}
+        onPress={async () => {
+          const token = await AsyncStorage.getItem('access_token');
+          if (token) {
+            await fetch(`${API_BASE_URL}/api/auth/logout`, {
+              method: 'POST',
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+          }
+          await AsyncStorage.removeItem('access_token');
+          Alert.alert('Sesión cerrada');
+          router.replace('/');
+        }}
+      >
+        <Text style={{ color: '#fff', fontWeight: 'bold' }}>Cerrar sesión</Text>
+      </TouchableOpacity>
+
     </ScrollView>
   );
 }
@@ -571,5 +654,15 @@ const styles = StyleSheet.create({
     color: '#7A3FCB',
     fontSize: 23,
     fontWeight: '900',
+  },
+  imagePickerContainer: {
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  imagePickerLabel: {
+    fontSize: 16,
+    color: '#7E57C2',
+    marginBottom: 10,
+    fontWeight: 'bold',
   },
 });

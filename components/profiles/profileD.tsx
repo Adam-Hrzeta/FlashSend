@@ -1,21 +1,12 @@
+//FRONDEND/FlashSend/components/profiles/profileD.tsx
 import { API_BASE_URL } from '@/constants/ApiConfig';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as ImagePicker from 'expo-image-picker';
-import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  Modal,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {ActivityIndicator,Alert,Image,Modal,ScrollView,StyleSheet,Text,TextInput,TouchableOpacity,View,} from 'react-native';
+import ImagePickerComponent from './modal-foto/imagenpiker';
+import { router } from 'expo-router';
+
 
 interface Repartidor {
   id: number;
@@ -44,13 +35,13 @@ export default function DealerProfileScreen() {
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editData, setEditData] = useState<Partial<Repartidor>>({});
   const [tipoServicio, setTipoServicio] = useState<string>('');
+  const [isUpdatingPhoto, setIsUpdatingPhoto] = useState(false);
 
   // Estados para búsqueda de negocios (solo de a mentis)
   const [busquedaNombre, setBusquedaNombre] = useState('');
   const [busquedaCategoria, setBusquedaCategoria] = useState('');
   const [negociosEncontrados, setNegociosEncontrados] = useState<Negocio[]>([]);
   const [buscando, setBuscando] = useState(false);
-  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     const fetchRepartidor = async () => {
@@ -85,6 +76,8 @@ export default function DealerProfileScreen() {
   const handleEdit = () => {
     setEditModalVisible(true);
   };
+
+
 
   const handleSaveEdit = async () => {
     const token = await AsyncStorage.getItem('access_token');
@@ -151,45 +144,62 @@ export default function DealerProfileScreen() {
     Alert.alert('Solicitud enviada', 'Esto es solo de a mentis, no se envió nada.');
   };
 
-  const handlePickImage = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permissionResult.granted) {
-      Alert.alert('Permiso requerido', 'Se necesita permiso para acceder a la galería.');
-      return;
-    }
-    const pickerResult = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.7, base64: false });
-    if (!pickerResult.canceled && pickerResult.assets && pickerResult.assets.length > 0) {
-      uploadProfileImage(pickerResult.assets[0].uri);
-    }
-  };
 
-  const uploadProfileImage = async (uri: string) => {
-    setUploading(true);
-    const token = await AsyncStorage.getItem('access_token');
-    const formData = new FormData();
-    formData.append('image', {
-      uri,
-      name: 'profile.jpg',
-      type: 'image/jpeg',
-    } as any);
+
+  //funcion para manejar la imagen -----------------------------------------------------------------------------
+  const handleImageSelected = async (uri: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/perfilRepartidor/upload_profile_image`, {
+      setIsUpdatingPhoto(true);
+      const token = await AsyncStorage.getItem('access_token');
+
+      // Crear FormData para enviar la imagen
+      const formData = new FormData();
+      formData.append('image', {
+        uri,
+        type: 'image/jpeg',
+        name: `avatar_${Date.now()}.jpg`
+      } as any);
+
+      // Subir la imagen al backend
+      const uploadResponse = await fetch(`${API_BASE_URL}/api/perfilRepartidor/upload_profile_image`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data',
         },
         body: formData,
       });
-      if (!response.ok) throw new Error('Error al subir la imagen');
-      Alert.alert('Éxito', 'Imagen de perfil actualizada');
-      fetchRepartidor();
-    } catch (e) {
-      Alert.alert('Error', 'No se pudo subir la imagen');
+
+      if (!uploadResponse.ok) {
+        const data = await uploadResponse.json().catch(() => ({}));
+        throw new Error(data?.mensaje || 'Error al actualizar la foto');
+      }
+
+      // Refrescar el perfil para obtener la nueva URL del avatar
+      const profileRes = await fetch(`${API_BASE_URL}/api/perfilRepartidor/perfilRepartidor`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!profileRes.ok) {
+        throw new Error('Error al refrescar perfil');
+      }
+
+      const profileData = await profileRes.json();
+      setRepartidor(profileData.repartidor);
+
+      Alert.alert('Éxito', 'Foto de perfil actualizada correctamente');
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Error', 'No se pudo actualizar la foto de perfil');
     } finally {
-      setUploading(false);
+      setIsUpdatingPhoto(false);
     }
   };
+  //---------------------------------------------------------------------------------------------------
+
+
 
   if (loading) {
     return (
@@ -203,14 +213,19 @@ export default function DealerProfileScreen() {
     <ScrollView style={styles.container}>
       <View style={styles.headerRow}>
         <View style={styles.avatarCircle}>
-          {repartidor?.avatar && (
-            <Image source={{ uri: repartidor.avatar + `&t=${Date.now()}` }} style={styles.avatar} />
-          )}
-          <TouchableOpacity style={styles.uploadButton} onPress={handlePickImage}>
-            <MaterialIcons name="photo-library" size={22} color="#7E57C2" />
+          <Image 
+            source={{ 
+              uri: repartidor?.avatar ? `${repartidor.avatar}&t=${Date.now()}` : undefined 
+            }} 
+            style={styles.avatar} 
+          />
+          <TouchableOpacity 
+            style={styles.changePhotoButton}
+            onPress={() => !isUpdatingPhoto && setEditModalVisible(true)}
+          >
+            <MaterialIcons name="camera-alt" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
-        {uploading && <ActivityIndicator size="small" color="#7E57C2" style={{ marginTop: 8 }} />}
         <View style={styles.infoSide}>
           <Text style={styles.nameOnly}>
             {repartidor?.nombre}
@@ -220,10 +235,15 @@ export default function DealerProfileScreen() {
           </Text>
         </View>
       </View>
+
+      
       <TouchableOpacity style={styles.editButton} onPress={handleEdit}>
         <MaterialIcons name="edit" size={20} color="#7E57C2" />
         <Text style={styles.editButtonText}>Editar información</Text>
       </TouchableOpacity>
+
+      
+
       <View style={styles.infoCard}>
         <Text style={styles.infoText}>
           <MaterialIcons name="badge" size={18} color="#7E57C2" /> Nombre: {repartidor?.nombre}
@@ -241,6 +261,8 @@ export default function DealerProfileScreen() {
           <MaterialIcons name="phone" size={18} color="#7E57C2" /> Teléfono: {repartidor?.telefono}
         </Text>
       </View>
+
+
       {/* Tipo de servicio abajo */}
       <View style={styles.infoCard}>
         <Text style={styles.infoText}>
@@ -266,8 +288,10 @@ export default function DealerProfileScreen() {
             <Text style={{ color: tipoServicio === 'Aliado' ? '#fff' : '#7E57C2' }}>Aliado</Text>
           </TouchableOpacity>
         </View>
+
+
         {tipoServicio === 'Aliado' && (
-          <View>
+          <>
             {/* Buscador de negocios solo de a mentis */}
             <Text style={[styles.infoText, { marginTop: 14, fontWeight: 'bold' }]}>Buscar negocios para aliarse</Text>
             <View style={styles.inputRow}>
@@ -296,6 +320,9 @@ export default function DealerProfileScreen() {
               </Text>
             </TouchableOpacity>
             {buscando && <ActivityIndicator color="#7E57C2" style={{ marginTop: 8 }} />}
+
+
+            {/* Solo de a mentis, no muestra resultados reales */}
             {negociosEncontrados.length === 0 && !buscando ? (
               <Text style={styles.emptyPedidos}>No se encontraron negocios.</Text>
             ) : (
@@ -315,10 +342,11 @@ export default function DealerProfileScreen() {
                 </View>
               ))
             )}
-          </View>
+          </>
         )}
       </View>
       {error && <Text style={styles.errorText}>{error}</Text>}
+
 
       {/* Modal para editar información */}
       <Modal
@@ -329,56 +357,98 @@ export default function DealerProfileScreen() {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContentCustom}>
-            <View style={styles.modalIconCircle}>
-              <MaterialIcons name="edit" size={38} color="#fff" />
+            <View style={styles.modalHeader}>
+              <View style={styles.modalIconCircle}>
+                <MaterialIcons name="edit" size={38} color="#fff" />
+              </View>
+              <Text style={styles.modalTitleCustom}>Editar información</Text>
             </View>
-            <Text style={styles.modalTitleCustom}>Editar información</Text>
-            <View style={styles.inputRow}>
-              <MaterialIcons name="person" size={20} color="#BA68C8" style={styles.inputIcon} />
-              <TextInput
-                style={styles.inputCustom}
-                placeholder="Nombre"
-                placeholderTextColor="#BA68C8"
-                value={editData.nombre}
-                onChangeText={text => setEditData({ ...editData, nombre: text })}
-              />
-            </View>
-            <View style={styles.inputRow}>
-              <MaterialIcons name="email" size={20} color="#BA68C8" style={styles.inputIcon} />
-              <TextInput
-                style={styles.inputCustom}
-                placeholder="Correo"
-                placeholderTextColor="#BA68C8"
-                value={editData.correo}
-                onChangeText={text => setEditData({ ...editData, correo: text })}
-                keyboardType="email-address"
-              />
-            </View>
-            <View style={styles.inputRow}>
-              <MaterialIcons name="phone" size={20} color="#BA68C8" style={styles.inputIcon} />
-              <TextInput
-                style={styles.inputCustom}
-                placeholder="Teléfono"
-                placeholderTextColor="#BA68C8"
-                value={editData.telefono}
-                onChangeText={text => setEditData({ ...editData, telefono: text })}
-                keyboardType="phone-pad"
-              />
-            </View>
-            <TouchableOpacity style={styles.modalButton} onPress={handleSaveEdit}>
-              <Text style={styles.modalButtonText}>
-                <MaterialIcons name="save" size={18} color="#fff" /> Guardar
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.cancelButtonCustom} onPress={() => setEditModalVisible(false)}>
-              <Text style={styles.cancelButtonText}>
-                <MaterialIcons name="close" size={18} color="#7E57C2" /> Cancelar
-              </Text>
-            </TouchableOpacity>
+            
+            <ScrollView style={styles.modalScrollView}>
+
+
+
+              {/* Sección de foto de perfil-------------------------------------------------- */}
+              <View style={styles.imagePickerContainer}>
+                <Text style={styles.imagePickerLabel}>Cambiar foto de perfil</Text>
+                <ImagePickerComponent onImageSelected={handleImageSelected} />
+              </View>
+              {/*------------------------------------------------- */}
+
+
+
+              {/* Sección de información personal */}
+              <View style={styles.formSection}>
+                <Text style={styles.sectionTitle}>Información Personal</Text>
+                <View style={styles.inputRow}>
+                  <MaterialIcons name="person" size={20} color="#BA68C8" style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.inputCustom}
+                    placeholder="Nombre"
+                    placeholderTextColor="#BA68C8"
+                    value={editData.nombre}
+                    onChangeText={text => setEditData({ ...editData, nombre: text })}
+                  />
+                </View>
+                <View style={styles.inputRow}>
+                  <MaterialIcons name="email" size={20} color="#BA68C8" style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.inputCustom}
+                    placeholder="Correo"
+                    placeholderTextColor="#BA68C8"
+                    value={editData.correo}
+                    onChangeText={text => setEditData({ ...editData, correo: text })}
+                    keyboardType="email-address"
+                  />
+                </View>
+                <View style={styles.inputRow}>
+                  <MaterialIcons name="phone" size={20} color="#BA68C8" style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.inputCustom}
+                    placeholder="Teléfono"
+                    placeholderTextColor="#BA68C8"
+                    value={editData.telefono}
+                    onChangeText={text => setEditData({ ...editData, telefono: text })}
+                    keyboardType="phone-pad"
+                  />
+                </View>
+                <View style={styles.inputRow}>
+                  <MaterialIcons name="cake" size={20} color="#BA68C8" style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.inputCustom}
+                    placeholder="Fecha de nacimiento"
+                    placeholderTextColor="#BA68C8"
+                    value={editData.fecha_nacimiento}
+                    onChangeText={text => setEditData({ ...editData, fecha_nacimiento: text })}
+                  />
+                </View>
+              </View>
+
+
+
+              {/* Botones de acción ------------------------------------------------------*/}
+              <View style={styles.modalActions}>
+                <TouchableOpacity style={styles.modalButton} onPress={handleSaveEdit}>
+                  <Text style={styles.modalButtonText}>
+                    <MaterialIcons name="save" size={18} color="#fff" /> Guardar
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.cancelButtonCustom} onPress={() => setEditModalVisible(false)}>
+                  <Text style={styles.cancelButtonText}>
+                    <MaterialIcons name="close" size={18} color="#7E57C2" /> Cancelar
+                  </Text>
+                </TouchableOpacity>
+              </View>
+               {/* Botones de acción ------------------------------------------------------*/}
+
+
+            </ScrollView>
           </View>
         </View>
       </Modal>
 
+
+        {/* Botón para cerrar sesión --------------------------------------------------------------*/}
       <TouchableOpacity
         style={{ backgroundColor: '#7E57C2', padding: 12, borderRadius: 10, margin: 16, alignItems: 'center' }}
         onPress={async () => {
@@ -396,6 +466,10 @@ export default function DealerProfileScreen() {
       >
         <Text style={{ color: '#fff', fontWeight: 'bold' }}>Cerrar sesión</Text>
       </TouchableOpacity>
+      {/* Botón para cerrar sesión --------------------------------------------------------------*/}
+
+
+      
     </ScrollView>
   );
 }
@@ -406,6 +480,51 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8F5FF',
     padding: 0,
   },
+  changePhotoButton: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: '#7E57C2',
+    borderRadius: 50,
+    padding: 6,
+    elevation: 4,
+  },
+
+//----------------------------------------------------
+
+  imagePickerContainer: {
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  imagePickerLabel: {
+    fontSize: 16,
+    color: '#7E57C2',
+    marginBottom: 10,
+    fontWeight: 'bold',
+  },
+  formSection: {
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#7E57C2',
+    marginBottom: 10,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalScrollView: {
+    width: '100%',
+  },
+  modalActions: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+//----------------------------------------------------
+
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
