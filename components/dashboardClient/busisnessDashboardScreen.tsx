@@ -91,7 +91,7 @@ export default function BusisnessDashboardScreen() {
           { backgroundColor: categoryColors[item.tipo_entrega as keyof typeof categoryColors] || '#b5c6e0' }
         ]}>
           <Text style={styles.categoryText}>
-            {categoryEmojis[item.tipo_entrega as keyof typeof categoryEmojis] || '🏷️'} {item.tipo_entrega?.charAt(0).toUpperCase() + item.tipo_entrega?.slice(1)}
+            {categoryEmojis[item.tipo_entrega as keyof typeof categoryEmojis] || '🏷'} {item.tipo_entrega?.charAt(0).toUpperCase() + item.tipo_entrega?.slice(1)}
           </Text>
         </View>
       </View>
@@ -149,7 +149,7 @@ export default function BusisnessDashboardScreen() {
           style={styles.categoryPicker}
           dropdownIconColor="#a18cd1"
         >
-          <Picker.Item label="Todas las categorías 🏷️" value="" />
+          <Picker.Item label="Todas las categorías 🏷" value="" />
           <Picker.Item label="Tecnología 💻" value="tecnologia" />
           <Picker.Item label="Comida 🍔" value="comida" />
           <Picker.Item label="Ropa 🧥" value="ropa" />

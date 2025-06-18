@@ -131,6 +131,13 @@ export default function RegisterDealerScreen() {
               },
             ]}
           >
+            <TouchableOpacity
+              onPress={() => router.push('/auth/select')}
+              style={styles.backCircleButton}
+              activeOpacity={0.8}
+            >
+              <MaterialIcons name="arrow-back" size={24} color="#FFFFFF" />
+            </TouchableOpacity>
             <Animated.View
               style={[
                 styles.logoCircle,
@@ -433,4 +440,21 @@ const styles = StyleSheet.create({
     color: '#7E57C2',
     textDecorationLine: 'underline',
   },
+  backCircleButton: {
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 50 : 30,
+    left: 20,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: '#7E57C2', // lila
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#5E35B1',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 6,
+  },
+
 });

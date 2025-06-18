@@ -97,13 +97,7 @@ export default function RegisterBusinessScreen() {
       style={{ flex: 1 }}
     >
       <LinearGradient
-        colors={[
-          '#F06292',
-          '#BA68C8',
-          '#9575CD',
-          '#7E57C2',
-          '#F06292',
-        ]}
+        colors={['#F06292', '#BA68C8', '#9575CD', '#7E57C2']}
         style={styles.gradient}
         start={{ x: 0.1, y: 0 }}
         end={{ x: 1, y: 1 }}
@@ -158,6 +152,15 @@ export default function RegisterBusinessScreen() {
             >
               <MaterialIcons name="store" size={44} color="#FFFDE7" />
             </Animated.View>
+
+            <TouchableOpacity
+              onPress={() => router.push('/auth/select')}
+              style={styles.backCircleButton}
+              activeOpacity={0.8}
+            >
+              <MaterialIcons name="arrow-back" size={24} color="#FFFFFF" />
+            </TouchableOpacity>
+
             <Animated.View
               style={{
                 opacity: titleAnim,
@@ -424,5 +427,21 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#7E57C2',
     textDecorationLine: 'underline',
+  },
+  backCircleButton: {
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 50 : 30,
+    left: 20,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: '#7E57C2',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#5E35B1',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 6,
   },
 });
