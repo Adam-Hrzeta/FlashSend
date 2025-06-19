@@ -43,6 +43,8 @@ export default function DealerProfileScreen() {
   const [negociosEncontrados, setNegociosEncontrados] = useState<Negocio[]>([]);
   const [buscando, setBuscando] = useState(false);
 
+  
+
   useEffect(() => {
     const fetchRepartidor = async () => {
       const token = await AsyncStorage.getItem('access_token');
@@ -106,6 +108,7 @@ export default function DealerProfileScreen() {
         Alert.alert('Error', 'No se pudo actualizar el perfil');
       });
   };
+  
 
   // Manejo de cambio de tipo de servicio fuera del modal
   const handleTipoServicioChange = (tipo: string) => {
@@ -244,6 +247,24 @@ export default function DealerProfileScreen() {
 
       
 
+
+   {/* -----------------------------------------------------------------------------------------------------*/}
+
+    <TouchableOpacity
+      style={[styles.editButton, { marginTop: 8, backgroundColor: '#BA68C8', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }]}
+      onPress={() => router.push('/profiles/pedidosDealer')} // ajusta la ruta si está en subcarpeta
+    >
+      <MaterialIcons name="assignment" size={20} color="#fff" />
+      <Text style={[styles.editButtonText, { color: '#fff', marginLeft: 6 }]}>Ver pedidos asignados</Text>
+    </TouchableOpacity>
+
+   {/* -----------------------------------------------------------------------------------------------------*/}
+
+
+
+
+
+      {/* Información del repartidor */}
       <View style={styles.infoCard}>
         <Text style={styles.infoText}>
           <MaterialIcons name="badge" size={18} color="#7E57C2" /> Nombre: {repartidor?.nombre}
