@@ -64,6 +64,14 @@ export default function Layout() {
             drawerIcon: ({ color }) => <AntDesign name="profile" size={24} color={color} />,
           }}
         />
+        <Drawer.Screen
+          name="dashboardNegocio"
+          options={{
+            drawerLabel: "Prodctos de Negocio",
+            title: "Mis productos",
+            drawerIcon: ({ color }) => <AntDesign name="shoppingcart" size={24} color={color} />,
+          }}
+        />
       </Drawer>
     </GestureHandlerRootView>
   );
