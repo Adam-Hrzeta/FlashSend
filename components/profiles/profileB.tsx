@@ -186,173 +186,242 @@ export default function NegocioProfileScreen() {
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.headerRow}>
-        <View style={styles.avatarCircle}>
-          {negocio?.avatar && (
-            <Image source={{ uri: localAvatar || negocio.avatar + `?t=${Date.now()}` }} style={styles.avatar} />
-          )}
-          <TouchableOpacity 
-            style={styles.uploadButton}
-            onPress={() => !isUpdatingPhoto && handlePickImage()}
-          >
-            <MaterialIcons name="camera-alt" size={24} color="#7E57C2" />
-          </TouchableOpacity>
-        </View>
-        {uploading && <ActivityIndicator size="small" color="#7E57C2" style={{marginTop: 8}} />}
-        <View style={styles.infoSide}>
-          <Text style={styles.nameOnly}>
-            {negocio?.nombre}
-          </Text>
-          <Text style={styles.emailOnly}>
-            {negocio?.correo}
-          </Text>
-          <Text style={styles.categoriaText}>
-            {negocio?.categoria}
-          </Text>
-        </View>
-      </View>
-      
-      <TouchableOpacity style={styles.editButton} onPress={handleEdit}>
-        <MaterialIcons name="edit" size={20} color="#7E57C2" />
-        <Text style={styles.editButtonText}>Editar información</Text>
-      </TouchableOpacity>
-
-      <View style={styles.infoCard}>
-        <Text style={styles.infoText}>
-          <MaterialIcons name="badge" size={18} color="#7E57C2" /> Nombre: {negocio?.nombre}
-        </Text>
-        <Text style={styles.infoText}>
-          <MaterialIcons name="email" size={18} color="#7E57C2" /> Correo: {negocio?.correo}
-        </Text>
-        <Text style={styles.infoText}>
-          <MaterialIcons name="phone" size={18} color="#7E57C2" /> Teléfono: {negocio?.telefono}
-        </Text>
-        <Text style={styles.infoText}>
-          <MaterialIcons name="location-on" size={18} color="#7E57C2" /> Dirección: {negocio?.direccion}
-        </Text>
-        <Text style={styles.infoText}>
-          <MaterialIcons name="info" size={18} color="#7E57C2" /> Descripción: {negocio?.descripcion || 'Sin descripción'}
-        </Text>
-        <Text style={styles.infoText}>
-          <MaterialIcons name="delivery-dining" size={18} color="#7E57C2" /> Tipo de entrega: {negocio?.tipo_entrega}
-        </Text>
-        <Text style={styles.infoText}>
-          <MaterialIcons name="circle" size={18} color={negocio?.disponibilidad ? '#4CAF50' : '#F44336'} /> 
-          Estado: {negocio?.disponibilidad ? 'Disponible' : 'No disponible'}
-        </Text>
-      </View>
-
-      <Modal
-        visible={editModalVisible}
-        animationType="slide"
-        transparent
-        onRequestClose={() => setEditModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContentCustom}>
-            <View style={styles.modalIconCircle}>
-              <MaterialIcons name="edit" size={38} color="#fff" />
-            </View>
-            <Text style={styles.modalTitleCustom}>Editar información</Text>
-            
-            <View style={styles.inputRow}>
-              <MaterialIcons name="person" size={20} color="#BA68C8" style={styles.inputIcon} />
-              <TextInput
-                style={styles.inputCustom}
-                placeholder="Nombre"
-                placeholderTextColor="#BA68C8"
-                value={editData.nombre || ''}
-                onChangeText={text => setEditData({ ...editData, nombre: text })}
-              />
-            </View>
-            
-            <View style={styles.inputRow}>
-              <MaterialIcons name="email" size={20} color="#BA68C8" style={styles.inputIcon} />
-              <TextInput
-                style={styles.inputCustom}
-                placeholder="Correo"
-                placeholderTextColor="#BA68C8"
-                value={editData.correo || ''}
-                onChangeText={text => setEditData({ ...editData, correo: text })}
-                keyboardType="email-address"
-              />
-            </View>
-            
-            <View style={styles.inputRow}>
-              <MaterialIcons name="phone" size={20} color="#BA68C8" style={styles.inputIcon} />
-              <TextInput
-                style={styles.inputCustom}
-                placeholder="Teléfono"
-                placeholderTextColor="#BA68C8"
-                value={editData.telefono || ''}
-                onChangeText={text => setEditData({ ...editData, telefono: text })}
-                keyboardType="phone-pad"
-              />
-            </View>
-            
-            <View style={styles.inputRow}>
-              <MaterialIcons name="location-on" size={20} color="#BA68C8" style={styles.inputIcon} />
-              <TextInput
-                style={styles.inputCustom}
-                placeholder="Dirección"
-                placeholderTextColor="#BA68C8"
-                value={editData.direccion || ''}
-                onChangeText={text => setEditData({ ...editData, direccion: text })}
-              />
-            </View>
-            
-            <View style={styles.inputRow}>
-              <MaterialIcons name="info" size={20} color="#BA68C8" style={styles.inputIcon} />
-              <TextInput
-                style={styles.inputCustom}
-                placeholder="Descripción"
-                placeholderTextColor="#BA68C8"
-                value={editData.descripcion || ''}
-                onChangeText={text => setEditData({ ...editData, descripcion: text })}
-                multiline
-              />
-            </View>
-            
-            <TouchableOpacity 
-              style={styles.modalButton} 
-              onPress={handleSaveEdit}
+    <View style={{ flex: 1, backgroundColor: '#F3EFFF', justifyContent: 'center' }}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 32 }}>
+        {/* Tarjeta principal */}
+        <View style={{
+          width: '92%',
+          backgroundColor: '#fff',
+          borderRadius: 28,
+          paddingTop: 70,
+          paddingBottom: 32,
+          paddingHorizontal: 24,
+          alignItems: 'center',
+          elevation: 8,
+          shadowColor: '#7E57C2',
+          shadowOffset: { width: 0, height: 8 },
+          shadowOpacity: 0.13,
+          shadowRadius: 16,
+          marginTop: 60,
+        }}>
+          {/* Avatar superpuesto */}
+          <View style={{
+            position: 'absolute',
+            top: -80,
+            alignSelf: 'center',
+            backgroundColor: '#fff',
+            borderRadius: 90,
+            width: 180,
+            height: 180,
+            justifyContent: 'center',
+            alignItems: 'center',
+            elevation: 10,
+            shadowColor: '#7E57C2',
+            shadowOffset: { width: 0, height: 8 },
+            shadowOpacity: 0.20,
+            shadowRadius: 18,
+          }}>
+            {negocio?.avatar && (
+              <Image source={{ uri: localAvatar || negocio.avatar + `?t=${Date.now()}` }} style={{ width: 165, height: 165, borderRadius: 82.5 }} />
+            )}
+            <TouchableOpacity
+              style={{
+                position: 'absolute',
+                bottom: 14,
+                right: 14,
+                backgroundColor: '#fff',
+                borderRadius: 30,
+                padding: 10,
+                elevation: 4,
+                shadowColor: '#7E57C2',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.13,
+                shadowRadius: 4,
+              }}
+              onPress={() => !isUpdatingPhoto && handlePickImage()}
             >
-              <Text style={styles.modalButtonText}>
-                <MaterialIcons name="save" size={18} color="#fff" /> Guardar
-              </Text>
+              <MaterialIcons name="camera-alt" size={28} color="#7E57C2" />
             </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={styles.cancelButtonCustom} 
-              onPress={() => setEditModalVisible(false)}
+          </View>
+
+          {/* Nombre y categoría */}
+          <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#5E35B1', marginTop: 12 }}>{negocio?.nombre}</Text>
+          <Text style={{ fontSize: 15, color: '#BA68C8', fontWeight: '600', marginBottom: 8 }}>{negocio?.categoria}</Text>
+
+          {/* Datos con iconos */}
+          <View style={{ width: '100%', marginTop: 18, marginBottom: 18 }}>
+            {[{
+              icon: 'email', value: negocio?.correo
+            }, {
+              icon: 'phone', value: negocio?.telefono
+            }, {
+              icon: 'location-on', value: negocio?.direccion
+            }, {
+              icon: 'info', value: negocio?.descripcion || 'Sin descripción'
+            }, {
+              icon: 'delivery-dining', value: negocio?.tipo_entrega
+            }, {
+              icon: 'circle', value: negocio?.disponibilidad ? 'Disponible' : 'No disponible', color: negocio?.disponibilidad ? '#4CAF50' : '#F44336'
+            }].map((item, idx) => (
+              <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: idx === 5 ? 0 : 14 }}>
+                <MaterialIcons name={item.icon as any} size={22} color={item.color || '#7E57C2'} />
+                <Text style={{ fontSize: 16, color: item.color || '#5E35B1', marginLeft: 14, flex: 1, flexWrap: 'wrap' }}>{item.value}</Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Botones */}
+          <View style={{ flexDirection: 'row', width: '100%', marginTop: 18, gap: 12 }}>
+            <TouchableOpacity
+              style={{
+                flex: 1,
+                backgroundColor: '#fff',
+                borderRadius: 16,
+                paddingVertical: 14,
+                alignItems: 'center',
+                elevation: 2,
+                shadowColor: '#7E57C2',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.13,
+                shadowRadius: 4,
+                flexDirection: 'row',
+                justifyContent: 'center',
+                borderWidth: 1.2,
+                borderColor: '#E1BEE7',
+              }}
+              onPress={handleEdit}
             >
-              <Text style={styles.cancelButtonText}>
-                <MaterialIcons name="close" size={18} color="#7E57C2" /> Cancelar
-              </Text>
+              <MaterialIcons name="edit" size={22} color="#7E57C2" />
+              <Text style={{ color: '#7E57C2', fontWeight: 'bold', marginLeft: 10, fontSize: 16 }}>Editar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                flex: 1,
+                backgroundColor: '#7E57C2',
+                borderRadius: 16,
+                paddingVertical: 14,
+                alignItems: 'center',
+                elevation: 2,
+                shadowColor: '#7E57C2',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.13,
+                shadowRadius: 4,
+                flexDirection: 'row',
+                justifyContent: 'center',
+              }}
+              onPress={async () => {
+                const token = await AsyncStorage.getItem('access_token');
+                if (token) {
+                  await fetch(`${API_BASE_URL}/api/auth/logout`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                  });
+                }
+                await AsyncStorage.removeItem('access_token');
+                Alert.alert('Sesión cerrada');
+                router.replace('/');
+              }}
+            >
+              <MaterialIcons name="logout" size={22} color="#fff" />
+              <Text style={{ color: '#fff', fontWeight: 'bold', marginLeft: 10, fontSize: 16 }}>Cerrar sesión</Text>
             </TouchableOpacity>
           </View>
         </View>
-      </Modal>
 
-      <TouchableOpacity
-        style={{backgroundColor: '#7E57C2', padding: 12, borderRadius: 10, margin: 16, alignItems: 'center'}}
-        onPress={async () => {
-          const token = await AsyncStorage.getItem('access_token');
-          if (token) {
-            await fetch(`${API_BASE_URL}/api/auth/logout`, {
-              method: 'POST',
-              headers: { 'Authorization': `Bearer ${token}` }
-            });
-          }
-          await AsyncStorage.removeItem('access_token');
-          Alert.alert('Sesión cerrada');
-          router.replace('/');
-        }}
-      >
-        <Text style={{color: '#fff', fontWeight: 'bold'}}>Cerrar sesión</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        {/* Modal de edición (igual que antes) */}
+        <Modal
+          visible={editModalVisible}
+          animationType="slide"
+          transparent
+          onRequestClose={() => setEditModalVisible(false)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContentCustom}>
+              <View style={styles.modalIconCircle}>
+                <MaterialIcons name="edit" size={38} color="#fff" />
+              </View>
+              <Text style={styles.modalTitleCustom}>Editar información</Text>
+              
+              <View style={styles.inputRow}>
+                <MaterialIcons name="person" size={20} color="#BA68C8" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.inputCustom}
+                  placeholder="Nombre"
+                  placeholderTextColor="#BA68C8"
+                  value={editData.nombre || ''}
+                  onChangeText={text => setEditData({ ...editData, nombre: text })}
+                />
+              </View>
+              
+              <View style={styles.inputRow}>
+                <MaterialIcons name="email" size={20} color="#BA68C8" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.inputCustom}
+                  placeholder="Correo"
+                  placeholderTextColor="#BA68C8"
+                  value={editData.correo || ''}
+                  onChangeText={text => setEditData({ ...editData, correo: text })}
+                  keyboardType="email-address"
+                />
+              </View>
+              
+              <View style={styles.inputRow}>
+                <MaterialIcons name="phone" size={20} color="#BA68C8" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.inputCustom}
+                  placeholder="Teléfono"
+                  placeholderTextColor="#BA68C8"
+                  value={editData.telefono || ''}
+                  onChangeText={text => setEditData({ ...editData, telefono: text })}
+                  keyboardType="phone-pad"
+                />
+              </View>
+              
+              <View style={styles.inputRow}>
+                <MaterialIcons name="location-on" size={20} color="#BA68C8" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.inputCustom}
+                  placeholder="Dirección"
+                  placeholderTextColor="#BA68C8"
+                  value={editData.direccion || ''}
+                  onChangeText={text => setEditData({ ...editData, direccion: text })}
+                />
+              </View>
+              
+              <View style={styles.inputRow}>
+                <MaterialIcons name="info" size={20} color="#BA68C8" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.inputCustom}
+                  placeholder="Descripción"
+                  placeholderTextColor="#BA68C8"
+                  value={editData.descripcion || ''}
+                  onChangeText={text => setEditData({ ...editData, descripcion: text })}
+                  multiline
+                />
+              </View>
+              
+              <TouchableOpacity 
+                style={styles.modalButton} 
+                onPress={handleSaveEdit}
+              >
+                <Text style={styles.modalButtonText}>
+                  <MaterialIcons name="save" size={18} color="#fff" /> Guardar
+                </Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={styles.cancelButtonCustom} 
+                onPress={() => setEditModalVisible(false)}
+              >
+                <Text style={styles.cancelButtonText}>
+                  <MaterialIcons name="close" size={18} color="#7E57C2" /> Cancelar
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      </ScrollView>
+    </View>
   );
 }
 
