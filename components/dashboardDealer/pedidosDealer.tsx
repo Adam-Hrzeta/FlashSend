@@ -8,7 +8,7 @@ const pedidosMock = [
   {
     id: '1',
     cliente: { id: 'c1', nombre: 'Juan Pérez', telefono: '555-123-4567' },
-    negocio: { id: 'n1', nombre: 'Tacos Don José', telefono: '555-987-6543', categoria: 'Comida Rápida' }
+    negocio: { id: 'n1', nombre: 'Tacos De perro', telefono: '555-987-6543', categoria: 'Comida Rápida' }
   },
   {
     id: '2',
