@@ -5,6 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { pickLocationAndGetAddress } from './LocationUtils';
 
 export interface Negocio {
   id: number;
@@ -245,8 +246,38 @@ export default function NegocioProfileScreen() {
           </View>
 
           {/* Nombre y categoría */}
-          <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#5E35B1', marginTop: 12 }}>{negocio?.nombre}</Text>
-          <Text style={{ fontSize: 15, color: '#BA68C8', fontWeight: '600', marginBottom: 8 }}>{negocio?.categoria}</Text>
+          <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#5E35B1', marginTop: 40 }}>{negocio?.nombre}</Text>
+          {/* Etiqueta de categoría tipo chip */}
+          {negocio?.categoria && (
+            <View style={{
+              backgroundColor: '#E1BEE7',
+              borderRadius: 16,
+              paddingHorizontal: 14,
+              paddingVertical: 4,
+              alignSelf: 'center',
+              marginTop: 8,
+              marginBottom: 8,
+            }}>
+              <Text style={{ color: '#7E57C2', fontWeight: 'bold', fontSize: 14 }}>{negocio.categoria}</Text>
+            </View>
+          )}
+
+          {/* Botón para cambiar estado */}
+          <TouchableOpacity
+            style={{
+              backgroundColor: negocio?.disponibilidad ? '#4CAF50' : '#F44336',
+              borderRadius: 16,
+              paddingHorizontal: 18,
+              paddingVertical: 8,
+              marginBottom: 10,
+              alignSelf: 'center',
+            }}
+            onPress={() => setNegocio(prev => prev ? { ...prev, disponibilidad: !prev.disponibilidad } : prev)}
+          >
+            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 15 }}>
+              {negocio?.disponibilidad ? 'Disponible' : 'No disponible'}
+            </Text>
+          </TouchableOpacity>
 
           {/* Datos con iconos */}
           <View style={{ width: '100%', marginTop: 18, marginBottom: 18 }}>
@@ -255,17 +286,39 @@ export default function NegocioProfileScreen() {
             }, {
               icon: 'phone', value: negocio?.telefono
             }, {
-              icon: 'location-on', value: negocio?.direccion
+              icon: 'location-on', value: negocio?.direccion,
+              isLocation: true
             }, {
               icon: 'info', value: negocio?.descripcion || 'Sin descripción'
             }, {
               icon: 'delivery-dining', value: negocio?.tipo_entrega
-            }, {
-              icon: 'circle', value: negocio?.disponibilidad ? 'Disponible' : 'No disponible', color: negocio?.disponibilidad ? '#4CAF50' : '#F44336'
             }].map((item, idx) => (
-              <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: idx === 5 ? 0 : 14 }}>
-                <MaterialIcons name={item.icon as any} size={22} color={item.color || '#7E57C2'} />
-                <Text style={{ fontSize: 16, color: item.color || '#5E35B1', marginLeft: 14, flex: 1, flexWrap: 'wrap' }}>{item.value}</Text>
+              <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: idx === 4 ? 0 : 14 }}>
+                <MaterialIcons name={item.icon as any} size={22} color={'#7E57C2'} />
+                <Text style={{ fontSize: 16, color: '#5E35B1', marginLeft: 14, flex: 1, flexWrap: 'wrap' }}>{item.value}</Text>
+                {item.isLocation && (
+                  <TouchableOpacity
+                    style={{ marginLeft: 8, backgroundColor: '#E1BEE7', borderRadius: 12, padding: 6 }}
+                    onPress={async () => {
+                      // Seleccionar ubicación y actualizar en backend
+                      const dir = await pickLocationAndGetAddress(setEditData, setNegocio);
+                      if (dir) {
+                        // Actualizar en backend
+                        const token = await AsyncStorage.getItem('access_token');
+                        await fetch(`${API_BASE_URL}/api/perfilNegocio/editarPerfil`, {
+                          method: 'PUT',
+                          headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                          },
+                          body: JSON.stringify({ ...negocio, direccion: dir })
+                        });
+                      }
+                    }}
+                  >
+                    <MaterialIcons name="my-location" size={20} color="#7E57C2" />
+                  </TouchableOpacity>
+                )}
               </View>
             ))}
           </View>
@@ -374,17 +427,6 @@ export default function NegocioProfileScreen() {
                   value={editData.telefono || ''}
                   onChangeText={text => setEditData({ ...editData, telefono: text })}
                   keyboardType="phone-pad"
-                />
-              </View>
-              
-              <View style={styles.inputRow}>
-                <MaterialIcons name="location-on" size={20} color="#BA68C8" style={styles.inputIcon} />
-                <TextInput
-                  style={styles.inputCustom}
-                  placeholder="Dirección"
-                  placeholderTextColor="#BA68C8"
-                  value={editData.direccion || ''}
-                  onChangeText={text => setEditData({ ...editData, direccion: text })}
                 />
               </View>
               
