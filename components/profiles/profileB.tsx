@@ -1,6 +1,7 @@
 import { API_BASE_URL } from '@/constants/ApiConfig'; //pefil
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -64,6 +65,12 @@ export default function NegocioProfileScreen() {
   useEffect(() => {
     fetchNegocio();
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchNegocio();
+    }, [])
+  );
 
   useEffect(() => {
     if (negocio?.avatar) {
@@ -168,6 +175,20 @@ export default function NegocioProfileScreen() {
       const uri = pickerResult.assets[0].uri;
       await handleImageSelected(uri);
     }
+  };
+
+  const handleLogout = async () => {
+    const token = await AsyncStorage.getItem('access_token');
+    if (token) {
+      await fetch(`${API_BASE_URL}/api/auth/logout`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+    }
+    await AsyncStorage.removeItem('access_token');
+    setNegocio(null); // Limpia el estado del perfil
+    Alert.alert('Sesión cerrada');
+    router.replace('/');
   };
 
   if (loading) {
@@ -362,18 +383,7 @@ export default function NegocioProfileScreen() {
                 flexDirection: 'row',
                 justifyContent: 'center',
               }}
-              onPress={async () => {
-                const token = await AsyncStorage.getItem('access_token');
-                if (token) {
-                  await fetch(`${API_BASE_URL}/api/auth/logout`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                  });
-                }
-                await AsyncStorage.removeItem('access_token');
-                Alert.alert('Sesión cerrada');
-                router.replace('/');
-              }}
+              onPress={handleLogout}
             >
               <MaterialIcons name="logout" size={22} color="#fff" />
               <Text style={{ color: '#fff', fontWeight: 'bold', marginLeft: 10, fontSize: 16 }}>Cerrar sesión</Text>

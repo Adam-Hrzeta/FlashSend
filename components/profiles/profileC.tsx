@@ -6,7 +6,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { router, useFocusEffect } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import ImagePickerComponent from './modal-foto/imagenpiker'
+import ImagePickerComponent from './modal-foto/imagenpiker';
 
 
 export interface Cliente {
@@ -155,8 +155,7 @@ export default function ClientProfileScreen() {
       });
     }
     await AsyncStorage.removeItem('access_token');
-    setCliente(null);
-    setError(null);
+    setCliente(null); // Limpia el estado del perfil
     Alert.alert('Sesión cerrada');
     router.replace('/');
   };
@@ -392,6 +391,7 @@ export default function ClientProfileScreen() {
             });
           }
           await AsyncStorage.removeItem('access_token');
+          setCliente(null); // Limpia el estado del perfil
           Alert.alert('Sesión cerrada');
           router.replace('/');
         }}
