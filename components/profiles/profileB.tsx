@@ -1,10 +1,10 @@
 import { API_BASE_URL } from '@/constants/ApiConfig';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as FileSystem from 'expo-file-system';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import ImagePickerComponent from './modal-foto/imagenpiker';
 
 export interface Negocio {
   id: number;
@@ -27,6 +27,7 @@ export default function NegocioProfileScreen() {
   const [editData, setEditData] = useState<Partial<Negocio>>({});
   const [uploading, setUploading] = useState(false);
   const [isUpdatingPhoto, setIsUpdatingPhoto] = useState(false);
+  const [localAvatar, setLocalAvatar] = useState<string | null>(null);
 
   const fetchNegocio = async () => {
     setLoading(true);
@@ -63,6 +64,22 @@ export default function NegocioProfileScreen() {
     fetchNegocio();
   }, []);
 
+  useEffect(() => {
+    if (negocio?.avatar && FileSystem.cacheDirectory) {
+      const filename = negocio.avatar.split('/').pop() || `avatar_${negocio.id}.jpg`;
+      const localUri = FileSystem.cacheDirectory + filename;
+      FileSystem.getInfoAsync(localUri).then(({ exists }) => {
+        if (exists) {
+          setLocalAvatar(localUri);
+        } else {
+          FileSystem.downloadAsync(negocio.avatar, localUri)
+            .then(() => setLocalAvatar(localUri))
+            .catch(() => setLocalAvatar(negocio.avatar));
+        }
+      });
+    }
+  }, [negocio?.avatar]);
+
   const handleEdit = () => {
     setEditModalVisible(true);
   };
@@ -85,7 +102,8 @@ export default function NegocioProfileScreen() {
         return res.json();
       })
       .then(data => {
-        setNegocio(data.negocio);
+        // Solo actualiza los datos, pero conserva el avatar actual
+        setNegocio(prev => prev ? { ...data.negocio, avatar: prev.avatar } : data.negocio);
         setEditModalVisible(false);
         Alert.alert('Perfil actualizado');
       })
@@ -163,7 +181,7 @@ export default function NegocioProfileScreen() {
       <View style={styles.headerRow}>
         <View style={styles.avatarCircle}>
           {negocio?.avatar && (
-            <Image source={{ uri: negocio.avatar + `&t=${Date.now()}` }} style={styles.avatar} />
+            <Image source={{ uri: localAvatar || negocio.avatar }} style={styles.avatar} />
           )}
           <TouchableOpacity 
             style={styles.uploadButton}
@@ -229,11 +247,6 @@ export default function NegocioProfileScreen() {
             </View>
             <Text style={styles.modalTitleCustom}>Editar información</Text>
             
-            <View style={styles.imagePickerContainer}>
-              <Text style={styles.imagePickerLabel}>Cambiar foto de perfil</Text>
-              <ImagePickerComponent onImageSelected={handleImageSelected} />
-            </View>
-
             <View style={styles.inputRow}>
               <MaterialIcons name="person" size={20} color="#BA68C8" style={styles.inputIcon} />
               <TextInput
@@ -571,15 +584,5 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.13,
     shadowRadius: 4,
-  },
-  imagePickerContainer: {
-    marginBottom: 20,
-    alignItems: 'center',
-  },
-  imagePickerLabel: {
-    fontSize: 16,
-    color: '#7E57C2',
-    marginBottom: 10,
-    fontWeight: 'bold',
   },
 });
