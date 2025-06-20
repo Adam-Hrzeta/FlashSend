@@ -1,7 +1,7 @@
 import { API_BASE_URL } from '@/constants/ApiConfig';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as FileSystem from 'expo-file-system';
+import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -65,18 +65,8 @@ export default function NegocioProfileScreen() {
   }, []);
 
   useEffect(() => {
-    if (negocio?.avatar && FileSystem.cacheDirectory) {
-      const filename = negocio.avatar.split('/').pop() || `avatar_${negocio.id}.jpg`;
-      const localUri = FileSystem.cacheDirectory + filename;
-      FileSystem.getInfoAsync(localUri).then(({ exists }) => {
-        if (exists) {
-          setLocalAvatar(localUri);
-        } else {
-          FileSystem.downloadAsync(negocio.avatar, localUri)
-            .then(() => setLocalAvatar(localUri))
-            .catch(() => setLocalAvatar(negocio.avatar));
-        }
-      });
+    if (negocio?.avatar) {
+      setLocalAvatar(null); // Siempre usar la URL remota más reciente
     }
   }, [negocio?.avatar]);
 
@@ -150,6 +140,7 @@ export default function NegocioProfileScreen() {
 
       const profileData = await profileRes.json();
       setNegocio(profileData.negocio);
+      setLocalAvatar(null); // Forzar recarga de la imagen
 
       Alert.alert('Éxito', 'Foto de perfil actualizada correctamente');
     } catch (error) {
@@ -157,6 +148,24 @@ export default function NegocioProfileScreen() {
       Alert.alert('Error', 'No se pudo actualizar la foto de perfil');
     } finally {
       setIsUpdatingPhoto(false);
+    }
+  };
+
+  const handlePickImage = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (permissionResult.granted === false) {
+      Alert.alert('Permiso requerido', 'Se necesita permiso para acceder a la galería.');
+      return;
+    }
+    const pickerResult = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+    if (!pickerResult.canceled && pickerResult.assets && pickerResult.assets.length > 0) {
+      const uri = pickerResult.assets[0].uri;
+      await handleImageSelected(uri);
     }
   };
 
@@ -181,11 +190,11 @@ export default function NegocioProfileScreen() {
       <View style={styles.headerRow}>
         <View style={styles.avatarCircle}>
           {negocio?.avatar && (
-            <Image source={{ uri: localAvatar || negocio.avatar }} style={styles.avatar} />
+            <Image source={{ uri: localAvatar || negocio.avatar + `?t=${Date.now()}` }} style={styles.avatar} />
           )}
           <TouchableOpacity 
             style={styles.uploadButton}
-            onPress={() => !isUpdatingPhoto && setEditModalVisible(true)}
+            onPress={() => !isUpdatingPhoto && handlePickImage()}
           >
             <MaterialIcons name="camera-alt" size={24} color="#7E57C2" />
           </TouchableOpacity>
