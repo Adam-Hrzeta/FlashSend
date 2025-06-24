@@ -26,6 +26,15 @@ export default function RegisterDealerScreen() {
   const [fechaNacimiento, setFechaNacimiento] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
 
+  // Estados para verificación
+  const [codigoVerificacion, setCodigoVerificacion] = useState('');
+  const [mostrarVerificacion, setMostrarVerificacion] = useState(false);
+  const [mensaje, setMensaje] = useState('');
+  const [error, setError] = useState('');
+  const [loadingRegistro, setLoadingRegistro] = useState(false);
+  const [loadingVerificacion, setLoadingVerificacion] = useState(false);
+  const [loadingReenvio, setLoadingReenvio] = useState(false);
+
   // Animaciones
   const cardAnim = useRef(new Animated.Value(0)).current;
   const logoAnim = useRef(new Animated.Value(0)).current;
@@ -67,6 +76,10 @@ export default function RegisterDealerScreen() {
       return;
     }
 
+    setLoadingRegistro(true);
+    setError('');
+    setMensaje('');
+
     try {
       const response = await fetch(`${API_BASE_URL}/api/auth/registro_Repartidor`, {
         method: 'POST',
@@ -81,13 +94,78 @@ export default function RegisterDealerScreen() {
       });
       const data = await response.json();
       if (response.ok) {
-        Alert.alert('Registro exitoso', data.mensaje || '¡Dealer registrado!');
-        router.push('/auth/login');
+        setMensaje(data.mensaje || '¡Repartidor registrado! Revisa tu correo para el código.');
+        setMostrarVerificacion(true);
       } else {
         Alert.alert('Error', data.error || 'No se pudo registrar');
       }
     } catch (error) {
       Alert.alert('Error', 'No se pudo conectar al servidor');
+    } finally {
+      setLoadingRegistro(false);
+    }
+  };
+
+  const handleVerificarCodigo = async () => {
+    if (!codigoVerificacion.trim()) {
+      setError('Por favor ingresa el código de verificación');
+      setMensaje('');
+      return;
+    }
+
+    setLoadingVerificacion(true);
+    setError('');
+    setMensaje('');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/verificar_correo`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          correo,
+          pin: codigoVerificacion.trim(),
+          tipo_usuario: 'repartidor',
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        Alert.alert('Éxito', data.mensaje || 'Correo verificado correctamente');
+        router.push('/auth/login');
+      } else {
+        setError(data.error || 'Código incorrecto o expirado');
+      }
+    } catch (error) {
+      setError('Error al conectar con el servidor');
+    } finally {
+      setLoadingVerificacion(false);
+    }
+  };
+
+  const handleReenviarPin = async () => {
+    setLoadingReenvio(true);
+    setError('');
+    setMensaje('');
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/reenviar_pin`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          correo,
+          tipo_usuario: 'repartidor',
+        }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setMensaje(data.mensaje || 'Se ha enviado un nuevo código a tu correo.');
+      } else {
+        setError(data.error || 'No se pudo reenviar el código');
+      }
+    } catch (error) {
+      setError('Error al conectar con el servidor');
+    } finally {
+      setLoadingReenvio(false);
     }
   };
 
@@ -185,97 +263,143 @@ export default function RegisterDealerScreen() {
               }}
             >
               <ThemedText type="title" style={styles.title}>
-                Registrar Repartidor
+                {mostrarVerificacion ? 'Verifica tu correo' : 'Registrar Repartidor'}
               </ThemedText>
             </Animated.View>
 
-            <View style={styles.inputContainer}>
-              <View style={styles.inputGroup}>
-                <MaterialIcons name="person" size={22} color="#7E57C2" style={styles.icon} />
-                <TextInput
-                  placeholder="Nombre completo"
-                  placeholderTextColor="#A3A3A3"
-                  style={styles.input}
-                  onChangeText={setNombre}
-                  value={nombre}
-                />
-              </View>
+            {!mostrarVerificacion ? (
+              <View style={styles.inputContainer}>
+                <View style={styles.inputGroup}>
+                  <MaterialIcons name="person" size={22} color="#7E57C2" style={styles.icon} />
+                  <TextInput
+                    placeholder="Nombre completo"
+                    placeholderTextColor="#A3A3A3"
+                    style={styles.input}
+                    onChangeText={setNombre}
+                    value={nombre}
+                  />
+                </View>
 
-              <View style={styles.inputGroup}>
-                <MaterialIcons name="phone" size={22} color="#7E57C2" style={styles.icon} />
-                <TextInput
-                  placeholder="Teléfono"
-                  placeholderTextColor="#A3A3A3"
-                  style={styles.input}
-                  keyboardType="phone-pad"
-                  onChangeText={setTelefono}
-                  value={telefono}
-                />
-              </View>
+                <View style={styles.inputGroup}>
+                  <MaterialIcons name="phone" size={22} color="#7E57C2" style={styles.icon} />
+                  <TextInput
+                    placeholder="Teléfono"
+                    placeholderTextColor="#A3A3A3"
+                    style={styles.input}
+                    keyboardType="phone-pad"
+                    onChangeText={setTelefono}
+                    value={telefono}
+                  />
+                </View>
 
-              <View style={styles.inputGroup}>
-                <MaterialIcons name="email" size={22} color="#7E57C2" style={styles.icon} />
-                <TextInput
-                  placeholder="Correo electrónico"
-                  placeholderTextColor="#A3A3A3"
-                  style={styles.input}
-                  onChangeText={setCorreo}
-                  keyboardType="email-address"
-                  value={correo}
-                />
-              </View>
+                <View style={styles.inputGroup}>
+                  <MaterialIcons name="email" size={22} color="#7E57C2" style={styles.icon} />
+                  <TextInput
+                    placeholder="Correo electrónico"
+                    placeholderTextColor="#A3A3A3"
+                    style={styles.input}
+                    onChangeText={setCorreo}
+                    keyboardType="email-address"
+                    value={correo}
+                  />
+                </View>
 
-              <View style={styles.inputGroup}>
-                <MaterialIcons name="lock" size={22} color="#7E57C2" style={styles.icon} />
-                <TextInput
-                  placeholder="Contraseña"
-                  placeholderTextColor="#A3A3A3"
-                  secureTextEntry
-                  style={styles.input}
-                  onChangeText={setContrasena}
-                  value={contrasena}
-                />
-              </View>
+                <View style={styles.inputGroup}>
+                  <MaterialIcons name="lock" size={22} color="#7E57C2" style={styles.icon} />
+                  <TextInput
+                    placeholder="Contraseña"
+                    placeholderTextColor="#A3A3A3"
+                    secureTextEntry
+                    style={styles.input}
+                    onChangeText={setContrasena}
+                    value={contrasena}
+                  />
+                </View>
 
-              <View style={styles.inputGroup}>
-                <MaterialIcons name="lock" size={22} color="#7E57C2" style={styles.icon} />
-                <TextInput
-                  placeholder="Repetir contraseña"
-                  placeholderTextColor="#A3A3A3"
-                  secureTextEntry
-                  style={styles.input}
-                  onChangeText={setRepetirContrasena}
-                  value={repetirContrasena}
-                />
-              </View>
+                <View style={styles.inputGroup}>
+                  <MaterialIcons name="lock" size={22} color="#7E57C2" style={styles.icon} />
+                  <TextInput
+                    placeholder="Repetir contraseña"
+                    placeholderTextColor="#A3A3A3"
+                    secureTextEntry
+                    style={styles.input}
+                    onChangeText={setRepetirContrasena}
+                    value={repetirContrasena}
+                  />
+                </View>
 
-              <View style={styles.inputGroup}>
-                <MaterialIcons name="cake" size={22} color="#7E57C2" style={styles.icon} />
+                <View style={styles.inputGroup}>
+                  <MaterialIcons name="cake" size={22} color="#7E57C2" style={styles.icon} />
+                  <TouchableOpacity
+                    style={[styles.input, { justifyContent: 'center' }]}
+                    onPress={() => setShowDatePicker(true)}
+                    activeOpacity={0.7}
+                  >
+                    <ThemedText style={styles.birthdayText}>
+                      {fechaNacimiento
+                        ? fechaNacimiento.toLocaleDateString()
+                        : 'Selecciona tu fecha de nacimiento'}
+                    </ThemedText>
+                  </TouchableOpacity>
+                  {showDatePicker && (
+                    <DateTimePicker
+                      value={fechaNacimiento}
+                      mode="date"
+                      display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                      maximumDate={new Date()}
+                      onChange={(_, selectedDate) => {
+                        setShowDatePicker(false);
+                        if (selectedDate) setFechaNacimiento(selectedDate);
+                      }}
+                    />
+                  )}
+                </View>
+              </View>
+            ) : (
+              <View style={styles.inputContainer}>
+                <View style={styles.inputGroup}>
+                  <MaterialIcons name="email" size={22} color="#7E57C2" style={styles.icon} />
+                  <TextInput
+                    placeholder="Correo electrónico"
+                    placeholderTextColor="#A3A3A3"
+                    style={styles.input}
+                    editable={false}
+                    value={correo}
+                  />
+                </View>
+                <View style={styles.inputGroup}>
+                  <MaterialIcons
+                    name="confirmation-number"
+                    size={22}
+                    color="#7E57C2"
+                    style={styles.icon}
+                  />
+                  <TextInput
+                    placeholder="Código de verificación"
+                    placeholderTextColor="#A3A3A3"
+                    style={styles.input}
+                    onChangeText={setCodigoVerificacion}
+                    value={codigoVerificacion}
+                  />
+                </View>
+                {mensaje ? (
+                  <ThemedText style={{ color: 'green', marginBottom: 10 }}>{mensaje}</ThemedText>
+                ) : null}
+                {error ? (
+                  <ThemedText style={{ color: 'red', marginBottom: 10 }}>{error}</ThemedText>
+                ) : null}
                 <TouchableOpacity
-                  style={[styles.input, { justifyContent: 'center' }]}
-                  onPress={() => setShowDatePicker(true)}
-                  activeOpacity={0.7}
+                  style={[styles.button, { backgroundColor: '#BA68C8', marginTop: 10 }]}
+                  onPress={handleReenviarPin}
+                  activeOpacity={0.8}
+                  disabled={loadingReenvio}
                 >
-                  <ThemedText style={styles.birthdayText}>
-                    {fechaNacimiento
-                      ? fechaNacimiento.toLocaleDateString()
-                      : 'Selecciona tu fecha de nacimiento'}
+                  <ThemedText type="defaultSemiBold" style={{ color: '#fff' }}>
+                    {loadingReenvio ? 'Enviando...' : 'Reenviar código'}
                   </ThemedText>
                 </TouchableOpacity>
-                {showDatePicker && (
-                  <DateTimePicker
-                    value={fechaNacimiento}
-                    mode="date"
-                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                    maximumDate={new Date()}
-                    onChange={(_, selectedDate) => {
-                      setShowDatePicker(false);
-                      if (selectedDate) setFechaNacimiento(selectedDate);
-                    }}
-                  />
-                )}
               </View>
-            </View>
+            )}
 
             <Animated.View
               style={[
@@ -293,24 +417,43 @@ export default function RegisterDealerScreen() {
                 },
               ]}
             >
-              <TouchableOpacity
-                style={styles.button}
-                onPress={handleRegister}
-                activeOpacity={0.8}
-              >
-                <ThemedText style={styles.buttonText}>Registrar</ThemedText>
-                <MaterialIcons name="arrow-forward" size={20} color="white" />
-              </TouchableOpacity>
+              {!mostrarVerificacion ? (
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={handleRegister}
+                  activeOpacity={0.8}
+                  disabled={loadingRegistro}
+                >
+                  <ThemedText style={styles.buttonText}>
+                    {loadingRegistro ? 'Registrando...' : 'Registrar'}
+                  </ThemedText>
+                  <MaterialIcons name="arrow-forward" size={20} color="white" />
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={handleVerificarCodigo}
+                  activeOpacity={0.8}
+                  disabled={loadingVerificacion}
+                >
+                  <ThemedText style={styles.buttonText}>
+                    {loadingVerificacion ? 'Verificando...' : 'Verificar Código'}
+                  </ThemedText>
+                  <MaterialIcons name="check" size={20} color="white" />
+                </TouchableOpacity>
+              )}
 
-              <TouchableOpacity
-                onPress={() => router.push('/auth/login')}
-                activeOpacity={0.6}
-              >
-                <ThemedText style={styles.linkText}>
-                  ¿Ya tienes cuenta?{' '}
-                  <ThemedText style={styles.linkBold}>Inicia sesión</ThemedText>
-                </ThemedText>
-              </TouchableOpacity>
+              {!mostrarVerificacion && (
+                <TouchableOpacity
+                  onPress={() => router.push('/auth/login')}
+                  activeOpacity={0.6}
+                >
+                  <ThemedText style={styles.linkText}>
+                    ¿Ya tienes cuenta?{' '}
+                    <ThemedText style={styles.linkBold}>Inicia sesión</ThemedText>
+                  </ThemedText>
+                </TouchableOpacity>
+              )}
             </Animated.View>
           </Animated.View>
         </View>
@@ -456,5 +599,4 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 6,
   },
-
 });

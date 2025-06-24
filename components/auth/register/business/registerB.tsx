@@ -25,6 +25,15 @@ export default function RegisterBusinessScreen() {
   const [contrasena, setContrasena] = useState('');
   const [repetirContrasena, setRepetirContrasena] = useState('');
 
+  // Estados para verificación
+  const [codigoVerificacion, setCodigoVerificacion] = useState('');
+  const [mostrarVerificacion, setMostrarVerificacion] = useState(false);
+  const [mensaje, setMensaje] = useState('');
+  const [error, setError] = useState('');
+  const [loadingRegistro, setLoadingRegistro] = useState(false);
+  const [loadingVerificacion, setLoadingVerificacion] = useState(false);
+  const [loadingReenvio, setLoadingReenvio] = useState(false);
+
   // Animaciones
   const cardAnim = useRef(new Animated.Value(0)).current;
   const logoAnim = useRef(new Animated.Value(0)).current;
@@ -65,6 +74,9 @@ export default function RegisterBusinessScreen() {
       Alert.alert('Error', 'Las contraseñas no coinciden');
       return;
     }
+    setLoadingRegistro(true);
+    setError('');
+    setMensaje('');
     try {
       const response = await fetch(`${API_BASE_URL}/api/auth/registro_Negocio`, {
         method: 'POST',
@@ -81,13 +93,96 @@ export default function RegisterBusinessScreen() {
       });
       const data = await response.json();
       if (response.ok) {
-        Alert.alert('Registro exitoso', data.mensaje || '¡Negocio registrado!');
-        router.push('/auth/login');
+        setMensaje(data.mensaje || '¡Negocio registrado! Revisa tu correo para el código.');
+        setMostrarVerificacion(true);
       } else {
-        Alert.alert('Error', data.mensaje || 'No se pudo registrar');
+        // Manejo de errores específicos
+        if (data.error && data.error.toLowerCase().includes('verificar')) {
+          Alert.alert(
+            'Correo no verificado',
+            data.error + '\n¿Quieres verificarlo ahora?',
+            [
+              {
+                text: 'Verificar',
+                onPress: () => setMostrarVerificacion(true),
+                style: 'default',
+              },
+              { text: 'Cancelar', style: 'cancel' },
+            ]
+          );
+        } else if (data.error && data.error.toLowerCase().includes('existe')) {
+          Alert.alert('Correo ya registrado', 'Este correo ya está en uso. Intenta con otro.');
+        } else {
+          Alert.alert('Error', data.mensaje || data.error || 'No se pudo registrar');
+        }
       }
     } catch (error) {
       Alert.alert('Error', 'No se pudo conectar al servidor');
+    } finally {
+      setLoadingRegistro(false);
+    }
+  };
+
+  const handleVerificarCodigo = async () => {
+    if (!codigoVerificacion.trim()) {
+      setError('Por favor ingresa el código de verificación');
+      setMensaje('');
+      return;
+    }
+
+    setLoadingVerificacion(true);
+    setError('');
+    setMensaje('');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/verificar_correo`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          correo,
+          pin: codigoVerificacion.trim(),
+          tipo_usuario: 'negocio',
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        Alert.alert('Éxito', data.mensaje || 'Correo verificado correctamente');
+        router.push('/auth/login');
+      } else {
+        setError(data.error || 'Código incorrecto o expirado');
+      }
+    } catch (error) {
+      setError('Error al conectar con el servidor');
+    } finally {
+      setLoadingVerificacion(false);
+    }
+  };
+
+  const handleReenviarPin = async () => {
+    setLoadingReenvio(true);
+    setError('');
+    setMensaje('');
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/reenviar_pin`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          correo,
+          tipo_usuario: 'negocio',
+        }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setMensaje(data.mensaje || 'Se ha enviado un nuevo código a tu correo.');
+      } else {
+        setError(data.error || 'No se pudo reenviar el código');
+      }
+    } catch (error) {
+      setError('Error al conectar con el servidor');
+    } finally {
+      setLoadingReenvio(false);
     }
   };
 
@@ -181,82 +276,133 @@ export default function RegisterBusinessScreen() {
               }}
             >
               <ThemedText type="title" style={styles.title}>
-                Registrar mi Negocio
+                {mostrarVerificacion ? 'Verifica tu correo' : 'Registrar mi Negocio'}
               </ThemedText>
             </Animated.View>
 
-            <View style={styles.inputContainer}>
-              <View style={styles.inputGroup}>
-                <MaterialIcons name="person" size={22} color="#7E57C2" style={styles.icon} />
-                <TextInput
-                  placeholder="Nombre del Negocio"
-                  placeholderTextColor="#A3A3A3"
-                  style={styles.input}
-                  onChangeText={setNombre}
-                />
-              </View>
-
-              <View style={styles.inputGroup}>
-                <MaterialIcons name="phone" size={22} color="#7E57C2" style={styles.icon} />
-                <TextInput
-                  placeholder="Teléfono"
-                  placeholderTextColor="#A3A3A3"
-                  style={styles.input}
-                  keyboardType="phone-pad"
-                  onChangeText={setTelefono}
-                />
-              </View>
-
-              <View style={styles.pickerWrapper}>
+            {!mostrarVerificacion ? (
+              <View style={styles.inputContainer}>
                 <View style={styles.inputGroup}>
-                  <MaterialIcons name="category" size={22} color="#7E57C2" style={styles.icon} />
-                  <Picker
-                    selectedValue={categoria}
-                    onValueChange={(itemValue) => setCategoria(itemValue)}
-                    style={styles.picker}
-                    dropdownIconColor="#7E57C2"
-                    mode="dropdown"
-                  >
-                    <Picker.Item label="Comida" value="comida" />
-                    <Picker.Item label="Tecnología" value="tecnologia" />
-                    <Picker.Item label="Ropa" value="ropa" />
-                    <Picker.Item label="Farmacia" value="hogar" />
-                  </Picker>
+                  <MaterialIcons name="person" size={22} color="#7E57C2" style={styles.icon} />
+                  <TextInput
+                    placeholder="Nombre del Negocio"
+                    placeholderTextColor="#A3A3A3"
+                    style={styles.input}
+                    onChangeText={setNombre}
+                    value={nombre}
+                  />
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <MaterialIcons name="phone" size={22} color="#7E57C2" style={styles.icon} />
+                  <TextInput
+                    placeholder="Teléfono"
+                    placeholderTextColor="#A3A3A3"
+                    style={styles.input}
+                    keyboardType="phone-pad"
+                    onChangeText={setTelefono}
+                    value={telefono}
+                  />
+                </View>
+
+                <View style={styles.pickerWrapper}>
+                  <View style={styles.inputGroup}>
+                    <MaterialIcons name="category" size={22} color="#7E57C2" style={styles.icon} />
+                    <Picker
+                      selectedValue={categoria}
+                      onValueChange={(itemValue) => setCategoria(itemValue)}
+                      style={styles.picker}
+                      dropdownIconColor="#7E57C2"
+                      mode="dropdown"
+                    >
+                      <Picker.Item label="Comida" value="comida" />
+                      <Picker.Item label="Tecnología" value="tecnologia" />
+                      <Picker.Item label="Ropa" value="ropa" />
+                      <Picker.Item label="Farmacia" value="hogar" />
+                    </Picker>
+                  </View>
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <MaterialIcons name="email" size={22} color="#7E57C2" style={styles.icon} />
+                  <TextInput
+                    placeholder="Correo electrónico"
+                    placeholderTextColor="#A3A3A3"
+                    style={styles.input}
+                    onChangeText={setCorreo}
+                    keyboardType="email-address"
+                    value={correo}
+                  />
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <MaterialIcons name="lock" size={22} color="#7E57C2" style={styles.icon} />
+                  <TextInput
+                    placeholder="Contraseña"
+                    placeholderTextColor="#A3A3A3"
+                    secureTextEntry
+                    style={styles.input}
+                    onChangeText={setContrasena}
+                    value={contrasena}
+                  />
+                </View>
+                <View style={styles.inputGroup}>
+                  <MaterialIcons name="lock" size={22} color="#7E57C2" style={styles.icon} />
+                  <TextInput
+                    placeholder="Repetir contraseña"
+                    placeholderTextColor="#A3A3A3"
+                    secureTextEntry
+                    style={styles.input}
+                    onChangeText={setRepetirContrasena}
+                    value={repetirContrasena}
+                  />
                 </View>
               </View>
-
-              <View style={styles.inputGroup}>
-                <MaterialIcons name="email" size={22} color="#7E57C2" style={styles.icon} />
-                <TextInput
-                  placeholder="Correo electrónico"
-                  placeholderTextColor="#A3A3A3"
-                  style={styles.input}
-                  onChangeText={setCorreo}
-                  keyboardType="email-address"
-                />
+            ) : (
+              <View style={styles.inputContainer}>
+                <View style={styles.inputGroup}>
+                  <MaterialIcons name="email" size={22} color="#7E57C2" style={styles.icon} />
+                  <TextInput
+                    placeholder="Correo electrónico"
+                    placeholderTextColor="#A3A3A3"
+                    style={styles.input}
+                    editable={false}
+                    value={correo}
+                  />
+                </View>
+                <View style={styles.inputGroup}>
+                  <MaterialIcons
+                    name="confirmation-number"
+                    size={22}
+                    color="#7E57C2"
+                    style={styles.icon}
+                  />
+                  <TextInput
+                    placeholder="Código de verificación"
+                    placeholderTextColor="#A3A3A3"
+                    style={styles.input}
+                    onChangeText={setCodigoVerificacion}
+                    value={codigoVerificacion}
+                  />
+                </View>
+                {mensaje ? (
+                  <ThemedText style={{ color: 'green', marginBottom: 10 }}>{mensaje}</ThemedText>
+                ) : null}
+                {error ? (
+                  <ThemedText style={{ color: 'red', marginBottom: 10 }}>{error}</ThemedText>
+                ) : null}
+                <TouchableOpacity
+                  style={[styles.button, { backgroundColor: '#BA68C8', marginTop: 10 }]}
+                  onPress={handleReenviarPin}
+                  activeOpacity={0.8}
+                  disabled={loadingReenvio}
+                >
+                  <ThemedText type="defaultSemiBold" style={{ color: '#fff' }}>
+                    {loadingReenvio ? 'Enviando...' : 'Reenviar código'}
+                  </ThemedText>
+                </TouchableOpacity>
               </View>
-
-              <View style={styles.inputGroup}>
-                <MaterialIcons name="lock" size={22} color="#7E57C2" style={styles.icon} />
-                <TextInput
-                  placeholder="Contraseña"
-                  placeholderTextColor="#A3A3A3"
-                  secureTextEntry
-                  style={styles.input}
-                  onChangeText={setContrasena}
-                />
-              </View>
-              <View style={styles.inputGroup}>
-                <MaterialIcons name="lock" size={22} color="#7E57C2" style={styles.icon} />
-                <TextInput
-                  placeholder="Repetir contraseña"
-                  placeholderTextColor="#A3A3A3"
-                  secureTextEntry
-                  style={styles.input}
-                  onChangeText={setRepetirContrasena}
-                />
-              </View>
-            </View>
+            )}
 
             <Animated.View
               style={[
@@ -274,24 +420,43 @@ export default function RegisterBusinessScreen() {
                 },
               ]}
             >
-              <TouchableOpacity
-                style={styles.button}
-                onPress={handleRegister}
-                activeOpacity={0.8}
-              >
-                <ThemedText style={styles.buttonText}>Registrar</ThemedText>
-                <MaterialIcons name="arrow-forward" size={20} color="white" />
-              </TouchableOpacity>
+              {!mostrarVerificacion ? (
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={handleRegister}
+                  activeOpacity={0.8}
+                  disabled={loadingRegistro}
+                >
+                  <ThemedText style={styles.buttonText}>
+                    {loadingRegistro ? 'Registrando...' : 'Registrar'}
+                  </ThemedText>
+                  <MaterialIcons name="arrow-forward" size={20} color="white" />
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={handleVerificarCodigo}
+                  activeOpacity={0.8}
+                  disabled={loadingVerificacion}
+                >
+                  <ThemedText style={styles.buttonText}>
+                    {loadingVerificacion ? 'Verificando...' : 'Verificar Código'}
+                  </ThemedText>
+                  <MaterialIcons name="check" size={20} color="white" />
+                </TouchableOpacity>
+              )}
 
-              <TouchableOpacity
-                onPress={() => router.push('/auth/login')}
-                activeOpacity={0.6}
-              >
-                <ThemedText style={styles.linkText}>
-                  ¿Ya tienes cuenta?{' '}
-                  <ThemedText style={styles.linkBold}>Inicia sesión</ThemedText>
-                </ThemedText>
-              </TouchableOpacity>
+              {!mostrarVerificacion && (
+                <TouchableOpacity
+                  onPress={() => router.push('/auth/login')}
+                  activeOpacity={0.6}
+                >
+                  <ThemedText style={styles.linkText}>
+                    ¿Ya tienes cuenta?{' '}
+                    <ThemedText style={styles.linkBold}>Inicia sesión</ThemedText>
+                  </ThemedText>
+                </TouchableOpacity>
+              )}
             </Animated.View>
           </Animated.View>
         </View>
@@ -301,6 +466,7 @@ export default function RegisterBusinessScreen() {
 }
 
 const styles = StyleSheet.create({
+  // ...tus estilos existentes...
   gradient: {
     flex: 1,
     justifyContent: 'center',
