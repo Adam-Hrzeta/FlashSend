@@ -2,28 +2,11 @@ import { HapticTab } from '@/components/HapticTab';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { getUserRole } from '@/utils/auth';
-import { router, Tabs } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import { Tabs } from 'expo-router';
+import React from 'react';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
-  const [checking, setChecking] = useState(true);
-
-  useEffect(() => {
-    (async () => {
-      const role = await getUserRole();
-      if (role !== 'administrador') {
-        router.replace('/');
-      } else {
-        setChecking(false);
-      }
-    })();
-  }, []);
-
-  if (checking) {
-    return null;
-  }
 
   return (
     <Tabs
