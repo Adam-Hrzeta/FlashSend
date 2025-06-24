@@ -80,6 +80,8 @@ export default function LoginScreen() {
           router.push('/profiles/clientProfile');
         } else if (data.tipo_usuario === 'repartidor') {
           router.push('/profiles/dealerProfile');
+        } else if (data.tipo_usuario === 'administrador') {
+          router.push('/dashboardAdmin/gestionUsers');
         } else {
           router.push('/');
         }
