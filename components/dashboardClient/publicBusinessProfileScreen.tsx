@@ -50,6 +50,8 @@ export default function PublicBusinessProfileScreen() {
   const [productos, setProductos] = useState<Producto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // Estado para el carrito
+  const [carrito, setCarrito] = useState<Producto[]>([]);
 
   useEffect(() => {
     // -------------------------------------- Obtener datos del negocio
@@ -100,6 +102,11 @@ export default function PublicBusinessProfileScreen() {
   // -----------------Componente para formatear el precio
 
 
+  // Función para agregar producto al carrito
+  const agregarAlCarrito = (producto: Producto) => {
+    setCarrito(prev => [...prev, producto]);
+  };
+
   // -------------------------------------Render de cada producto
   const renderProductItem = ({ item }: { item: Producto }) => (
     <View style={styles.productSlide}>
@@ -113,9 +120,22 @@ export default function PublicBusinessProfileScreen() {
       <View style={styles.productInfo}>
         <Text style={styles.productName}>{item.nombre}</Text>
         <ProductPrice precio={item.precio} />
-        <Text style={styles.productDescription} numberOfLines={2}>
-          {item.descripcion}
-        </Text>
+        <Text style={styles.productDescription}>{item.descripcion}</Text>
+        <View style={styles.divider} />
+        {item.categoria && (
+          <View style={styles.infoRowResponsive}>
+            <MaterialIcons name="category" size={18} color="#7E57C2" />
+            <Text style={styles.infoTextResponsive}>{item.categoria}</Text>
+          </View>
+        )}
+        <View style={styles.infoRowResponsive}>
+          <MaterialIcons name="inventory" size={18} color="#7E57C2" />
+          <Text style={styles.infoTextResponsive}>Stock: {item.stock}</Text>
+        </View>
+        <TouchableOpacity style={styles.addToCartButton} onPress={() => agregarAlCarrito(item)}>
+          <MaterialIcons name="add-shopping-cart" size={20} color="#fff" />
+          <Text style={styles.addToCartText}>Agregar a mi carrito</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -174,29 +194,27 @@ export default function PublicBusinessProfileScreen() {
       </View>
       {/*--------------------------Sección de productos */}
       <View style={styles.productsSection}>
-        <Text style={styles.sectionTitle}>Productos</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+          <Text style={[styles.sectionTitle, { textAlign: 'right', flex: 0 }]}>Productos</Text>
+          <View style={{ width: 16 }} />
+          <TouchableOpacity style={styles.viewCartButtonSmall} onPress={() => {/* Aquí puedes navegar o mostrar el carrito */}}>
+            <MaterialIcons name="shopping-cart" size={20} color="#fff" />
+            <Text style={styles.viewCartTextSmall}>Ver mi carrito ({carrito.length})</Text>
+          </TouchableOpacity>
+        </View>
         {productos.length === 0 ? (
           <Text style={styles.emptyText}>Este negocio aún no tiene productos disponibles.</Text>
         ) : (
-          <>
-            <FlatList
-              data={productos}
-              renderItem={renderProductItem}
-              keyExtractor={item => item.id.toString()}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              snapToInterval={screenWidth * 0.8 + 20}
-              decelerationRate="fast"
-              contentContainerStyle={styles.carouselContainer}
-            />
-            <TouchableOpacity
-              style={styles.orderButton}
-              onPress={() => console.log('Realizar pedido')}
-            >
-              <MaterialIcons name="shopping-cart" size={24} color="#fff" />
-              <Text style={styles.orderButtonText}>Realizar pedido</Text>
-            </TouchableOpacity>
-          </>
+          <FlatList
+            data={productos}
+            renderItem={renderProductItem}
+            keyExtractor={item => item.id.toString()}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            snapToInterval={screenWidth * 0.6 + 16} // Ajuste para que coincida con el ancho real de la tarjeta y margen
+            decelerationRate="fast"
+            contentContainerStyle={[styles.carouselContainer, { alignItems: 'flex-start', minHeight: undefined }]}
+          />
         )}
       </View>
     </ScrollView>
@@ -332,20 +350,20 @@ const styles = StyleSheet.create({
   infoRowResponsive: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 6,
     flexWrap: 'wrap',
     width: '100%',
   },
   infoTextResponsive: {
     fontSize: 14,
     color: '#5E35B1',
-    marginLeft: 10,
+    marginLeft: 8,
     flex: 1,
     flexWrap: 'wrap',
     minWidth: 0,
   },
   productsSection: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 0, // Elimino padding aquí
     marginBottom: 30,
   },
   sectionTitle: {
@@ -362,33 +380,41 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   carouselContainer: {
-    paddingHorizontal: 10,
+    paddingHorizontal: 16, // Aplico el padding aquí para separar las tarjetas de los bordes
     paddingBottom: 20,
   },
   productSlide: {
-    width: screenWidth * 0.8,
-    backgroundColor: '#fff',
+    width: screenWidth * 0.6,
+    backgroundColor: '#F8F5FF',
     borderRadius: 16,
-    marginRight: 20,
+    marginRight: 16,
     overflow: 'hidden',
     elevation: 4,
     shadowColor: '#7E57C2',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E1BEE7',
+    alignItems: 'flex-start', // Alinear contenido arriba
   },
   productImage: {
     width: '100%',
-    height: 180,
+    height: 130,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    marginBottom: 0,
   },
   productInfo: {
-    padding: 16,
+    padding: 10,
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start', // Alinear info arriba
   },
   productName: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#5E35B1',
-    marginBottom: 6,
+    marginBottom: 4,
   },
   productPrice: {
     fontSize: 16,
@@ -400,27 +426,70 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     lineHeight: 18,
+    marginBottom: 8,
   },
-  orderButton: {
+  divider: {
+    height: 1,
+    backgroundColor: '#E1BEE7',
+    marginVertical: 6,
+    width: '100%',
+    alignSelf: 'center',
+  },
+  addToCartButton: {
     backgroundColor: '#7E57C2',
-    borderRadius: 16,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
     flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 20,
+    alignSelf: 'flex-start',
+    marginTop: 10,
+  },
+  addToCartText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 15,
+    marginLeft: 8,
+  },
+  viewCartButton: {
+    backgroundColor: '#5E35B1',
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 28,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
     elevation: 4,
     shadowColor: '#7E57C2',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.18,
     shadowRadius: 8,
   },
-  orderButtonText: {
+  viewCartButtonSmall: {
+    backgroundColor: '#5E35B1',
+    borderRadius: 12,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 10,
+    elevation: 2,
+    shadowColor: '#7E57C2',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
+  },
+  viewCartText: {
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: 18,
+    fontSize: 17,
     marginLeft: 10,
+  },
+  viewCartTextSmall: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 14,
+    marginLeft: 6,
   },
   categoryTextResponsive: {
     color: '#5E35B1',
