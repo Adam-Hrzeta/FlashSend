@@ -2,15 +2,15 @@ import { Picker } from '@react-native-picker/picker';
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  Dimensions,
-  FlatList,
-  Image,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Dimensions,
+    FlatList,
+    Image,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import { API_BASE_URL } from '../../constants/ApiConfig';
 
@@ -37,6 +37,9 @@ interface Negocio {
   tipo_entrega: string;
   avatar?: string;
   telefono?: string;
+  correo?: string;
+  direccion?: string;
+  disponibilidad?: boolean;
 }
 
 export default function BusisnessDashboardScreen() {
@@ -76,8 +79,6 @@ export default function BusisnessDashboardScreen() {
   const renderBusinessCard = ({ item }: { item: Negocio }) => (
     <TouchableOpacity style={styles.card} activeOpacity={0.93}
       onPress={() => {
-        // Navegar a la nueva screen de perfil público de negocio
-        // @ts-ignore
         navigation.navigate('publicBusinessProfile', { negocioId: item.id });
       }}
     >
@@ -100,10 +101,17 @@ export default function BusisnessDashboardScreen() {
         <Text style={styles.businessDescription} numberOfLines={2}>
           {item.descripcion}
         </Text>
+        <Text style={{ fontSize: 13, color: '#7c6ee6', marginTop: 4 }}>
+          {item.direccion}
+        </Text>
+        <Text style={{ fontSize: 13, color: item.disponibilidad ? '#4CAF50' : '#F44336', fontWeight: 'bold', marginTop: 2 }}>
+          {item.disponibilidad ? 'Disponible' : 'No disponible'}
+        </Text>
       </View>
       <View style={styles.cardFooter}>
         <Text style={styles.contactIcon}>📞</Text>
         <Text style={styles.contactText}>{item.telefono}</Text>
+        {item.correo && <Text style={{ color: '#a18cd1', fontSize: 12, marginLeft: 8 }}>{item.correo}</Text>}
       </View>
     </TouchableOpacity>
   );

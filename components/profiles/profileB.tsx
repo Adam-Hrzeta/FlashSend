@@ -334,6 +334,8 @@ export default function NegocioProfileScreen() {
                           },
                           body: JSON.stringify({ ...negocio, direccion: dir })
                         });
+                        // Refrescar perfil para mostrar la dirección actualizada
+                        fetchNegocio();
                       }
                     }}
                   >
@@ -389,6 +391,22 @@ export default function NegocioProfileScreen() {
               <Text style={{ color: '#fff', fontWeight: 'bold', marginLeft: 10, fontSize: 16 }}>Cerrar sesión</Text>
             </TouchableOpacity>
           </View>
+
+          {/* Botón para gestionar productos */}
+          <TouchableOpacity
+            style={{
+              backgroundColor: '#7E57C2',
+              padding: 16,
+              borderRadius: 16,
+              marginTop: 18,
+              alignItems: 'center',
+              elevation: 4,
+              width: '100%',
+            }}
+            onPress={() => router.push('/dashboardNegocio/gestionProductos')}
+          >
+            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18 }}>Gestionar productos</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Modal de edición (igual que antes) */}
