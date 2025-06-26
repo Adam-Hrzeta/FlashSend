@@ -406,7 +406,6 @@ const styles = StyleSheet.create({
   },
   screenBg: {
     flex: 1,
-    backgroundColor: 'linear-gradient(180deg, #e3eeff 0%, #f3e7e9 100%)', // solo referencia visual
     backgroundColor: '#f3e7e9',
   },
   headerModern: {

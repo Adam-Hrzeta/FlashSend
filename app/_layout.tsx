@@ -51,7 +51,7 @@ export default function Layout() {
         <Drawer.Screen
           name="dashboardClient"
           options={{
-            drawerLabel: "Negocios y Servicios",
+            drawerLabel: "Servicios",
             title: "Negocios y Servicios",
             drawerIcon: ({ color }) => <AntDesign name="appstore-o" size={24} color={color} />,
           }}

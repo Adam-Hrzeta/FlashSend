@@ -1,19 +1,19 @@
 //FlashSend/components/dashboardClient/publicBusinessProfileScreen.tsx
 import { API_BASE_URL } from '@/constants/ApiConfig';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useRoute } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Dimensions,
+  FlatList,
   Image,
   ScrollView,
   StyleSheet,
   Text,
-  View,
   TouchableOpacity,
-  Dimensions,
-  FlatList,
+  View,
 } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
 
 interface NegocioPublico {
   id: number;
@@ -138,85 +138,43 @@ export default function PublicBusinessProfileScreen() {
   }
 
   return (
-    <ScrollView style={styles.container}>
-
-      
-      {/*  Imagen convertida usando profile_image */}
-      {negocio.profile_image && (
-  <Image
-    source={{
-      uri: `data:image/jpeg;base64,${negocio.profile_image}`
-            }}
-        />
-      )}
-
-
-      {/* ----------Tarjeta principal */}
-      <View style={styles.mainCard}>
-        {/* -----------Imagen de perfil redonda superpuesta */}
-        <View style={styles.avatarContainer}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+      {/* Eliminar imagen superior */}
+      {/* ----------Tarjeta principal horizontal */}
+      <View style={styles.mainCardResponsiveHorizontal}>
+        <View style={styles.avatarContainerResponsiveHorizontal}>
           <Image
-
-
-
-          //---------------------------------------------tranformar la imagen.
             source={negocio.profile_image
-      ? { uri: `data:image/jpeg;base64,${negocio.profile_image}` } //  cambio real
-      : { uri: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png' }
+              ? { uri: `data:image/jpeg;base64,${negocio.profile_image}` }
+              : { uri: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png' }
             }
-            //----------------------------------------------tranformar la imagen.
-
-
-
-        style={styles.avatar}
+            style={styles.avatarResponsiveHorizontal}
           />
+          <View style={styles.availabilityBadgeHorizontal}>
+            <Text style={styles.availabilityText}>
+              {negocio.disponibilidad ? 'Disponible' : 'No disponible'}
+            </Text>
+          </View>
+          <View style={styles.categoryChipResponsiveHorizontal}>
+            <Text style={styles.categoryTextResponsive}>{negocio.categoria}</Text>
+          </View>
         </View>
-
-        <Text style={styles.businessName}>{negocio.nombre}</Text>
-        <Text style={styles.businessName}>{negocio.categoria}</Text>
-
-        <View style={styles.categoryChip}>
-          <Text style={styles.categoryText}>{negocio.categoria}</Text>
-        </View>
-
-        <View style={[
-          styles.availabilityBadge,
-          negocio.disponibilidad ? styles.available : styles.notAvailable
-        ]}>
-          <Text style={styles.availabilityText}>
-            {negocio.disponibilidad ? 'Disponible' : 'No disponible'}
-          </Text>
-        </View>
-
-        <Text style={styles.description}>{negocio.descripcion || 'Este negocio no tiene descripción.'}</Text>
-
-        <View style={styles.infoContainer}>
-          <View style={styles.infoRow}>
+        <View style={styles.infoSideHorizontal}>
+          <Text style={styles.businessNameResponsive}>{negocio.nombre}</Text>
+          <Text style={styles.descriptionResponsive}>{negocio.descripcion || 'Este negocio no tiene descripción.'}</Text>
+          <View style={styles.infoRowResponsive}>
             <MaterialIcons name="phone" size={20} color="#7E57C2" />
-            <Text style={styles.infoText}>{negocio.telefono || 'No disponible'}</Text>
+            <Text style={styles.infoTextResponsive}>{negocio.telefono || 'No disponible'}</Text>
           </View>
-
-          <View style={styles.infoRow}>
-            <MaterialIcons name="email" size={20} color="#7E57C2" />
-            <Text style={styles.infoText}>{negocio.correo || 'No disponible'}</Text>
-          </View>
-
-          <View style={styles.infoRow}>
+          <View style={styles.infoRowResponsive}>
             <MaterialIcons name="location-on" size={20} color="#7E57C2" />
-            <Text style={styles.infoText}>{negocio.direccion || 'No disponible'}</Text>
-          </View>
-
-          <View style={styles.infoRow}>
-            <MaterialIcons name="delivery-dining" size={20} color="#7E57C2" />
-            <Text style={styles.infoText}>{negocio.tipo_entrega || 'No especificado'}</Text>
+            <Text style={styles.infoTextResponsive}>{negocio.direccion || 'No disponible'}</Text>
           </View>
         </View>
       </View>
-
       {/*--------------------------Sección de productos */}
       <View style={styles.productsSection}>
         <Text style={styles.sectionTitle}>Productos</Text>
-
         {productos.length === 0 ? (
           <Text style={styles.emptyText}>Este negocio aún no tiene productos disponibles.</Text>
         ) : (
@@ -262,72 +220,87 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  bannerImage: {
-    width: '100%',
-    height: 180,
-  },
-  mainCard: {
-    backgroundColor: '#fff',
-    borderRadius: 28,
-    paddingTop: 100,
+  scrollContent: {
     paddingBottom: 32,
-    paddingHorizontal: 24,
-    margin: 16,
     alignItems: 'center',
+    minHeight: '100%',
+  },
+  mainCardResponsiveHorizontal: {
+    backgroundColor: '#fff',
+    borderRadius: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    margin: 10,
+    width: '96%',
+    maxWidth: 520,
     elevation: 8,
     shadowColor: '#7E57C2',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.13,
     shadowRadius: 16,
   },
-  avatarContainer: {
-    position: 'absolute',
-    top: -80,
-    alignSelf: 'center',
+  avatarContainerResponsiveHorizontal: {
     backgroundColor: '#fff',
-    borderRadius: 90,
-    width: 160,
-    height: 160,
-    justifyContent: 'center',
+    borderRadius: 80,
+    width: 120,
+    height: 180,
+    justifyContent: 'flex-start',
     alignItems: 'center',
-    elevation: 10,
+    elevation: 6,
     shadowColor: '#7E57C2',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.20,
-    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+    marginRight: 18,
+    paddingTop: 8,
+    paddingBottom: 8,
   },
-  avatar: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    borderWidth: 3,
+  avatarResponsiveHorizontal: {
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    borderWidth: 2,
     borderColor: '#E1BEE7',
+    marginBottom: 8,
   },
-  businessName: {
-    fontSize: 24,
+  availabilityBadgeHorizontal: {
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    marginBottom: 8,
+    backgroundColor: '#4CAF50',
+    alignSelf: 'center',
+  },
+  categoryChipResponsiveHorizontal: {
+    backgroundColor: '#E1BEE7',
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    marginBottom: 8,
+    alignSelf: 'center',
+  },
+  infoSideHorizontal: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    gap: 2,
+    minWidth: 0,
+  },
+  businessNameResponsive: {
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#5E35B1',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  categoryChip: {
-    backgroundColor: '#E1BEE7',
-    borderRadius: 16,
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    marginBottom: 12,
-  },
-  categoryText: {
-    color: '#7E57C2',
-    fontWeight: 'bold',
-    fontSize: 14,
+    marginBottom: 6,
+    textAlign: 'left',
+    flexWrap: 'wrap',
+    maxWidth: '90%',
   },
   availabilityBadge: {
     borderRadius: 16,
     paddingHorizontal: 18,
     paddingVertical: 8,
     marginBottom: 16,
-    alignSelf: 'center',
+    alignSelf: 'flex-start',
   },
   available: {
     backgroundColor: '#4CAF50',
@@ -340,30 +313,36 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 15,
   },
-  description: {
-    fontSize: 15,
+  descriptionResponsive: {
+    fontSize: 14,
     color: '#5a5a5a',
-    marginBottom: 20,
-    textAlign: 'center',
-    lineHeight: 22,
+    marginBottom: 16,
+    textAlign: 'left',
+    lineHeight: 20,
+    maxWidth: '95%',
   },
-  infoContainer: {
+  infoContainerResponsive: {
     width: '100%',
     backgroundColor: '#F8F5FF',
-    borderRadius: 16,
-    padding: 16,
-    marginTop: 8,
+    borderRadius: 14,
+    padding: 12,
+    marginTop: 6,
+    alignItems: 'flex-start',
   },
-  infoRow: {
+  infoRowResponsive: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 8,
+    flexWrap: 'wrap',
+    width: '100%',
   },
-  infoText: {
-    fontSize: 15,
+  infoTextResponsive: {
+    fontSize: 14,
     color: '#5E35B1',
-    marginLeft: 12,
+    marginLeft: 10,
     flex: 1,
+    flexWrap: 'wrap',
+    minWidth: 0,
   },
   productsSection: {
     paddingHorizontal: 16,
@@ -442,5 +421,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 18,
     marginLeft: 10,
+  },
+  categoryTextResponsive: {
+    color: '#5E35B1',
+    fontWeight: 'bold',
+    fontSize: 14,
+    textAlign: 'center',
+    flexWrap: 'wrap',
+    maxWidth: 90,
   },
 });
