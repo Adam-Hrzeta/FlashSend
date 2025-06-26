@@ -16,7 +16,7 @@ interface Repartidor {
   correo: string;
 }
 
-export default function CrudUsers() {
+export default function CrudUsers({ setNotAuth }: { setNotAuth?: (v: boolean) => void }) {
   const [negocios, setNegocios] = useState<Negocio[]>([]);
   const [repartidores, setRepartidores] = useState<Repartidor[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,6 +33,10 @@ export default function CrudUsers() {
           headers: { Authorization: `Bearer ${token}` },
         })
       ]);
+      if (negociosRes.status === 403 || repartidoresRes.status === 403) {
+        setNotAuth && setNotAuth(true);
+        return;
+      }
       setNegocios(await negociosRes.json());
       setRepartidores(await repartidoresRes.json());
     } catch (e) {

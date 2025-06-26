@@ -28,7 +28,7 @@ const CATEGORIAS = [
   'Otros',
 ];
 
-export default function CrudProducts() {
+export default function CrudProducts({ setNotAuth }: { setNotAuth?: (v: boolean) => void }) {
   const [productos, setProductos] = useState<Producto[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
@@ -44,6 +44,11 @@ export default function CrudProducts() {
     const res = await fetch(`${API_BASE_URL}/api/productos/`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
+    if (res.status === 403) {
+      setNotAuth && setNotAuth(true);
+      setLoading(false);
+      return;
+    }
     if (res.ok) {
       setProductos(await res.json());
     }
