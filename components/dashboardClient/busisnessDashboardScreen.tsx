@@ -2,15 +2,15 @@ import { Picker } from '@react-native-picker/picker';
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Dimensions,
-    FlatList,
-    Image,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Dimensions,
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { API_BASE_URL } from '../../constants/ApiConfig';
 
@@ -40,6 +40,7 @@ interface Negocio {
   correo?: string;
   direccion?: string;
   disponibilidad?: boolean;
+  categoria?: string;
 }
 
 export default function BusisnessDashboardScreen() {
@@ -77,41 +78,26 @@ export default function BusisnessDashboardScreen() {
   });
 
   const renderBusinessCard = ({ item }: { item: Negocio }) => (
-    <TouchableOpacity style={styles.card} activeOpacity={0.93}
+    <TouchableOpacity style={styles.horizontalCard} activeOpacity={0.93}
       onPress={() => {
         navigation.navigate('publicBusinessProfile', { negocioId: item.id });
       }}
     >
-      <View style={styles.cardHeader}>
+      <View style={styles.imageContainer}>
         <Image
-          source={{ uri: item.avatar || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png' }}
-          style={styles.image}
+          source={{ uri: item.avatar ? `${API_BASE_URL}${item.avatar}` : 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png' }}
+          style={styles.horizontalImageFull}
         />
-        <View style={[
-          styles.categoryTag,
-          { backgroundColor: categoryColors[item.tipo_entrega as keyof typeof categoryColors] || '#b5c6e0' }
-        ]}>
-          <Text style={styles.categoryText}>
-            {categoryEmojis[item.tipo_entrega as keyof typeof categoryEmojis] || '🏷'} {item.tipo_entrega?.charAt(0).toUpperCase() + item.tipo_entrega?.slice(1)}
-          </Text>
+        <Text style={[styles.disponibleTag, { backgroundColor: item.disponibilidad ? '#4CAF50' : '#F44336' }]}>{item.disponibilidad ? 'Disponible' : 'No disponible'}</Text>
+      </View>
+      <View style={styles.horizontalInfoLeftBetter}>
+        <Text style={styles.businessNameBig}>{item.nombre}</Text>
+        <View style={styles.categoryTagCardBetter}>
+          <Text style={styles.categoryTextCardBetter}>{item.categoria || 'Sin categoría'}</Text>
         </View>
-      </View>
-      <View style={styles.cardBody}>
-        <Text style={styles.businessName}>{item.nombre}</Text>
-        <Text style={styles.businessDescription} numberOfLines={2}>
-          {item.descripcion}
-        </Text>
-        <Text style={{ fontSize: 13, color: '#7c6ee6', marginTop: 4 }}>
-          {item.direccion}
-        </Text>
-        <Text style={{ fontSize: 13, color: item.disponibilidad ? '#4CAF50' : '#F44336', fontWeight: 'bold', marginTop: 2 }}>
-          {item.disponibilidad ? 'Disponible' : 'No disponible'}
-        </Text>
-      </View>
-      <View style={styles.cardFooter}>
-        <Text style={styles.contactIcon}>📞</Text>
-        <Text style={styles.contactText}>{item.telefono}</Text>
-        {item.correo && <Text style={{ color: '#a18cd1', fontSize: 12, marginLeft: 8 }}>{item.correo}</Text>}
+        <Text style={styles.businessDescriptionBetter} numberOfLines={2}>{item.descripcion}</Text>
+        <Text style={styles.infoTextBetter}>{item.direccion}</Text>
+        <Text style={styles.infoTextBetter}>{item.telefono}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -170,9 +156,7 @@ export default function BusisnessDashboardScreen() {
         data={filteredBusinesses}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderBusinessCard}
-        numColumns={2}
         contentContainerStyle={styles.businessList}
-        columnWrapperStyle={styles.columnWrapper}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <Text style={styles.emptyText}>
@@ -261,14 +245,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderWidth: 0,
     justifyContent: 'center',
+    fontSize: 16,
+    fontWeight: 'bold',
+    letterSpacing: 0.2,
   },
   businessList: {
     paddingBottom: 24,
     paddingHorizontal: 16,
     gap: 16,
-  },
-  columnWrapper: {
-    justifyContent: 'space-between',
   },
   card: {
     width: cardWidth,
@@ -286,79 +270,121 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     paddingTop: 18,
   },
-  cardContent: {
-    flex: 1,
-  },
-  cardHeader: {
-    width: '100%',
-    alignItems: 'center',
-    marginBottom: 8,
+  imageContainer: {
     position: 'relative',
+    flex: 1.1,
+    minWidth: 0,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f8f5ff',
   },
-  image: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    marginBottom: 8,
-    borderWidth: 3,
-    borderColor: '#a18cd1',
-    backgroundColor: '#fff',
+  horizontalImageFull: {
+    width: '100%',
+    aspectRatio: 1,
+    height: undefined,
+    borderTopLeftRadius: 24,
+    borderBottomLeftRadius: 24,
+    resizeMode: 'cover',
+    borderRightWidth: 2,
+    borderRightColor: '#E1BEE7',
+    flex: 1,
+    minWidth: 0,
   },
-  categoryTag: {
+  disponibleTag: {
     position: 'absolute',
-    top: 8,
-    right: 16,
-    paddingHorizontal: 10,
+    top: 12,
+    left: 12,
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 13,
+    paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
-    backgroundColor: '#a18cd1',
-    shadowColor: '#a18cd1',
+    zIndex: 2,
+    overflow: 'hidden',
+    minWidth: 90,
+    textAlign: 'center',
+    elevation: 4,
+    letterSpacing: 0.5,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
+    shadowOpacity: 0.18,
+    shadowRadius: 4,
+  },
+  horizontalCard: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    backgroundColor: '#fff',
+    borderRadius: 24,
+    marginBottom: 20,
+    marginHorizontal: 8,
+    padding: 0,
+    shadowColor: '#7E57C2',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.18,
+    shadowRadius: 16,
+    elevation: 6,
+    overflow: 'hidden',
+    minHeight: 150,
+    borderWidth: 1.5,
+    borderColor: '#E1BEE7',
+    flex: 1,
+    minWidth: 0,
+  },
+  horizontalInfoLeftBetter: {
+    flex: 1.5,
+    justifyContent: 'flex-start',
+    padding: 18,
+    gap: 4,
+    backgroundColor: '#fff',
+    minWidth: 0,
+  },
+  businessNameBig: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#5E35B1',
+    marginBottom: 2,
+    letterSpacing: 0.7,
+    textAlign: 'left',
+    textShadowColor: '#E1BEE7',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+  categoryTagCardBetter: {
+    backgroundColor: '#E1BEE7',
+    borderRadius: 10,
+    alignSelf: 'flex-start',
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    marginBottom: 6,
+    marginTop: 2,
+    shadowColor: '#7E57C2',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.13,
     shadowRadius: 4,
     elevation: 2,
   },
-  categoryText: {
-    color: '#fff',
-    fontSize: 13,
-    fontWeight: '800',
-    letterSpacing: 0.5,
+  categoryTextCardBetter: {
+    color: '#7E57C2',
+    fontWeight: 'bold',
+    fontSize: 14,
+    letterSpacing: 0.3,
   },
-  cardBody: {
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    marginBottom: 8,
-  },
-  businessName: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#6c63ff',
+  businessDescriptionBetter: {
+    fontSize: 15,
+    color: '#7E57C2',
+    lineHeight: 20,
+    textAlign: 'left',
     marginBottom: 4,
-    letterSpacing: 0.5,
-    textAlign: 'center',
+    fontWeight: '500',
   },
-  businessDescription: {
+  infoTextBetter: {
     fontSize: 13,
-    color: '#a18cd1',
-    lineHeight: 18,
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  cardFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 4,
-  },
-  contactIcon: {
-    marginRight: 6,
-    fontSize: 18,
-    color: '#a18cd1',
-  },
-  contactText: {
-    fontSize: 13,
-    color: '#6c63ff',
-    fontWeight: '600',
+    color: '#7c6ee6',
+    marginTop: 1,
+    textAlign: 'left',
+    fontWeight: '500',
   },
   emptyText: {
     textAlign: 'center',
