@@ -1,5 +1,5 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -49,6 +49,28 @@ export default function BusisnessDashboardScreen() {
   const [businesses, setBusinesses] = useState<Negocio[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
+
+  // Refrescar negocios al enfocar la pantalla
+  useFocusEffect(
+    React.useCallback(() => {
+      setLoading(true);
+      fetch(`${API_BASE_URL}/api/dashboard_mostrar_negocios/dashboard_negocios`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === 'success' && Array.isArray(data.negocios)) {
+            setBusinesses(data.negocios);
+            setFetchError(null);
+          } else {
+            setFetchError('No se pudo cargar la lista de negocios.');
+          }
+          setLoading(false);
+        })
+        .catch(() => {
+          setLoading(false);
+          setFetchError('No se pudo cargar la lista de negocios.');
+        });
+    }, [])
+  );
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/dashboard_mostrar_negocios/dashboard_negocios`)

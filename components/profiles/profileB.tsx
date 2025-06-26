@@ -293,7 +293,28 @@ export default function NegocioProfileScreen() {
               marginBottom: 10,
               alignSelf: 'center',
             }}
-            onPress={() => setNegocio(prev => prev ? { ...prev, disponibilidad: !prev.disponibilidad } : prev)}
+            onPress={async () => {
+              if (!negocio) return;
+              const newDisponibilidad = !negocio.disponibilidad;
+              setNegocio(prev => prev ? { ...prev, disponibilidad: newDisponibilidad } : prev);
+              try {
+                const token = await AsyncStorage.getItem('access_token');
+                const res = await fetch(`${API_BASE_URL}/api/perfilNegocio/editarPerfil`, {
+                  method: 'PUT',
+                  headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ disponibilidad: newDisponibilidad }),
+                });
+                if (!res.ok) {
+                  throw new Error('Error al actualizar disponibilidad');
+                }
+              } catch (e) {
+                Alert.alert('Error', 'No se pudo actualizar el estado.');
+                setNegocio(prev => prev ? { ...prev, disponibilidad: !newDisponibilidad } : prev);
+              }
+            }}
           >
             <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 15 }}>
               {negocio?.disponibilidad ? 'Disponible' : 'No disponible'}

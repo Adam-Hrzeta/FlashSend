@@ -1,7 +1,7 @@
 //FlashSend/components/dashboardClient/publicBusinessProfileScreen.tsx
 import { API_BASE_URL } from '@/constants/ApiConfig';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useRoute } from '@react-navigation/native';
+import { useFocusEffect, useRoute } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -53,8 +53,44 @@ export default function PublicBusinessProfileScreen() {
   // Estado para el carrito
   const [carrito, setCarrito] = useState<Producto[]>([]);
 
+  // Refrescar datos al enfocar la pantalla
+  useFocusEffect(
+    React.useCallback(() => {
+      setLoading(true);
+      setError(null);
+      fetch(`${API_BASE_URL}/api/negocioyProductos/negocioyProductos/${negocioId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === 'success') {
+            setNegocio(data.negocio);
+          } else {
+            setError('No se pudo cargar el perfil del negocio.');
+          }
+          setLoading(false);
+        })
+        .catch(() => {
+          setError('No se pudo cargar el perfil del negocio.');
+          setLoading(false);
+        });
+      fetch(`${API_BASE_URL}/api/negocioyProductos/negocioyProductos/${negocioId}/productos`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === 'success') {
+            const productosNormalizados = data.productos.map((producto: any) => ({
+              ...producto,
+              precio: producto.precio ? parseFloat(producto.precio) : 0,
+            }));
+            setProductos(productosNormalizados);
+          }
+        })
+        .catch(() => {
+          console.log('Error al obtener los productos del negocio.');
+        });
+    }, [negocioId])
+  );
+
+  // -------------------------------------- Obtener datos del negocio
   useEffect(() => {
-    // -------------------------------------- Obtener datos del negocio
     fetch(`${API_BASE_URL}/api/negocioyProductos/negocioyProductos/${negocioId}`)
       .then(res => res.json())
       .then(data => {
@@ -69,11 +105,13 @@ export default function PublicBusinessProfileScreen() {
         setError('No se pudo cargar el perfil del negocio.');
         setLoading(false);
       });
-    // -------------------------------------- Obtener datos del negocio
+  }, [negocioId]);
+  // -------------------------------------- Obtener datos del negocio
 
 
 
-    //---------------------------------------- Obtener productos del negocio
+  //---------------------------------------- Obtener productos del negocio
+  useEffect(() => {
     fetch(`${API_BASE_URL}/api/negocioyProductos/negocioyProductos/${negocioId}/productos`)
       .then(res => res.json())
       .then(data => {
@@ -170,7 +208,7 @@ export default function PublicBusinessProfileScreen() {
             }
             style={styles.avatarResponsiveHorizontal}
           />
-          <View style={styles.availabilityBadgeHorizontal}>
+          <View style={[styles.availabilityBadgeHorizontal, { backgroundColor: negocio.disponibilidad ? '#4CAF50' : '#F44336' }]}>
             <Text style={styles.availabilityText}>
               {negocio.disponibilidad ? 'Disponible' : 'No disponible'}
             </Text>
