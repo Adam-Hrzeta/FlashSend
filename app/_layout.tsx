@@ -59,7 +59,7 @@ export default function Layout() {
         <Drawer.Screen
           name="profiles"
           options={{
-            drawerLabel: "Perfiles",
+            drawerLabel: "Mi Perfil",
             title: "Perfiles de Usuario",
             drawerIcon: ({ color }) => <AntDesign name="profile" size={24} color={color} />,
           }}
@@ -67,7 +67,7 @@ export default function Layout() {
         <Drawer.Screen
           name="dashboardNegocio"
           options={{
-            drawerLabel: "Prodctos de Negocio",
+            drawerLabel: "Mis productos",
             title: "Mis productos",
             drawerIcon: ({ color }) => <AntDesign name="shoppingcart" size={24} color={color} />,
           }}
@@ -75,7 +75,7 @@ export default function Layout() {
         <Drawer.Screen
           name="dashboardAdmin"
           options={{
-            drawerLabel: "Administración de usuarios",
+            drawerLabel: "Administración",
             title: "Peticiones de usuarios",
             drawerIcon: ({ color }) => <AntDesign name="setting" size={24} color={color} />,
           }}

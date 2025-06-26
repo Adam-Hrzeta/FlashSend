@@ -1,4 +1,4 @@
-import { Picker } from '@react-native-picker/picker';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import {
@@ -44,9 +44,8 @@ interface Negocio {
 }
 
 export default function BusisnessDashboardScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const [searchText, setSearchText] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
   const [businesses, setBusinesses] = useState<Negocio[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -69,12 +68,14 @@ export default function BusisnessDashboardScreen() {
       });
   }, []);
 
+  // Unificar búsqueda: texto y categoría
   const filteredBusinesses = businesses.filter(business => {
     const matchesSearch =
       business.nombre.toLowerCase().includes(searchText.toLowerCase()) ||
-      (business.descripcion || '').toLowerCase().includes(searchText.toLowerCase());
-    const matchesCategory = selectedCategory === '' || business.tipo_entrega === selectedCategory;
-    return matchesSearch && matchesCategory;
+      (business.descripcion || '').toLowerCase().includes(searchText.toLowerCase()) ||
+      (business.categoria || '').toLowerCase().includes(searchText.toLowerCase()) ||
+      (business.tipo_entrega || '').toLowerCase().includes(searchText.toLowerCase());
+    return matchesSearch;
   });
 
   const renderBusinessCard = ({ item }: { item: Negocio }) => (
@@ -93,11 +94,18 @@ export default function BusisnessDashboardScreen() {
       <View style={styles.horizontalInfoLeftBetter}>
         <Text style={styles.businessNameBig}>{item.nombre}</Text>
         <View style={styles.categoryTagCardBetter}>
+          <MaterialIcons name="local-offer" size={16} color="#7E57C2" style={{ marginRight: 4 }} />
           <Text style={styles.categoryTextCardBetter}>{item.categoria || 'Sin categoría'}</Text>
         </View>
         <Text style={styles.businessDescriptionBetter} numberOfLines={2}>{item.descripcion}</Text>
-        <Text style={styles.infoTextBetter}>{item.direccion}</Text>
-        <Text style={styles.infoTextBetter}>{item.telefono}</Text>
+        <View style={styles.infoRowBetter}>
+          <MaterialIcons name="place" size={16} color="#7c6ee6" style={{ marginRight: 4 }} />
+          <Text style={styles.infoTextBetter}>{item.direccion}</Text>
+        </View>
+        <View style={styles.infoRowBetter}>
+          <MaterialIcons name="phone" size={16} color="#7c6ee6" style={{ marginRight: 4 }} />
+          <Text style={styles.infoTextBetter}>{item.telefono}</Text>
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -119,49 +127,34 @@ export default function BusisnessDashboardScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Negocios Destacados</Text>
-        <Text style={styles.headerSubtitle}>Descubre lo mejor de tu localidad</Text>
+    <View style={styles.screenBg}>
+      <View style={styles.headerModern}>
+        <Text style={styles.headerTitleModern}>🌟 Negocios Destacados</Text>
+        <Text style={styles.headerSubtitleModern}>Descubre lo mejor de tu localidad</Text>
       </View>
 
-      <View style={styles.searchContainer}>
-        <Text style={styles.searchIcon}>🔍</Text>
+      <View style={styles.searchContainerModern}>
+        <Text style={styles.searchIconModern}>🔍</Text>
         <TextInput
-          placeholder="Buscar negocios..."
+          placeholder="Buscar negocios, categorías, servicios..."
           placeholderTextColor="#b5c6e0"
-          style={styles.searchInput}
+          style={styles.searchInputModern}
           value={searchText}
           onChangeText={setSearchText}
         />
-      </View>
-
-      <View style={styles.pickerWrapper}>
-        <Picker
-          selectedValue={selectedCategory}
-          onValueChange={(value) => setSelectedCategory(value)}
-          style={styles.categoryPicker}
-          dropdownIconColor="#a18cd1"
-        >
-          <Picker.Item label="Todas las categorías 🏷" value="" />
-          <Picker.Item label="Tecnología 💻" value="tecnologia" />
-          <Picker.Item label="Comida 🍔" value="comida" />
-          <Picker.Item label="Ropa 🧥" value="ropa" />
-          <Picker.Item label="Hogar 🏡" value="hogar" />
-          <Picker.Item label="Salud 🩺" value="salud" />
-        </Picker>
       </View>
 
       <FlatList
         data={filteredBusinesses}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderBusinessCard}
-        contentContainerStyle={styles.businessList}
+        contentContainerStyle={styles.businessListModern}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>
-            No se encontraron negocios.
-          </Text>
+          <View style={styles.emptyModernBox}>
+            <Text style={styles.emptyModernIcon}>😕</Text>
+            <Text style={styles.emptyModernText}>No se encontraron negocios.</Text>
+          </View>
         }
       />
     </View>
@@ -335,13 +328,15 @@ const styles = StyleSheet.create({
   horizontalInfoLeftBetter: {
     flex: 1.5,
     justifyContent: 'flex-start',
-    padding: 18,
+    padding: 14,
     gap: 4,
     backgroundColor: '#fff',
     minWidth: 0,
+    flexShrink: 1,
+    flexGrow: 1,
   },
   businessNameBig: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#5E35B1',
     marginBottom: 2,
@@ -350,6 +345,8 @@ const styles = StyleSheet.create({
     textShadowColor: '#E1BEE7',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
+    flexShrink: 1,
+    flexWrap: 'wrap',
   },
   categoryTagCardBetter: {
     backgroundColor: '#E1BEE7',
@@ -364,6 +361,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.13,
     shadowRadius: 4,
     elevation: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    maxWidth: '90%',
   },
   categoryTextCardBetter: {
     color: '#7E57C2',
@@ -378,6 +379,8 @@ const styles = StyleSheet.create({
     textAlign: 'left',
     marginBottom: 4,
     fontWeight: '500',
+    flexShrink: 1,
+    flexWrap: 'wrap',
   },
   infoTextBetter: {
     fontSize: 13,
@@ -385,6 +388,14 @@ const styles = StyleSheet.create({
     marginTop: 1,
     textAlign: 'left',
     fontWeight: '500',
+    flexShrink: 1,
+    flexWrap: 'wrap',
+  },
+  infoRowBetter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 2,
+    gap: 2,
   },
   emptyText: {
     textAlign: 'center',
@@ -392,5 +403,95 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 40,
     fontWeight: '600',
+  },
+  screenBg: {
+    flex: 1,
+    backgroundColor: 'linear-gradient(180deg, #e3eeff 0%, #f3e7e9 100%)', // solo referencia visual
+    backgroundColor: '#f3e7e9',
+  },
+  headerModern: {
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    paddingTop: 38,
+    paddingBottom: 28,
+    borderBottomLeftRadius: 40,
+    borderBottomRightRadius: 40,
+    marginBottom: 18,
+    shadowColor: '#7E57C2',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.10,
+    shadowRadius: 16,
+    elevation: 6,
+  },
+  headerTitleModern: {
+    fontSize: 30,
+    fontWeight: 'bold',
+    color: '#5E35B1',
+    marginBottom: 4,
+    letterSpacing: 1.2,
+    textShadowColor: '#E1BEE7',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+  headerSubtitleModern: {
+    fontSize: 16,
+    color: '#7E57C2',
+    fontWeight: '600',
+    letterSpacing: 0.5,
+  },
+  searchContainerModern: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 18,
+    paddingHorizontal: 18,
+    height: 56,
+    marginHorizontal: 28,
+    marginBottom: 22,
+    shadowColor: '#7E57C2',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.10,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  searchIconModern: {
+    marginRight: 12,
+    fontSize: 22,
+    color: '#7E57C2',
+  },
+  searchInputModern: {
+    flex: 1,
+    height: '100%',
+    fontSize: 17,
+    color: '#5E35B1',
+    fontWeight: '500',
+    letterSpacing: 0.2,
+  },
+  businessListModern: {
+    paddingBottom: 32,
+    paddingHorizontal: 8,
+    gap: 18,
+  },
+  emptyModernBox: {
+    alignItems: 'center',
+    marginTop: 60,
+    padding: 24,
+    backgroundColor: '#fff',
+    borderRadius: 18,
+    shadowColor: '#7E57C2',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.10,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  emptyModernIcon: {
+    fontSize: 38,
+    marginBottom: 8,
+  },
+  emptyModernText: {
+    color: '#7E57C2',
+    fontSize: 17,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });
