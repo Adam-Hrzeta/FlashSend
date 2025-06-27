@@ -25,6 +25,12 @@ export default function TabLayout() {
           title: 'Productos',
         }}
       />
+      <Tabs.Screen
+        name="IncomingOrders"
+        options={{
+          title: 'Ordenes Entrantes',
+        }}
+      />
     </Tabs>
   );
 }

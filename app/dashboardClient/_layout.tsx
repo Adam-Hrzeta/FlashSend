@@ -31,6 +31,12 @@ export default function TabLayout() {
           title: 'Perfil Negocio',
         }}
       />
+      <Tabs.Screen
+        name="shoppingCart"
+        options={{
+          title: 'Carrito de Compras',
+        }}
+      />
     </Tabs>
   );
 }
