@@ -1,7 +1,7 @@
 //FlashSend/components/dashboardClient/publicBusinessProfileScreen.tsx
 import { API_BASE_URL } from '@/constants/ApiConfig';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useFocusEffect, useRoute } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -44,6 +44,7 @@ const { width: screenWidth } = Dimensions.get('window');
 
 export default function PublicBusinessProfileScreen() {
   const route = useRoute();
+  const navigation = useNavigation<any>();
   // @ts-ignore
   const { negocioId } = route.params || {};
   const [negocio, setNegocio] = useState<NegocioPublico | null>(null);
@@ -235,7 +236,7 @@ export default function PublicBusinessProfileScreen() {
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
           <Text style={[styles.sectionTitle, { textAlign: 'right', flex: 0 }]}>Productos</Text>
           <View style={{ width: 16 }} />
-          <TouchableOpacity style={styles.viewCartButtonSmall} onPress={() => {/* Aquí puedes navegar o mostrar el carrito */}}>
+          <TouchableOpacity style={styles.viewCartButtonSmall} onPress={() => navigation.navigate('shoppingCart')}>
             <MaterialIcons name="shopping-cart" size={20} color="#fff" />
             <Text style={styles.viewCartTextSmall}>Ver mi carrito ({carrito.length})</Text>
           </TouchableOpacity>
