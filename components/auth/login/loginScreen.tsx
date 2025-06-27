@@ -1,5 +1,6 @@
 import { ThemedText } from '@/components/ThemedText';
 import { API_BASE_URL } from '@/constants/ApiConfig';
+import { setToken } from '@/utils/authToken';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -17,7 +18,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { setToken } from '@/utils/authToken';
 
 export default function LoginScreen() {
   const [correo, setEmail] = useState('');

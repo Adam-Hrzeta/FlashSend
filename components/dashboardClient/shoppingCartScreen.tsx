@@ -1,8 +1,8 @@
-import { useState } from "react";
 import { useCarrito } from "@/components/context/CarritoContext";
-import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View, Alert } from "react-native";
 import { API_BASE_URL } from "@/constants/ApiConfig";
 import { getToken } from "@/utils/authToken";
+import { useState } from "react";
+import { Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function ShoppingCartScreen() {
   const { productos, quitarProducto, neto, total, limpiarCarrito } = useCarrito();
