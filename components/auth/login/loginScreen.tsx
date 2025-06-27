@@ -17,6 +17,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { setToken } from '@/utils/authToken';
 
 export default function LoginScreen() {
   const [correo, setEmail] = useState('');
@@ -70,6 +71,7 @@ export default function LoginScreen() {
       if (response.ok) {
         // Guarda el token en AsyncStorage (esto reemplaza el anterior)
         await AsyncStorage.setItem('access_token', data.access_token);
+        await setToken(data.access_token);
 
         // Opcional: puedes guardar el tipo de usuario si lo necesitas
         // await AsyncStorage.setItem('tipo_usuario', data.tipo_usuario);

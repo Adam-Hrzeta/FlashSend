@@ -1,8 +1,41 @@
+import { useState } from "react";
 import { useCarrito } from "@/components/context/CarritoContext";
-import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View, Alert } from "react-native";
+import { API_BASE_URL } from "@/constants/ApiConfig";
+import { getToken } from "@/utils/authToken";
 
 export default function ShoppingCartScreen() {
   const { productos, quitarProducto, neto, total, limpiarCarrito } = useCarrito();
+  const [loading, setLoading] = useState(false);
+
+  const realizarPedido = async () => {
+    setLoading(true);
+    try {
+      const token = await getToken();
+      const res = await fetch(`${API_BASE_URL}/api/pedidos_cliente/realizar_pedido`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          productos: productos.map(p => ({ id: p.id, cantidad: p.cantidad, precio: p.precio })),
+          total
+        })
+      });
+      const data = await res.json();
+      if (data.status === "success") {
+        Alert.alert("Pedido realizado", "Tu pedido ha sido registrado con éxito.");
+        limpiarCarrito();
+      } else {
+        Alert.alert("Error", data.message || "No se pudo realizar el pedido.");
+      }
+    } catch (e) {
+      Alert.alert("Error", "No se pudo conectar con el servidor.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const renderItem = ({ item }: any) => (
     <View style={styles.itemContainer}>
@@ -35,7 +68,13 @@ export default function ShoppingCartScreen() {
       <TouchableOpacity style={styles.clearBtn} onPress={limpiarCarrito}>
         <Text style={styles.clearText}>Vaciar carrito</Text>
       </TouchableOpacity>
-      {/* Aquí irá el botón para realizar pedido */}
+      <TouchableOpacity
+        style={[styles.clearBtn, { backgroundColor: '#7E57C2', marginTop: 12 }]}
+        onPress={realizarPedido}
+        disabled={productos.length === 0 || loading}
+      >
+        <Text style={[styles.clearText, { color: '#fff' }]}>{loading ? 'Enviando...' : 'Realizar pedido'}</Text>
+      </TouchableOpacity>
     </View>
   );
 }
