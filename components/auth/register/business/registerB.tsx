@@ -11,6 +11,7 @@ import {
   Easing,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
   StyleSheet,
   TextInput,
   TouchableOpacity,
@@ -24,6 +25,7 @@ export default function RegisterBusinessScreen() {
   const [correo, setCorreo] = useState('');
   const [contrasena, setContrasena] = useState('');
   const [repetirContrasena, setRepetirContrasena] = useState('');
+  const [descripcion, setDescripcion] = useState('');
 
   // Estados para verificación
   const [codigoVerificacion, setCodigoVerificacion] = useState('');
@@ -87,7 +89,7 @@ export default function RegisterBusinessScreen() {
           contrasena,
           telefono,
           direccion: '',
-          descripcion: '',
+          descripcion,
           categoria,
         }),
       });
@@ -197,269 +199,283 @@ export default function RegisterBusinessScreen() {
         start={{ x: 0.1, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
-        <View style={styles.container}>
-          <Animated.View
-            style={[
-              styles.card,
-              {
-                opacity: cardAnim,
-                transform: [
-                  {
-                    translateY: cardAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [80, 0],
-                    }),
-                  },
-                  {
-                    scale: cardAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [0.95, 1],
-                    }),
-                  },
-                ],
-              },
-            ]}
-          >
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+          <View style={styles.container}>
             <Animated.View
               style={[
-                styles.logoCircle,
+                styles.card,
                 {
+                  opacity: cardAnim,
                   transform: [
                     {
-                      scale: logoAnim.interpolate({
+                      translateY: cardAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [80, 0],
+                      }),
+                    },
+                    {
+                      scale: cardAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0.95, 1],
+                      }),
+                    },
+                  ],
+                },
+              ]}
+            >
+              <Animated.View
+                style={[
+                  styles.logoCircle,
+                  {
+                    transform: [
+                      {
+                        scale: logoAnim.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [0.7, 1.1],
+                        }),
+                      },
+                      {
+                        rotate: logoAnim.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: ['-20deg', '0deg'],
+                        }),
+                      },
+                    ],
+                    shadowOpacity: logoAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0.1, 0.35],
+                    }),
+                  },
+                ]}
+              >
+                <MaterialIcons name="store" size={44} color="#FFFDE7" />
+              </Animated.View>
+
+              <TouchableOpacity
+                onPress={() => router.push('/auth/select')}
+                style={styles.backCircleButton}
+                activeOpacity={0.8}
+              >
+                <MaterialIcons name="arrow-back" size={24} color="#FFFFFF" />
+              </TouchableOpacity>
+
+              <Animated.View
+                style={{
+                  opacity: titleAnim,
+                  transform: [
+                    {
+                      scale: titleAnim.interpolate({
                         inputRange: [0, 1],
                         outputRange: [0.7, 1.1],
                       }),
                     },
                     {
-                      rotate: logoAnim.interpolate({
+                      rotate: titleAnim.interpolate({
                         inputRange: [0, 1],
-                        outputRange: ['-20deg', '0deg'],
+                        outputRange: ['-10deg', '0deg'],
                       }),
                     },
                   ],
-                  shadowOpacity: logoAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0.1, 0.35],
-                  }),
-                },
-              ]}
-            >
-              <MaterialIcons name="store" size={44} color="#FFFDE7" />
-            </Animated.View>
+                }}
+              >
+                <ThemedText type="title" style={styles.title}>
+                  {mostrarVerificacion ? 'Verifica tu correo' : 'Registrar mi Negocio'}
+                </ThemedText>
+              </Animated.View>
 
-            <TouchableOpacity
-              onPress={() => router.push('/auth/select')}
-              style={styles.backCircleButton}
-              activeOpacity={0.8}
-            >
-              <MaterialIcons name="arrow-back" size={24} color="#FFFFFF" />
-            </TouchableOpacity>
-
-            <Animated.View
-              style={{
-                opacity: titleAnim,
-                transform: [
-                  {
-                    scale: titleAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [0.7, 1.1],
-                    }),
-                  },
-                  {
-                    rotate: titleAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: ['-10deg', '0deg'],
-                    }),
-                  },
-                ],
-              }}
-            >
-              <ThemedText type="title" style={styles.title}>
-                {mostrarVerificacion ? 'Verifica tu correo' : 'Registrar mi Negocio'}
-              </ThemedText>
-            </Animated.View>
-
-            {!mostrarVerificacion ? (
-              <View style={styles.inputContainer}>
-                <View style={styles.inputGroup}>
-                  <MaterialIcons name="person" size={22} color="#7E57C2" style={styles.icon} />
-                  <TextInput
-                    placeholder="Nombre del Negocio"
-                    placeholderTextColor="#A3A3A3"
-                    style={styles.input}
-                    onChangeText={setNombre}
-                    value={nombre}
-                  />
-                </View>
-
-                <View style={styles.inputGroup}>
-                  <MaterialIcons name="phone" size={22} color="#7E57C2" style={styles.icon} />
-                  <TextInput
-                    placeholder="Teléfono"
-                    placeholderTextColor="#A3A3A3"
-                    style={styles.input}
-                    keyboardType="phone-pad"
-                    onChangeText={setTelefono}
-                    value={telefono}
-                  />
-                </View>
-
-                <View style={styles.pickerWrapper}>
-                  <View style={styles.inputGroup}>
-                    <MaterialIcons name="category" size={22} color="#7E57C2" style={styles.icon} />
-                    <Picker
-                      selectedValue={categoria}
-                      onValueChange={(itemValue) => setCategoria(itemValue)}
-                      style={styles.picker}
-                      dropdownIconColor="#7E57C2"
-                      mode="dropdown"
-                    >
-                      <Picker.Item label="Comida" value="comida" />
-                      <Picker.Item label="Tecnología" value="tecnologia" />
-                      <Picker.Item label="Ropa" value="ropa" />
-                      <Picker.Item label="Farmacia" value="hogar" />
-                    </Picker>
-                  </View>
-                </View>
-
-                <View style={styles.inputGroup}>
-                  <MaterialIcons name="email" size={22} color="#7E57C2" style={styles.icon} />
-                  <TextInput
-                    placeholder="Correo electrónico"
-                    placeholderTextColor="#A3A3A3"
-                    style={styles.input}
-                    onChangeText={setCorreo}
-                    keyboardType="email-address"
-                    value={correo}
-                  />
-                </View>
-
-                <View style={styles.inputGroup}>
-                  <MaterialIcons name="lock" size={22} color="#7E57C2" style={styles.icon} />
-                  <TextInput
-                    placeholder="Contraseña"
-                    placeholderTextColor="#A3A3A3"
-                    secureTextEntry
-                    style={styles.input}
-                    onChangeText={setContrasena}
-                    value={contrasena}
-                  />
-                </View>
-                <View style={styles.inputGroup}>
-                  <MaterialIcons name="lock" size={22} color="#7E57C2" style={styles.icon} />
-                  <TextInput
-                    placeholder="Repetir contraseña"
-                    placeholderTextColor="#A3A3A3"
-                    secureTextEntry
-                    style={styles.input}
-                    onChangeText={setRepetirContrasena}
-                    value={repetirContrasena}
-                  />
-                </View>
-              </View>
-            ) : (
-              <View style={styles.inputContainer}>
-                <View style={styles.inputGroup}>
-                  <MaterialIcons name="email" size={22} color="#7E57C2" style={styles.icon} />
-                  <TextInput
-                    placeholder="Correo electrónico"
-                    placeholderTextColor="#A3A3A3"
-                    style={styles.input}
-                    editable={false}
-                    value={correo}
-                  />
-                </View>
-                <View style={styles.inputGroup}>
-                  <MaterialIcons
-                    name="confirmation-number"
-                    size={22}
-                    color="#7E57C2"
-                    style={styles.icon}
-                  />
-                  <TextInput
-                    placeholder="Código de verificación"
-                    placeholderTextColor="#A3A3A3"
-                    style={styles.input}
-                    onChangeText={setCodigoVerificacion}
-                    value={codigoVerificacion}
-                  />
-                </View>
-                {mensaje ? (
-                  <ThemedText style={{ color: 'green', marginBottom: 10 }}>{mensaje}</ThemedText>
-                ) : null}
-                {error ? (
-                  <ThemedText style={{ color: 'red', marginBottom: 10 }}>{error}</ThemedText>
-                ) : null}
-                <TouchableOpacity
-                  style={[styles.button, { backgroundColor: '#BA68C8', marginTop: 10 }]}
-                  onPress={handleReenviarPin}
-                  activeOpacity={0.8}
-                  disabled={loadingReenvio}
-                >
-                  <ThemedText type="defaultSemiBold" style={{ color: '#fff' }}>
-                    {loadingReenvio ? 'Enviando...' : 'Reenviar código'}
-                  </ThemedText>
-                </TouchableOpacity>
-              </View>
-            )}
-
-            <Animated.View
-              style={[
-                styles.buttonContainer,
-                {
-                  opacity: buttonAnim,
-                  transform: [
-                    {
-                      scale: buttonAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [0.9, 1],
-                      }),
-                    },
-                  ],
-                },
-              ]}
-            >
               {!mostrarVerificacion ? (
-                <TouchableOpacity
-                  style={styles.button}
-                  onPress={handleRegister}
-                  activeOpacity={0.8}
-                  disabled={loadingRegistro}
-                >
-                  <ThemedText style={styles.buttonText}>
-                    {loadingRegistro ? 'Registrando...' : 'Registrar'}
-                  </ThemedText>
-                  <MaterialIcons name="arrow-forward" size={20} color="white" />
-                </TouchableOpacity>
+                <View style={styles.inputContainer}>
+                  <View style={styles.inputGroup}>
+                    <MaterialIcons name="person" size={22} color="#7E57C2" style={styles.icon} />
+                    <TextInput
+                      placeholder="Nombre del Negocio"
+                      placeholderTextColor="#A3A3A3"
+                      style={styles.input}
+                      onChangeText={setNombre}
+                      value={nombre}
+                    />
+                  </View>
+
+                  <View style={styles.inputGroup}>
+                    <MaterialIcons name="phone" size={22} color="#7E57C2" style={styles.icon} />
+                    <TextInput
+                      placeholder="Teléfono"
+                      placeholderTextColor="#A3A3A3"
+                      style={styles.input}
+                      keyboardType="phone-pad"
+                      onChangeText={setTelefono}
+                      value={telefono}
+                    />
+                  </View>
+
+                  <View style={styles.pickerWrapper}>
+                    <View style={styles.inputGroup}>
+                      <MaterialIcons name="category" size={22} color="#7E57C2" style={styles.icon} />
+                      <Picker
+                        selectedValue={categoria}
+                        onValueChange={(itemValue) => setCategoria(itemValue)}
+                        style={styles.picker}
+                        dropdownIconColor="#7E57C2"
+                        mode="dropdown"
+                      >
+                        <Picker.Item label="Comida" value="comida" />
+                        <Picker.Item label="Tecnología" value="tecnologia" />
+                        <Picker.Item label="Ropa" value="ropa" />
+                        <Picker.Item label="Farmacia" value="hogar" />
+                      </Picker>
+                    </View>
+                  </View>
+
+                  <View style={styles.inputGroup}>
+                    <MaterialIcons name="email" size={22} color="#7E57C2" style={styles.icon} />
+                    <TextInput
+                      placeholder="Correo electrónico"
+                      placeholderTextColor="#A3A3A3"
+                      style={styles.input}
+                      onChangeText={setCorreo}
+                      keyboardType="email-address"
+                      value={correo}
+                    />
+                  </View>
+
+                  <View style={styles.inputGroup}>
+                    <MaterialIcons name="lock" size={22} color="#7E57C2" style={styles.icon} />
+                    <TextInput
+                      placeholder="Contraseña"
+                      placeholderTextColor="#A3A3A3"
+                      secureTextEntry
+                      style={styles.input}
+                      onChangeText={setContrasena}
+                      value={contrasena}
+                    />
+                  </View>
+                  <View style={styles.inputGroup}>
+                    <MaterialIcons name="lock" size={22} color="#7E57C2" style={styles.icon} />
+                    <TextInput
+                      placeholder="Repetir contraseña"
+                      placeholderTextColor="#A3A3A3"
+                      secureTextEntry
+                      style={styles.input}
+                      onChangeText={setRepetirContrasena}
+                      value={repetirContrasena}
+                    />
+                  </View>
+
+                  {/* Campo de descripción fuera del inputGroup para mejor visualización */}
+                  <TextInput
+                    placeholder="Descripción del Negocio"
+                    placeholderTextColor="#A3A3A3"
+                    style={styles.descripcionInput}
+                    onChangeText={setDescripcion}
+                    value={descripcion}
+                    multiline
+                    numberOfLines={6}
+                    textAlignVertical="top"
+                  />
+                </View>
               ) : (
-                <TouchableOpacity
-                  style={styles.button}
-                  onPress={handleVerificarCodigo}
-                  activeOpacity={0.8}
-                  disabled={loadingVerificacion}
-                >
-                  <ThemedText style={styles.buttonText}>
-                    {loadingVerificacion ? 'Verificando...' : 'Verificar Código'}
-                  </ThemedText>
-                  <MaterialIcons name="check" size={20} color="white" />
-                </TouchableOpacity>
+                <View style={styles.inputContainer}>
+                  <View style={styles.inputGroup}>
+                    <MaterialIcons name="email" size={22} color="#7E57C2" style={styles.icon} />
+                    <TextInput
+                      placeholder="Correo electrónico"
+                      placeholderTextColor="#A3A3A3"
+                      style={styles.input}
+                      editable={false}
+                      value={correo}
+                    />
+                  </View>
+                  <View style={styles.inputGroup}>
+                    <MaterialIcons
+                      name="confirmation-number"
+                      size={22}
+                      color="#7E57C2"
+                      style={styles.icon}
+                    />
+                    <TextInput
+                      placeholder="Código de verificación"
+                      placeholderTextColor="#A3A3A3"
+                      style={styles.input}
+                      onChangeText={setCodigoVerificacion}
+                      value={codigoVerificacion}
+                    />
+                  </View>
+                  {mensaje ? (
+                    <ThemedText style={{ color: 'green', marginBottom: 10 }}>{mensaje}</ThemedText>
+                  ) : null}
+                  {error ? (
+                    <ThemedText style={{ color: 'red', marginBottom: 10 }}>{error}</ThemedText>
+                  ) : null}
+                  <TouchableOpacity
+                    style={[styles.button, { backgroundColor: '#BA68C8', marginTop: 10 }]}
+                    onPress={handleReenviarPin}
+                    activeOpacity={0.8}
+                    disabled={loadingReenvio}
+                  >
+                    <ThemedText type="defaultSemiBold" style={{ color: '#fff' }}>
+                      {loadingReenvio ? 'Enviando...' : 'Reenviar código'}
+                    </ThemedText>
+                  </TouchableOpacity>
+                </View>
               )}
 
-              {!mostrarVerificacion && (
-                <TouchableOpacity
-                  onPress={() => router.push('/auth/login')}
-                  activeOpacity={0.6}
-                >
-                  <ThemedText style={styles.linkText}>
-                    ¿Ya tienes cuenta?{' '}
-                    <ThemedText style={styles.linkBold}>Inicia sesión</ThemedText>
-                  </ThemedText>
-                </TouchableOpacity>
-              )}
+              <Animated.View
+                style={[
+                  styles.buttonContainer,
+                  {
+                    opacity: buttonAnim,
+                    transform: [
+                      {
+                        scale: buttonAnim.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [0.9, 1],
+                        }),
+                      },
+                    ],
+                  },
+                ]}
+              >
+                {!mostrarVerificacion ? (
+                  <TouchableOpacity
+                    style={styles.button}
+                    onPress={handleRegister}
+                    activeOpacity={0.8}
+                    disabled={loadingRegistro}
+                  >
+                    <ThemedText style={styles.buttonText}>
+                      {loadingRegistro ? 'Registrando...' : 'Registrar'}
+                    </ThemedText>
+                    <MaterialIcons name="arrow-forward" size={20} color="white" />
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity
+                    style={styles.button}
+                    onPress={handleVerificarCodigo}
+                    activeOpacity={0.8}
+                    disabled={loadingVerificacion}
+                  >
+                    <ThemedText style={styles.buttonText}>
+                      {loadingVerificacion ? 'Verificando...' : 'Verificar Código'}
+                    </ThemedText>
+                    <MaterialIcons name="check" size={20} color="white" />
+                  </TouchableOpacity>
+                )}
+
+                {!mostrarVerificacion && (
+                  <TouchableOpacity
+                    onPress={() => router.push('/auth/login')}
+                    activeOpacity={0.6}
+                  >
+                    <ThemedText style={styles.linkText}>
+                      ¿Ya tienes cuenta?{' '}
+                      <ThemedText style={styles.linkBold}>Inicia sesión</ThemedText>
+                    </ThemedText>
+                  </TouchableOpacity>
+                )}
+              </Animated.View>
             </Animated.View>
-          </Animated.View>
-        </View>
+          </View>
+        </ScrollView>
       </LinearGradient>
     </KeyboardAvoidingView>
   );
@@ -609,5 +625,20 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 6,
     elevation: 6,
+  },
+  descripcionInput: {
+    minHeight: 120,
+    maxHeight: 220,
+    height: 140,
+    paddingTop: 14,
+    paddingBottom: 14,
+    textAlignVertical: 'top',
+    fontSize: 16,
+    backgroundColor: '#F3EFFF',
+    borderRadius: 16,
+    borderWidth: 1.2,
+    borderColor: '#E1D5FA',
+    marginBottom: 16,
+    paddingHorizontal: 14,
   },
 });
