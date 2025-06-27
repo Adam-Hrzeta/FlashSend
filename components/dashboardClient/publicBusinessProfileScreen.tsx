@@ -1,4 +1,5 @@
 //FlashSend/components/dashboardClient/publicBusinessProfileScreen.tsx
+import { useCarrito } from "@/components/context/CarritoContext";
 import { API_BASE_URL } from '@/constants/ApiConfig';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
@@ -8,9 +9,11 @@ import {
   Dimensions,
   FlatList,
   Image,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
+  ToastAndroid,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -51,6 +54,7 @@ export default function PublicBusinessProfileScreen() {
   const [productos, setProductos] = useState<Producto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { agregarProducto, productos: productosCarrito } = useCarrito();
   // Estado para el carrito
   const [carrito, setCarrito] = useState<Producto[]>([]);
 
@@ -143,7 +147,15 @@ export default function PublicBusinessProfileScreen() {
 
   // Función para agregar producto al carrito
   const agregarAlCarrito = (producto: Producto) => {
-    setCarrito(prev => [...prev, producto]);
+    agregarProducto({
+      ...producto,
+      precio: typeof producto.precio === 'string' ? parseFloat(producto.precio) : producto.precio,
+      cantidad: 1,
+      imagen_url: producto.imagen_url ? (producto.imagen_url.startsWith('http') ? producto.imagen_url : `${API_BASE_URL}${producto.imagen_url}`) : undefined
+    });
+    if (Platform.OS === 'android') {
+      ToastAndroid.show('Producto agregado al carrito', ToastAndroid.SHORT);
+    }
   };
 
   // -------------------------------------Render de cada producto
@@ -238,7 +250,7 @@ export default function PublicBusinessProfileScreen() {
           <View style={{ width: 16 }} />
           <TouchableOpacity style={styles.viewCartButtonSmall} onPress={() => navigation.navigate('shoppingCart')}>
             <MaterialIcons name="shopping-cart" size={20} color="#fff" />
-            <Text style={styles.viewCartTextSmall}>Ver mi carrito ({carrito.length})</Text>
+            <Text style={styles.viewCartTextSmall}>Ver mi carrito ({productosCarrito.reduce((acc, p) => acc + p.cantidad, 0)})</Text>
           </TouchableOpacity>
         </View>
         {productos.length === 0 ? (
