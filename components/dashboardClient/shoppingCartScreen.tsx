@@ -12,6 +12,9 @@ export default function ShoppingCartScreen() {
     setLoading(true);
     try {
       const token = await getToken();
+      // Obtener negocio_id del primer producto (asumiendo todos son del mismo negocio)
+      const negocio_id = productos.length > 0 ? productos[0].negocio_id : null;
+      console.log('[DEBUG] negocio_id a enviar:', negocio_id, productos);
       const res = await fetch(`${API_BASE_URL}/api/pedidos_cliente/realizar_pedido`, {
         method: "POST",
         headers: {
@@ -20,7 +23,8 @@ export default function ShoppingCartScreen() {
         },
         body: JSON.stringify({
           productos: productos.map(p => ({ id: p.id, cantidad: p.cantidad, precio: p.precio })),
-          total
+          total,
+          negocio_id
         })
       });
       const data = await res.json();

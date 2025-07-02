@@ -9,6 +9,7 @@ export interface ProductoCarrito {
   stock: number;
   imagen_url?: string;
   cantidad: number;
+  negocio_id?: number; // <-- Asegura que el producto en el carrito lleva negocio_id
 }
 
 interface CarritoContextType {

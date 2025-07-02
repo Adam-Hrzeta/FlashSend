@@ -5,17 +5,17 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  Dimensions,
-  FlatList,
-  Image,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  ToastAndroid,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Dimensions,
+    FlatList,
+    Image,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    ToastAndroid,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 
 interface NegocioPublico {
@@ -149,6 +149,7 @@ export default function PublicBusinessProfileScreen() {
   const agregarAlCarrito = (producto: Producto) => {
     agregarProducto({
       ...producto,
+      negocio_id: negocio?.id, // <-- Asegura que el producto lleva el negocio_id
       precio: typeof producto.precio === 'string' ? parseFloat(producto.precio) : producto.precio,
       cantidad: 1,
       imagen_url: producto.imagen_url ? (producto.imagen_url.startsWith('http') ? producto.imagen_url : `${API_BASE_URL}${producto.imagen_url}`) : undefined
