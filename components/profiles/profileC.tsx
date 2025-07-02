@@ -6,17 +6,17 @@ import * as ImagePicker from 'expo-image-picker';
 import { router, useFocusEffect } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  Modal,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Image,
+    Modal,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import ImagePickerComponent from './modal-foto/imagenpiker';
 
@@ -30,6 +30,16 @@ export interface Cliente {
   fecha_nacimiento: string;
 }
 
+interface PedidoHistorial {
+  id: number;
+  negocio_id: number;
+  negocio_nombre?: string;
+  total: number;
+  fecha: string;
+  estatus: string;
+  direccion_entrega: string;
+}
+
 export default function ClientProfileScreen() {
   const [cliente, setCliente] = useState<Cliente | null>(null);
   const [loading, setLoading] = useState(true);
@@ -39,6 +49,8 @@ export default function ClientProfileScreen() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [isUpdatingPhoto, setIsUpdatingPhoto] = useState(false);
   const [localAvatar, setLocalAvatar] = useState<string | null>(null);
+  const [historial, setHistorial] = useState<PedidoHistorial[]>([]);
+  const [loadingHistorial, setLoadingHistorial] = useState(true);
 
   const fetchCliente = async () => {
     setLoading(true);
@@ -71,6 +83,25 @@ export default function ClientProfileScreen() {
     }
   };
 
+  const fetchHistorial = async () => {
+    setLoadingHistorial(true);
+    try {
+      const token = await AsyncStorage.getItem('access_token');
+      const response = await fetch(`${API_BASE_URL}/api/pedidos_cliente/historial`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await response.json();
+      setHistorial(data.pedidos || []);
+    } catch (e) {
+      setHistorial([]);
+    } finally {
+      setLoadingHistorial(false);
+    }
+  };
+
   useEffect(() => {
     fetchCliente();
   }, []);
@@ -78,6 +109,7 @@ export default function ClientProfileScreen() {
   useFocusEffect(
     React.useCallback(() => {
       fetchCliente();
+      fetchHistorial();
     }, [])
   );
 
@@ -376,7 +408,22 @@ export default function ClientProfileScreen() {
           shadowRadius: 16,
         }}>
           <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#5E35B1', marginBottom: 16 }}>Historial de pedidos</Text>
-          <Text style={{ color: '#7E57C2', textAlign: 'center', paddingVertical: 20 }}>No hay pedidos recientes</Text>
+          {loadingHistorial ? (
+            <ActivityIndicator size="small" color="#7E57C2" />
+          ) : historial.length === 0 ? (
+            <Text style={{ color: '#7E57C2', textAlign: 'center', paddingVertical: 20 }}>No hay pedidos recientes</Text>
+          ) : (
+            historial.map((pedido) => (
+              <View key={pedido.id} style={{ marginBottom: 16, backgroundColor: '#F3EFFF', borderRadius: 12, padding: 12 }}>
+                <Text style={{ color: '#5E35B1', fontWeight: 'bold' }}>Pedido #{pedido.id}</Text>
+                <Text style={{ color: '#7E57C2' }}>Negocio: {pedido.negocio_nombre || pedido.negocio_id}</Text>
+                <Text style={{ color: '#7E57C2' }}>Total: ${pedido.total}</Text>
+                <Text style={{ color: '#7E57C2' }}>Fecha: {pedido.fecha}</Text>
+                <Text style={{ color: '#7E57C2' }}>Estatus: {pedido.estatus}</Text>
+                <Text style={{ color: '#7E57C2' }}>Dirección: {pedido.direccion_entrega}</Text>
+              </View>
+            ))
+          )}
         </View>
 
         {/* Modal de edición */}

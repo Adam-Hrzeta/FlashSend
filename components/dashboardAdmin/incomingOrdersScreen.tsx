@@ -1,10 +1,21 @@
 import { API_BASE_URL } from '@/constants/ApiConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
+interface PedidoEntrante {
+  id: number;
+  cliente_id: number;
+  total: number;
+  fecha: string;
+  direccion_entrega?: string;
+  estatus?: string;
+  cliente_nombre?: string;
+}
+
 export default function IncomingOrdersScreen() {
-  const [pedidos, setPedidos] = useState([]);
+  const [pedidos, setPedidos] = useState<PedidoEntrante[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -45,6 +56,43 @@ export default function IncomingOrdersScreen() {
     }
   };
 
+  // Obtener nombre de cliente por id
+  const [clientes, setClientes] = useState<{[key: number]: string}>({});
+  const fetchClienteNombre = async (clienteId: number) => {
+    if (clientes[clienteId]) return clientes[clienteId];
+    try {
+      const token = await AsyncStorage.getItem('access_token');
+      const res = await fetch(`${API_BASE_URL}/api/perfilCliente/perfilCliente?id=${clienteId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.cliente && data.cliente.nombre) {
+        setClientes(prev => ({ ...prev, [clienteId]: data.cliente.nombre }));
+        return data.cliente.nombre;
+      }
+    } catch {}
+    return clienteId;
+  };
+
+  // Cargar nombres de clientes para los pedidos
+  useEffect(() => {
+    (async () => {
+      for (const pedido of pedidos) {
+        if (pedido.cliente_id && !clientes[pedido.cliente_id]) {
+          await fetchClienteNombre(pedido.cliente_id);
+        }
+      }
+    })();
+    // eslint-disable-next-line
+  }, [pedidos]);
+
+  // Elimina el refresco automático, solo actualiza al enfocar o al hacer pull-to-refresh
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchPedidos();
+    }, [])
+  );
+
   if (loading) {
     return <ActivityIndicator size="large" color="#7E57C2" style={{ marginTop: 40 }} />;
   }
@@ -58,12 +106,15 @@ export default function IncomingOrdersScreen() {
       <Text style={styles.titulo}>Pedidos entrantes</Text>
       <FlatList
         data={pedidos}
-        keyExtractor={item => item.id?.toString() || Math.random().toString()}
+        keyExtractor={(item) => item.id?.toString() || Math.random().toString()}
         refreshing={refreshing}
         onRefresh={fetchPedidos}
-        renderItem={({ item }) => (
+        renderItem={({ item }: { item: PedidoEntrante }) => (
           <View style={styles.card}>
-            <Text style={styles.info}><Text style={styles.label}>Cliente:</Text> {item.cliente_id}</Text>
+            <Text style={styles.info}>
+              <Text style={styles.label}>Cliente:</Text> {item.cliente_nombre ? item.cliente_nombre : (clientes[item.cliente_id] ? clientes[item.cliente_id] : `ID: ${item.cliente_id}`)}
+            </Text>
+            <Text style={styles.info}><Text style={styles.label}>Dirección:</Text> {item.direccion_entrega || 'No disponible'}</Text>
             <Text style={styles.info}><Text style={styles.label}>Total:</Text> ${item.total}</Text>
             <Text style={styles.info}><Text style={styles.label}>Fecha:</Text> {item.fecha}</Text>
             <TouchableOpacity style={styles.boton} onPress={() => handleAceptar(item.id)}>

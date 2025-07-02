@@ -6,6 +6,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useRegisterPushToken } from '../hooks/useRegisterPushToken';
 import { pickLocationAndGetAddress } from './LocationUtils';
 
 export interface Negocio {
@@ -191,6 +192,8 @@ export default function NegocioProfileScreen() {
     router.replace('/');
   };
 
+  useRegisterPushToken(negocio?.id);
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -367,11 +370,13 @@ export default function NegocioProfileScreen() {
             ))}
           </View>
 
-          {/* Botones */}
-          <View style={{ flexDirection: 'row', width: '100%', marginTop: 18, gap: 12 }}>
+          {/* Botones principales */}
+          <View style={{ flexDirection: 'row', width: '100%', marginTop: 18, gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
             <TouchableOpacity
               style={{
                 flex: 1,
+                minWidth: 150,
+                maxWidth: 200,
                 backgroundColor: '#fff',
                 borderRadius: 16,
                 paddingVertical: 14,
@@ -385,15 +390,18 @@ export default function NegocioProfileScreen() {
                 justifyContent: 'center',
                 borderWidth: 1.2,
                 borderColor: '#E1BEE7',
+                marginBottom: 8,
               }}
-              onPress={handleEdit}
+              onPress={() => router.push('/dashboardNegocio/gestionProductos')}
             >
-              <MaterialIcons name="edit" size={22} color="#7E57C2" />
-              <Text style={{ color: '#7E57C2', fontWeight: 'bold', marginLeft: 10, fontSize: 16 }}>Editar</Text>
+              <MaterialIcons name="inventory" size={22} color="#7E57C2" />
+              <Text style={{ color: '#7E57C2', fontWeight: 'bold', marginLeft: 10, fontSize: 15, flexShrink: 1, flexWrap: 'wrap' }}>Gestionar productos</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={{
                 flex: 1,
+                minWidth: 120,
+                maxWidth: 180,
                 backgroundColor: '#7E57C2',
                 borderRadius: 16,
                 paddingVertical: 14,
@@ -405,112 +413,97 @@ export default function NegocioProfileScreen() {
                 shadowRadius: 4,
                 flexDirection: 'row',
                 justifyContent: 'center',
+                marginBottom: 8,
               }}
-              onPress={handleLogout}
+              onPress={() => router.push('/dashboardNegocio/incomingOrders')}
             >
-              <MaterialIcons name="logout" size={22} color="#fff" />
-              <Text style={{ color: '#fff', fontWeight: 'bold', marginLeft: 10, fontSize: 16 }}>Cerrar sesión</Text>
+              <MaterialIcons name="assignment" size={22} color="#fff" />
+              <Text style={{ color: '#fff', fontWeight: 'bold', marginLeft: 10, fontSize: 15, flexShrink: 1, flexWrap: 'wrap' }}>Ver pedidos</Text>
             </TouchableOpacity>
           </View>
 
-          {/* Botón para gestionar productos */}
-          <TouchableOpacity
-            style={{
-              backgroundColor: '#7E57C2',
-              padding: 16,
-              borderRadius: 16,
-              marginTop: 18,
-              alignItems: 'center',
-              elevation: 4,
-              width: '100%',
-            }}
-            onPress={() => router.push('/dashboardNegocio/gestionProductos')}
+          {/* Modal de edición (igual que antes) */}
+          <Modal
+            visible={editModalVisible}
+            animationType="slide"
+            transparent
+            onRequestClose={() => setEditModalVisible(false)}
           >
-            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18 }}>Gestionar productos</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Modal de edición (igual que antes) */}
-        <Modal
-          visible={editModalVisible}
-          animationType="slide"
-          transparent
-          onRequestClose={() => setEditModalVisible(false)}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContentCustom}>
-              <View style={styles.modalIconCircle}>
-                <MaterialIcons name="edit" size={38} color="#fff" />
+            <View style={styles.modalContainer}>
+              <View style={styles.modalContentCustom}>
+                <View style={styles.modalIconCircle}>
+                  <MaterialIcons name="edit" size={38} color="#fff" />
+                </View>
+                <Text style={styles.modalTitleCustom}>Editar información</Text>
+                
+                <View style={styles.inputRow}>
+                  <MaterialIcons name="person" size={20} color="#BA68C8" style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.inputCustom}
+                    placeholder="Nombre"
+                    placeholderTextColor="#BA68C8"
+                    value={editData.nombre || ''}
+                    onChangeText={text => setEditData({ ...editData, nombre: text })}
+                  />
+                </View>
+                
+                <View style={styles.inputRow}>
+                  <MaterialIcons name="email" size={20} color="#BA68C8" style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.inputCustom}
+                    placeholder="Correo"
+                    placeholderTextColor="#BA68C8"
+                    value={editData.correo || ''}
+                    onChangeText={text => setEditData({ ...editData, correo: text })}
+                    keyboardType="email-address"
+                  />
+                </View>
+                
+                <View style={styles.inputRow}>
+                  <MaterialIcons name="phone" size={20} color="#BA68C8" style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.inputCustom}
+                    placeholder="Teléfono"
+                    placeholderTextColor="#BA68C8"
+                    value={editData.telefono || ''}
+                    onChangeText={text => setEditData({ ...editData, telefono: text })}
+                    keyboardType="phone-pad"
+                  />
+                </View>
+                
+                <View style={styles.inputRow}>
+                  <MaterialIcons name="info" size={20} color="#BA68C8" style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.inputCustom}
+                    placeholder="Descripción"
+                    placeholderTextColor="#BA68C8"
+                    value={editData.descripcion || ''}
+                    onChangeText={text => setEditData({ ...editData, descripcion: text })}
+                    multiline
+                  />
+                </View>
+                
+                <TouchableOpacity 
+                  style={styles.modalButton} 
+                  onPress={handleSaveEdit}
+                >
+                  <Text style={styles.modalButtonText}>
+                    <MaterialIcons name="save" size={18} color="#fff" /> Guardar
+                  </Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  style={styles.cancelButtonCustom} 
+                  onPress={() => setEditModalVisible(false)}
+                >
+                  <Text style={styles.cancelButtonText}>
+                    <MaterialIcons name="close" size={18} color="#7E57C2" /> Cancelar
+                  </Text>
+                </TouchableOpacity>
               </View>
-              <Text style={styles.modalTitleCustom}>Editar información</Text>
-              
-              <View style={styles.inputRow}>
-                <MaterialIcons name="person" size={20} color="#BA68C8" style={styles.inputIcon} />
-                <TextInput
-                  style={styles.inputCustom}
-                  placeholder="Nombre"
-                  placeholderTextColor="#BA68C8"
-                  value={editData.nombre || ''}
-                  onChangeText={text => setEditData({ ...editData, nombre: text })}
-                />
-              </View>
-              
-              <View style={styles.inputRow}>
-                <MaterialIcons name="email" size={20} color="#BA68C8" style={styles.inputIcon} />
-                <TextInput
-                  style={styles.inputCustom}
-                  placeholder="Correo"
-                  placeholderTextColor="#BA68C8"
-                  value={editData.correo || ''}
-                  onChangeText={text => setEditData({ ...editData, correo: text })}
-                  keyboardType="email-address"
-                />
-              </View>
-              
-              <View style={styles.inputRow}>
-                <MaterialIcons name="phone" size={20} color="#BA68C8" style={styles.inputIcon} />
-                <TextInput
-                  style={styles.inputCustom}
-                  placeholder="Teléfono"
-                  placeholderTextColor="#BA68C8"
-                  value={editData.telefono || ''}
-                  onChangeText={text => setEditData({ ...editData, telefono: text })}
-                  keyboardType="phone-pad"
-                />
-              </View>
-              
-              <View style={styles.inputRow}>
-                <MaterialIcons name="info" size={20} color="#BA68C8" style={styles.inputIcon} />
-                <TextInput
-                  style={styles.inputCustom}
-                  placeholder="Descripción"
-                  placeholderTextColor="#BA68C8"
-                  value={editData.descripcion || ''}
-                  onChangeText={text => setEditData({ ...editData, descripcion: text })}
-                  multiline
-                />
-              </View>
-              
-              <TouchableOpacity 
-                style={styles.modalButton} 
-                onPress={handleSaveEdit}
-              >
-                <Text style={styles.modalButtonText}>
-                  <MaterialIcons name="save" size={18} color="#fff" /> Guardar
-                </Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={styles.cancelButtonCustom} 
-                onPress={() => setEditModalVisible(false)}
-              >
-                <Text style={styles.cancelButtonText}>
-                  <MaterialIcons name="close" size={18} color="#7E57C2" /> Cancelar
-                </Text>
-              </TouchableOpacity>
             </View>
-          </View>
-        </Modal>
+          </Modal>
+        </View>
       </ScrollView>
     </View>
   );

@@ -1,20 +1,56 @@
 import { useCarrito } from "@/components/context/CarritoContext";
 import { API_BASE_URL } from "@/constants/ApiConfig";
 import { getToken } from "@/utils/authToken";
+import * as Location from 'expo-location';
 import { useState } from "react";
-import { Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, FlatList, Image, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 export default function ShoppingCartScreen() {
   const { productos, quitarProducto, neto, total, limpiarCarrito } = useCarrito();
   const [loading, setLoading] = useState(false);
+  const [direccion, setDireccion] = useState("");
+  const [modalVisible, setModalVisible] = useState(false);
+  const [direccionEntrega, setDireccionEntrega] = useState<string | null>(null);
+  const [obteniendoUbicacion, setObteniendoUbicacion] = useState(false);
+
+  const solicitarUbicacion = async () => {
+    setObteniendoUbicacion(true);
+    try {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permiso denegado', 'Se requiere permiso de ubicación para continuar.');
+        setObteniendoUbicacion(false);
+        return;
+      }
+      let location = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = location.coords;
+      // Opcional: obtener dirección legible
+      let address = `Lat: ${latitude}, Lng: ${longitude}`;
+      try {
+        const geocode = await Location.reverseGeocodeAsync({ latitude, longitude });
+        if (geocode && geocode.length > 0) {
+          const g = geocode[0];
+          address = `${g.street || ''} ${g.name || ''}, ${g.city || ''}, ${g.region || ''}, ${g.country || ''}`;
+        }
+      } catch {}
+      setDireccionEntrega(address);
+      return address;
+    } catch (e) {
+      Alert.alert('Error', 'No se pudo obtener la ubicación.');
+    } finally {
+      setObteniendoUbicacion(false);
+    }
+  };
 
   const realizarPedido = async () => {
+    if (!direccionEntrega) {
+      const address = await solicitarUbicacion();
+      if (!address) return;
+    }
     setLoading(true);
     try {
       const token = await getToken();
-      // Obtener negocio_id del primer producto (asumiendo todos son del mismo negocio)
       const negocio_id = productos.length > 0 ? productos[0].negocio_id : null;
-      console.log('[DEBUG] negocio_id a enviar:', negocio_id, productos);
       const res = await fetch(`${API_BASE_URL}/api/pedidos_cliente/realizar_pedido`, {
         method: "POST",
         headers: {
@@ -24,13 +60,15 @@ export default function ShoppingCartScreen() {
         body: JSON.stringify({
           productos: productos.map(p => ({ id: p.id, cantidad: p.cantidad, precio: p.precio })),
           total,
-          negocio_id
+          negocio_id,
+          direccion_entrega: direccionEntrega
         })
       });
       const data = await res.json();
       if (data.status === "success") {
         Alert.alert("Pedido realizado", "Tu pedido ha sido registrado con éxito.");
         limpiarCarrito();
+        setDireccionEntrega(null);
       } else {
         Alert.alert("Error", data.message || "No se pudo realizar el pedido.");
       }
@@ -75,10 +113,29 @@ export default function ShoppingCartScreen() {
       <TouchableOpacity
         style={[styles.clearBtn, { backgroundColor: '#7E57C2', marginTop: 12 }]}
         onPress={realizarPedido}
-        disabled={productos.length === 0 || loading}
+        disabled={productos.length === 0 || loading || obteniendoUbicacion}
       >
-        <Text style={[styles.clearText, { color: '#fff' }]}>{loading ? 'Enviando...' : 'Realizar pedido'}</Text>
+        <Text style={[styles.clearText, { color: '#fff' }]}>{loading ? 'Enviando...' : obteniendoUbicacion ? 'Obteniendo ubicación...' : 'Realizar pedido'}</Text>
       </TouchableOpacity>
+      <Modal visible={modalVisible} transparent animationType="slide">
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.2)' }}>
+          <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 24, width: '85%' }}>
+            <Text style={{ color: '#7E57C2', fontWeight: 'bold', fontSize: 18, marginBottom: 12 }}>Dirección de entrega</Text>
+            <TextInput
+              placeholder="Ingresa la dirección de entrega o usa tu ubicación"
+              value={direccion}
+              onChangeText={setDireccion}
+              style={{ borderWidth: 1, borderColor: '#E1BEE7', borderRadius: 8, padding: 10, marginBottom: 16, color: '#5E35B1' }}
+            />
+            <TouchableOpacity style={[styles.clearBtn, { backgroundColor: '#7E57C2' }]} onPress={realizarPedido}>
+              <Text style={[styles.clearText, { color: '#fff' }]}>{loading ? 'Enviando...' : 'Confirmar pedido'}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.clearBtn, { marginTop: 8 }]} onPress={() => setModalVisible(false)}>
+              <Text style={styles.clearText}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
