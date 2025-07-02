@@ -371,11 +371,37 @@ export default function NegocioProfileScreen() {
           </View>
 
           {/* Botones principales */}
-          <View style={{ flexDirection: 'row', width: '100%', marginTop: 18, gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <View style={{ flexDirection: 'row', width: '100%', marginTop: 18, gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             <TouchableOpacity
               style={{
                 flex: 1,
-                minWidth: 150,
+                minWidth: 140,
+                maxWidth: 200,
+                backgroundColor: '#fff',
+                borderRadius: 16,
+                paddingVertical: 14,
+                alignItems: 'center',
+                elevation: 2,
+                shadowColor: '#7E57C2',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.13,
+                shadowRadius: 4,
+                flexDirection: 'row',
+                justifyContent: 'flex-start', // Align content to the left
+                borderWidth: 1.2,
+                borderColor: '#E1BEE7',
+                marginBottom: 8,
+                paddingLeft: 24, // Move content to the right
+              }}
+              onPress={() => router.push('/dashboardNegocio/gestionProductos')}
+            >
+              <MaterialIcons name="inventory" size={22} color="#7E57C2" style={{ marginRight: 12 }} />
+              <Text style={{ color: '#7E57C2', fontWeight: 'bold', marginLeft: -3, fontSize: 15, flexShrink: 1, flexWrap: 'wrap' }}>Gestionar productos</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                flex: 1,
+                minWidth: 140,
                 maxWidth: 200,
                 backgroundColor: '#fff',
                 borderRadius: 16,
@@ -392,33 +418,10 @@ export default function NegocioProfileScreen() {
                 borderColor: '#E1BEE7',
                 marginBottom: 8,
               }}
-              onPress={() => router.push('/dashboardNegocio/gestionProductos')}
-            >
-              <MaterialIcons name="inventory" size={22} color="#7E57C2" />
-              <Text style={{ color: '#7E57C2', fontWeight: 'bold', marginLeft: 10, fontSize: 15, flexShrink: 1, flexWrap: 'wrap' }}>Gestionar productos</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{
-                flex: 1,
-                minWidth: 120,
-                maxWidth: 180,
-                backgroundColor: '#7E57C2',
-                borderRadius: 16,
-                paddingVertical: 14,
-                alignItems: 'center',
-                elevation: 2,
-                shadowColor: '#7E57C2',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.13,
-                shadowRadius: 4,
-                flexDirection: 'row',
-                justifyContent: 'center',
-                marginBottom: 8,
-              }}
               onPress={() => router.push('/dashboardNegocio/incomingOrders')}
             >
-              <MaterialIcons name="assignment" size={22} color="#fff" />
-              <Text style={{ color: '#fff', fontWeight: 'bold', marginLeft: 10, fontSize: 15, flexShrink: 1, flexWrap: 'wrap' }}>Ver pedidos</Text>
+              <MaterialIcons name="assignment" size={22} color="#7E57C2" />
+              <Text style={{ color: '#7E57C2', fontWeight: 'bold', marginLeft: 10, fontSize: 15, flexShrink: 1, flexWrap: 'wrap' }}>Ver pedidos</Text>
             </TouchableOpacity>
           </View>
 
