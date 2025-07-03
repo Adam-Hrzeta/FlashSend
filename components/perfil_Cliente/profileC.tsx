@@ -65,7 +65,7 @@ export default function ClientProfileScreen() {
 
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
-        throw new Error(data?.mensaje || 'No autorizado');
+        throw new Error(data?.mensaje || 'Solo los clientes pueden acceder a este modulo.');
       }
 
       const data = await response.json();

@@ -56,7 +56,7 @@ const PedidosD = () => {
         )}
       />
 
-      <TouchableOpacity style={styles.botonVolver} onPress={() => router.push('/profiles/dealerProfile')}>
+      <TouchableOpacity style={styles.botonVolver} onPress={() => router.push('/perfil_Repartidor/dealerProfile')}>
         <MaterialIcons name="arrow-back" size={22} color="#fff" />
         <Text style={styles.textoBoton}>Volver al perfil</Text>
       </TouchableOpacity>

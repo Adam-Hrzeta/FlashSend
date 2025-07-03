@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '@/constants/ApiConfig'; //pefil
+import { API_BASE_URL } from '@/constants/ApiConfig';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
@@ -46,7 +46,7 @@ export default function NegocioProfileScreen() {
 
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
-        throw new Error(data?.error || 'No autorizado');
+        throw new Error(data?.error || 'Solo los negocios pueden acceder a este modulo.');
       }
 
       const data = await response.json();
