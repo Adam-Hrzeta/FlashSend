@@ -6,8 +6,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { useRegisterPushToken } from '../hooks/useRegisterPushToken';
 import { pickLocationAndGetAddress } from '../cliente/LocationUtils';
+import { useRegisterPushToken } from '../hooks/useRegisterPushToken';
 
 export interface Negocio {
   id: number;
@@ -371,15 +371,13 @@ export default function Perfil_NegocioScreen() {
           </View>
 
           {/* Botones principales */}
-          <View style={{ flexDirection: 'row', width: '100%', marginTop: 18, gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <View style={{ width: '100%', marginTop: 28, gap: 0, alignItems: 'center' }}>
             <TouchableOpacity
               style={{
-                flex: 1,
-                minWidth: 140,
-                maxWidth: 200,
+                width: '100%',
                 backgroundColor: '#fff',
                 borderRadius: 16,
-                paddingVertical: 14,
+                paddingVertical: 16,
                 alignItems: 'center',
                 elevation: 2,
                 shadowColor: '#7E57C2',
@@ -387,25 +385,50 @@ export default function Perfil_NegocioScreen() {
                 shadowOpacity: 0.13,
                 shadowRadius: 4,
                 flexDirection: 'row',
-                justifyContent: 'flex-start', // Align content to the left
+                justifyContent: 'flex-start',
                 borderWidth: 1.2,
                 borderColor: '#E1BEE7',
-                marginBottom: 8,
-                paddingLeft: 24, // Move content to the right
+                marginBottom: 16,
+                paddingLeft: 28,
+                minHeight: 54,
               }}
               onPress={() => router.push('/negocio/crud_Productos')}
             >
-              <MaterialIcons name="inventory" size={22} color="#7E57C2" style={{ marginRight: 12 }} />
-              <Text style={{ color: '#7E57C2', fontWeight: 'bold', marginLeft: -3, fontSize: 15, flexShrink: 1, flexWrap: 'wrap' }}>Gestionar productos</Text>
+              <MaterialIcons name="inventory" size={24} color="#7E57C2" style={{ marginRight: 14 }} />
+              <Text style={{ color: '#7E57C2', fontWeight: 'bold', fontSize: 16, flexShrink: 1, flexWrap: 'wrap' }}>Gestionar productos</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={{
-                flex: 1,
-                minWidth: 140,
-                maxWidth: 200,
+                width: '100%',
                 backgroundColor: '#fff',
                 borderRadius: 16,
-                paddingVertical: 14,
+                paddingVertical: 16,
+                alignItems: 'center',
+                elevation: 2,
+                shadowColor: '#7E57C2',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.13,
+                shadowRadius: 4,
+                flexDirection: 'row',
+                justifyContent: 'flex-start',
+                borderWidth: 1.2,
+                borderColor: '#E1BEE7',
+                marginBottom: 16,
+                paddingLeft: 28,
+                minHeight: 54,
+              }}
+              onPress={() => router.push('/negocio/ordenes_Entrantes')}
+            >
+              <MaterialIcons name="assignment" size={24} color="#7E57C2" style={{ marginRight: 14 }} />
+              <Text style={{ color: '#7E57C2', fontWeight: 'bold', fontSize: 16, flexShrink: 1, flexWrap: 'wrap' }}>Ver pedidos</Text>
+            </TouchableOpacity>
+            {/* Botón cerrar sesión */}
+            <TouchableOpacity
+              style={{
+                width: '100%',
+                backgroundColor: '#7E57C2',
+                borderRadius: 16,
+                paddingVertical: 16,
                 alignItems: 'center',
                 elevation: 2,
                 shadowColor: '#7E57C2',
@@ -414,14 +437,13 @@ export default function Perfil_NegocioScreen() {
                 shadowRadius: 4,
                 flexDirection: 'row',
                 justifyContent: 'center',
-                borderWidth: 1.2,
-                borderColor: '#E1BEE7',
-                marginBottom: 8,
+                marginBottom: 0,
+                minHeight: 54,
               }}
-              onPress={() => router.push('/negocio/ordenes_Entrantes')}
+              onPress={handleLogout}
             >
-              <MaterialIcons name="assignment" size={22} color="#7E57C2" />
-              <Text style={{ color: '#7E57C2', fontWeight: 'bold', marginLeft: 10, fontSize: 15, flexShrink: 1, flexWrap: 'wrap' }}>Ver pedidos</Text>
+              <MaterialIcons name="logout" size={24} color="#fff" style={{ marginRight: 14 }} />
+              <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 17 }}>Cerrar sesión</Text>
             </TouchableOpacity>
           </View>
 

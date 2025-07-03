@@ -37,7 +37,7 @@ export default function ordenes_EntrantesScreen() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
-      console.log('PEDIDOS:', data.pedidos); // <-- Depuración
+      // console.log('PEDIDOS:', data.pedidos); // <-- Depuración
       setPedidos(data.pedidos || []);
     } catch (e) {
       Alert.alert('Error', 'No se pudieron cargar los pedidos');

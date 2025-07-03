@@ -153,17 +153,19 @@ export default function Crud_ProductosScreen({ setNotAuth }: { setNotAuth?: (v: 
                 transform: [{ translateY: fadeAnim.interpolate({ inputRange: [0, 1], outputRange: [40, 0] }) }],
               }}
             >
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', minHeight: 110 }}>
                 {producto.imagen_url && (
-                  <Image source={{ uri: API_BASE_URL + producto.imagen_url }} style={styles.productImage} />
+                  <Image source={{ uri: API_BASE_URL + producto.imagen_url }} style={styles.productImageBetter} />
                 )}
-                <View style={styles.productInfoBox}>
-                  <Text style={styles.productName}>{producto.nombre}</Text>
-                  <Text style={styles.productDesc}>{producto.descripcion}</Text>
-                  <Text style={styles.productPrice}>${producto.precio}</Text>
-                  <Text style={styles.productStock}>Stock: {producto.stock}</Text>
-                  <Text style={styles.productCat}>{producto.categoria}</Text>
-                  <View style={styles.actionRow}>
+                <View style={styles.productInfoBoxBetter}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', marginBottom: 2 }}>
+                    <Text style={styles.productNameBetter} numberOfLines={1}>{producto.nombre}</Text>
+                    <Text style={styles.productPriceBetter}>${producto.precio}</Text>
+                    <Text style={styles.productStockBetter}>Stock: {producto.stock}</Text>
+                  </View>
+                  <Text style={styles.productDescBetter} numberOfLines={2}>{producto.descripcion}</Text>
+                  <Text style={styles.productCatBetter}>{producto.categoria}</Text>
+                  <View style={styles.actionRowBetter}>
                     <TouchableOpacity onPress={() => handleEdit(producto)} style={styles.editBtn}>
                       <MaterialIcons name="edit" size={20} color="#7E57C2" />
                     </TouchableOpacity>
@@ -286,58 +288,57 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 8,
   },
-  productImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 16,
-    marginRight: 18,
+  productImageBetter: {
+    width: 90,
+    height: 90,
+    borderRadius: 12,
+    marginRight: 12,
     backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: '#E1BEE7',
   },
-  productInfoBox: {
+  productInfoBoxBetter: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'flex-start',
-    paddingLeft: 6,
+    paddingLeft: 2,
   },
-  productName: {
-    fontSize: 22,
+  productNameBetter: {
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#7E57C2',
-    marginBottom: 4,
-    textAlign: 'left',
+    flex: 1,
+    marginRight: 6,
   },
-  productDesc: {
-    color: '#5E35B1',
-    marginBottom: 8,
-    fontSize: 16,
-    textAlign: 'left',
-  },
-  productPrice: {
+  productPriceBetter: {
     color: '#43A047',
     fontWeight: 'bold',
-    fontSize: 20,
-    marginBottom: 4,
+    fontSize: 15,
+    marginRight: 8,
+  },
+  productStockBetter: {
+    color: '#BA68C8',
+    fontSize: 13,
+    fontWeight: 'bold',
+  },
+  productDescBetter: {
+    color: '#5E35B1',
+    fontSize: 13,
+    marginBottom: 2,
+    marginTop: 2,
     textAlign: 'left',
   },
-  productStock: {
-    color: '#BA68C8',
-    fontSize: 16,
+  productCatBetter: {
+    color: '#9575CD',
+    fontStyle: 'italic',
+    fontSize: 12,
     marginBottom: 2,
     textAlign: 'left',
   },
-  productCat: {
-    color: '#9575CD',
-    fontStyle: 'italic',
-    fontSize: 15,
-    marginBottom: 8,
-    textAlign: 'left',
-  },
-  actionRow: {
+  actionRowBetter: {
     flexDirection: 'row',
-    marginTop: 10,
-    justifyContent: 'center',
+    marginTop: 4,
+    justifyContent: 'flex-start',
   },
   editBtn: { marginRight: 12, backgroundColor: '#fff', borderRadius: 8, padding: 6, borderWidth: 1, borderColor: '#7E57C2' },
   deleteBtn: { backgroundColor: '#E57373', borderRadius: 8, padding: 6 },
