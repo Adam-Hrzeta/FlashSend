@@ -2,21 +2,10 @@
 import { API_BASE_URL } from '@/constants/ApiConfig';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  Modal,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
 import { router } from 'expo-router';
-import ImagePickerComponent from '../perfil_Cliente/modal-foto/imagenpiker';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, } from 'react-native';
+
 
 interface Repartidor {
   id: number;
@@ -46,11 +35,15 @@ export default function DealerProfileScreen() {
   const [editData, setEditData] = useState<Partial<Repartidor>>({});
   const [tipoServicio, setTipoServicio] = useState<string>('');
   const [isUpdatingPhoto, setIsUpdatingPhoto] = useState(false);
+
+  // Estados para búsqueda de negocios (solo de a mentis)
   const [busquedaNombre, setBusquedaNombre] = useState('');
   const [busquedaCategoria, setBusquedaCategoria] = useState('');
   const [negociosEncontrados, setNegociosEncontrados] = useState<Negocio[]>([]);
   const [buscando, setBuscando] = useState(false);
 
+  
+  // ---------------------------------------Cargar repartidor al iniciar
   useEffect(() => {
     const fetchRepartidor = async () => {
       const token = await AsyncStorage.getItem('access_token');
@@ -84,10 +77,14 @@ export default function DealerProfileScreen() {
   const handleEdit = () => {
     setEditModalVisible(true);
   };
+  //-----------------------------------------------------------------
 
+
+
+  // --------------------funciona------------------------Manejo de guardado de edición
   const handleSaveEdit = async () => {
     const token = await AsyncStorage.getItem('access_token');
-    fetch(`${API_BASE_URL}/api/perfilRepartidor/editarPerfil`, {
+    fetch(`${API_BASE_URL}/api/perfilRepartidor/editarPerfil`, { // CORREGIDO
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -112,12 +109,15 @@ export default function DealerProfileScreen() {
         Alert.alert('Error', 'No se pudo actualizar el perfil');
       });
   };
+  
 
+  // Manejo de cambio de tipo de servicio fuera del modal
   const handleTipoServicioChange = (tipo: string) => {
     setTipoServicio(tipo);
+    // Actualiza el backend
     const update = async () => {
       const token = await AsyncStorage.getItem('access_token');
-      await fetch(`${API_BASE_URL}/api/perfilRepartidor/editarPerfil`, {
+      await fetch(`${API_BASE_URL}/api/perfilRepartidor/editarPerfil`, { // CORREGIDO
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -132,6 +132,8 @@ export default function DealerProfileScreen() {
     update();
   };
 
+  // --------------------------Búsqueda de negocios ( solo de a mentis)
+  // es funcional: realiza petición real al backend con nombre y categoría
   const buscarNegocios = async () => {
     setBuscando(true);
     setNegociosEncontrados([]);
@@ -154,6 +156,8 @@ export default function DealerProfileScreen() {
     }
   };
 
+  // ------------------------Solicitud de alianza ( solo de a mentis)
+  // se actualiza en el backend el negocio_id y tipo_servicio del repartidor
   const enviarSolicitudAliado = async (negocioId: number) => {
     const token = await AsyncStorage.getItem('access_token');
     try {
@@ -183,11 +187,15 @@ export default function DealerProfileScreen() {
     }
   };
 
+
+
+  //funcion para manejar la imagen -----------------------------------------------------------------------------
   const handleImageSelected = async (uri: string) => {
     try {
       setIsUpdatingPhoto(true);
       const token = await AsyncStorage.getItem('access_token');
 
+      // Crear FormData para enviar la imagen
       const formData = new FormData();
       formData.append('image', {
         uri,
@@ -195,6 +203,7 @@ export default function DealerProfileScreen() {
         name: `avatar_${Date.now()}.jpg`
       } as any);
 
+      // -----------------------------------Subir la imagen al backend
       const uploadResponse = await fetch(`${API_BASE_URL}/api/perfilRepartidor/upload_profile_image`, {
         method: 'POST',
         headers: {
@@ -208,6 +217,7 @@ export default function DealerProfileScreen() {
         throw new Error(data?.mensaje || 'Error al actualizar la foto');
       }
 
+      //-------------------------- Refrescar el perfil para obtener la nueva URL del avatar
       const profileRes = await fetch(`${API_BASE_URL}/api/perfilRepartidor/perfilRepartidor`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -230,6 +240,9 @@ export default function DealerProfileScreen() {
       setIsUpdatingPhoto(false);
     }
   };
+  //---------------------------------------------------------------------------------------------------
+
+
 
   if (loading) {
     return (
@@ -266,19 +279,32 @@ export default function DealerProfileScreen() {
         </View>
       </View>
 
+      
       <TouchableOpacity style={styles.editButton} onPress={handleEdit}>
         <MaterialIcons name="edit" size={20} color="#7E57C2" />
         <Text style={styles.editButtonText}>Editar información</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity
-        style={[styles.editButton, { marginTop: 8, backgroundColor: '#BA68C8', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }]}
-        onPress={() => router.push('/perfil_Repartidor/pedidosAsignados')} 
-      >
-        <MaterialIcons name="assignment" size={20} color="#fff" />
-        <Text style={[styles.editButtonText, { color: '#fff', marginLeft: 6 }]}>Ver pedidos asignados</Text>
-      </TouchableOpacity>
+      
 
+
+   {/* ------------------------PEDIDOS ASIGNADOS-----------------------------------------------------------------------------*/}
+
+    <TouchableOpacity
+      style={[styles.editButton, { marginTop: 8, backgroundColor: '#BA68C8', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }]}
+      onPress={() => router.push('/perfil_Repartidor/pedidosAsignados')} 
+    >
+      <MaterialIcons name="assignment" size={20} color="#fff" />
+      <Text style={[styles.editButtonText, { color: '#fff', marginLeft: 6 }]}>Ver pedidos asignados</Text>
+    </TouchableOpacity>
+
+   {/* -----------------------------------------------------------------------------------------------------*/}
+
+
+
+
+
+      {/* Información del repartidor */}
       <View style={styles.infoCard}>
         <Text style={styles.infoText}>
           <MaterialIcons name="badge" size={18} color="#7E57C2" /> Nombre: {repartidor?.nombre}
@@ -297,6 +323,8 @@ export default function DealerProfileScreen() {
         </Text>
       </View>
 
+          
+      {/* ----------------hay checar esto------------------------------Tipo de servicio abajo */}
       <View style={styles.infoCard}>
         <Text style={styles.infoText}>
           <MaterialIcons name="local-shipping" size={18} color="#7E57C2" /> Tipo de servicio:
@@ -321,9 +349,12 @@ export default function DealerProfileScreen() {
             <Text style={{ color: tipoServicio === 'Aliado' ? '#fff' : '#7E57C2' }}>Aliado</Text>
           </TouchableOpacity>
         </View>
+        
 
+            {/* ----------hay que checar esto--------------------------Información del negocio si es aliado */}
         {tipoServicio === 'Aliado' && (
           <>
+            {/* Buscador de negocios solo de a mentis */}
             <Text style={[styles.infoText, { marginTop: 14, fontWeight: 'bold' }]}>Buscar negocios para aliarse</Text>
             <View style={styles.inputRow}>
               <MaterialIcons name="search" size={20} color="#BA68C8" style={styles.inputIcon} />
@@ -352,6 +383,8 @@ export default function DealerProfileScreen() {
             </TouchableOpacity>
             {buscando && <ActivityIndicator color="#7E57C2" style={{ marginTop: 8 }} />}
 
+
+            {/*--------------------------- checar esto-- Solo de a mentis, no muestra resultados reales */}
             {negociosEncontrados.length === 0 && !buscando ? (
               <Text style={styles.emptyPedidos}>No se encontraron negocios.</Text>
             ) : (
@@ -376,6 +409,8 @@ export default function DealerProfileScreen() {
       </View>
       {error && <Text style={styles.errorText}>{error}</Text>}
 
+
+      {/*--------------funciona :)--------------- Modal para editar información */}
       <Modal
         visible={editModalVisible}
         animationType="slide"
@@ -392,11 +427,16 @@ export default function DealerProfileScreen() {
             </View>
             
             <ScrollView style={styles.modalScrollView}>
-              <View style={styles.imagePickerContainer}>
-                <Text style={styles.imagePickerLabel}>Cambiar foto de perfil</Text>
-                <ImagePickerComponent onImageSelected={handleImageSelected} />
-              </View>
 
+
+
+              {/* Sección de foto de perfil-------------------------------------------------- */}
+              
+              {/*------------------------------------------------- */}
+
+
+
+              {/* Sección de información personal */}
               <View style={styles.formSection}>
                 <Text style={styles.sectionTitle}>Información Personal</Text>
                 <View style={styles.inputRow}>
@@ -443,6 +483,9 @@ export default function DealerProfileScreen() {
                 </View>
               </View>
 
+
+
+              {/* Botones de acción -------------------camara-----------------------------------*/}
               <View style={styles.modalActions}>
                 <TouchableOpacity style={styles.modalButton} onPress={handleSaveEdit}>
                   <Text style={styles.modalButtonText}>
@@ -455,11 +498,14 @@ export default function DealerProfileScreen() {
                   </Text>
                 </TouchableOpacity>
               </View>
+            {/* Botones de acción ------------------------------------------------------*/}
             </ScrollView>
           </View>
         </View>
       </Modal>
 
+
+        {/* Botón para cerrar sesión --------------------------------------------------------------*/}
       <TouchableOpacity
         style={{ backgroundColor: '#7E57C2', padding: 12, borderRadius: 10, margin: 16, alignItems: 'center' }}
         onPress={async () => {
@@ -477,6 +523,10 @@ export default function DealerProfileScreen() {
       >
         <Text style={{ color: '#fff', fontWeight: 'bold' }}>Cerrar sesión</Text>
       </TouchableOpacity>
+      {/* Botón para cerrar sesión --------------------------------------------------------------*/}
+
+
+      
     </ScrollView>
   );
 }
@@ -496,6 +546,9 @@ const styles = StyleSheet.create({
     padding: 6,
     elevation: 4,
   },
+
+//----------------------------------------------------
+
   imagePickerContainer: {
     marginBottom: 20,
     alignItems: 'center',
@@ -527,6 +580,8 @@ const styles = StyleSheet.create({
     marginTop: 20,
     alignItems: 'center',
   },
+//----------------------------------------------------
+
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',

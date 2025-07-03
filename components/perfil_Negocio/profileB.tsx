@@ -393,7 +393,7 @@ export default function NegocioProfileScreen() {
                 marginBottom: 8,
                 paddingLeft: 24, // Move content to the right
               }}
-              onPress={() => router.push('/dashboardNegocio/gestionProductos')}
+              onPress={() => router.push('/perfil_Negocio/gestionProductos')}
             >
               <MaterialIcons name="inventory" size={22} color="#7E57C2" style={{ marginRight: 12 }} />
               <Text style={{ color: '#7E57C2', fontWeight: 'bold', marginLeft: -3, fontSize: 15, flexShrink: 1, flexWrap: 'wrap' }}>Gestionar productos</Text>
@@ -418,7 +418,7 @@ export default function NegocioProfileScreen() {
                 borderColor: '#E1BEE7',
                 marginBottom: 8,
               }}
-              onPress={() => router.push('/dashboardNegocio/incomingOrders')}
+              onPress={() => router.push('/perfil_Negocio/incomingOrders')}
             >
               <MaterialIcons name="assignment" size={22} color="#7E57C2" />
               <Text style={{ color: '#7E57C2', fontWeight: 'bold', marginLeft: 10, fontSize: 15, flexShrink: 1, flexWrap: 'wrap' }}>Ver pedidos</Text>

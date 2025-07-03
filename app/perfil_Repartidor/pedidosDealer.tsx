@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, Text, FlatList, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
-import { useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import React from 'react';
+import { FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 // Datos simulados (mock)
 const pedidosMock = [
@@ -56,7 +56,7 @@ const PedidosD = () => {
         )}
       />
 
-      <TouchableOpacity style={styles.botonVolver} onPress={() => router.push('/profiles/dealerProfile')}>
+      <TouchableOpacity style={styles.botonVolver} onPress={() => router.push('/perfil_Repartidor/dealerProfile')}>
         <MaterialIcons name="arrow-back" size={22} color="#fff" />
         <Text style={styles.textoBoton}>Volver al perfil</Text>
       </TouchableOpacity>
