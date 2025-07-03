@@ -4,8 +4,8 @@ import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import {ActivityIndicator,Alert,Image,Modal,ScrollView,StyleSheet,Text,TextInput,TouchableOpacity,View,} from 'react-native';
-import ImagePickerComponent from './modal-foto/imagenpiker';
 import { router } from 'expo-router';
+import ImagePickerComponent from '../perfil_Cliente/modal-foto/imagenpiker';
 
 
 interface Repartidor {

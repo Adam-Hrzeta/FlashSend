@@ -7,7 +7,7 @@ import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useRegisterPushToken } from '../hooks/useRegisterPushToken';
-import { pickLocationAndGetAddress } from './LocationUtils';
+import { pickLocationAndGetAddress } from '../perfil_Cliente/LocationUtils';
 
 export interface Negocio {
   id: number;

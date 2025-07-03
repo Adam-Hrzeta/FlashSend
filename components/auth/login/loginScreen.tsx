@@ -77,9 +77,9 @@ export default function LoginScreen() {
         // await AsyncStorage.setItem('tipo_usuario', data.tipo_usuario);
 
         if (data.tipo_usuario === 'negocio') {
-          router.push('/profiles/busisnessProfile');
+          router.push('/perfil_Negocio/busisnessProfile');
         } else if (data.tipo_usuario === 'cliente') {
-          router.push('/profiles/clientProfile');
+          router.push('/perfil_Cliente/clientProfile');
         } else if (data.tipo_usuario === 'repartidor') {
           router.push('/profiles/dealerProfile');
         } else if (data.tipo_usuario === 'administrador') {

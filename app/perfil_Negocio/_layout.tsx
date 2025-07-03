@@ -1,9 +1,10 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
 import { HapticTab } from '@/components/HapticTab';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { Tabs } from 'expo-router';
+import React from 'react';
+import { Feather } from '@expo/vector-icons';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -16,26 +17,28 @@ export default function TabLayout() {
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
         tabBarStyle: {
-          display: 'none', 
+        //display: 'none',
         },
-      }}
-    >
+      }}>
       <Tabs.Screen
         name="busisnessProfile"
         options={{
-          title: 'Perfil de Negocio',
+          title: 'Mi Negocio',
+          tabBarIcon: ({ color, size }) => <Feather name="box" color={color} size={size} />,
         }}
       />
       <Tabs.Screen
-        name="clientProfile"
+        name="gestionProductos"
         options={{
-          title: 'Perfil de cliente',
+          title: 'Productos',
+          tabBarIcon: ({ color, size }) => <Feather name="grid" color={color} size={size} />,
         }}
       />
       <Tabs.Screen
-        name="dealerProfile"
+        name="incomingOrders"
         options={{
-          title: 'Perfil de repartidor',
+          title: 'Pedidos Entrantes',
+          tabBarIcon: ({ color, size }) => <Feather name="shopping-cart" color={color} size={size} />,
         }}
       />
     </Tabs>

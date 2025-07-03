@@ -4,6 +4,12 @@ import { useFocusEffect } from '@react-navigation/native';
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
+interface DetallePedido {
+  producto_id: number;
+  nombre?: string;
+  cantidad: number;
+}
+
 interface PedidoEntrante {
   id: number;
   cliente_id: number;
@@ -12,6 +18,7 @@ interface PedidoEntrante {
   direccion_entrega?: string;
   estatus?: string;
   cliente_nombre?: string;
+  detalles?: DetallePedido[];
 }
 
 export default function IncomingOrdersScreen() {
@@ -116,7 +123,17 @@ export default function IncomingOrdersScreen() {
             </Text>
             <Text style={styles.info}><Text style={styles.label}>Dirección:</Text> {item.direccion_entrega || 'No disponible'}</Text>
             <Text style={styles.info}><Text style={styles.label}>Total:</Text> ${item.total}</Text>
-            <Text style={styles.info}><Text style={styles.label}>Fecha:</Text> {item.fecha}</Text>
+            <Text style={styles.info}><Text style={styles.label}>Fecha:</Text> {formatearFecha(item.fecha)}</Text>
+            {item.detalles && item.detalles.length > 0 && (
+              <View style={{marginBottom: 6}}>
+                <Text style={styles.label}>Productos:</Text>
+                {item.detalles.map((detalle, idx) => (
+                  <Text key={idx} style={styles.info}>
+                    - {detalle.nombre ? detalle.nombre : `Producto ${detalle.producto_id}`}: {detalle.cantidad}
+                  </Text>
+                ))}
+              </View>
+            )}
             <TouchableOpacity style={styles.boton} onPress={() => handleAceptar(item.id)}>
               <Text style={styles.botonTexto}>Aceptar pedido</Text>
             </TouchableOpacity>
@@ -125,6 +142,22 @@ export default function IncomingOrdersScreen() {
       />
     </View>
   );
+}
+
+function formatearFecha(fecha: string) {
+  try {
+    const date = new Date(fecha);
+    return date.toLocaleString('es-MX', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  } catch {
+    return fecha;
+  }
 }
 
 const styles = StyleSheet.create({

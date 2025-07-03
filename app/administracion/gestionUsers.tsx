@@ -1,4 +1,4 @@
-import CrudUsers from "@/components/dashboardAdmin/crudUsers";
+import CrudUsers from "@/components/administracion/crudUsers";
 import { useState } from "react";
 import { Text } from "react-native";
 

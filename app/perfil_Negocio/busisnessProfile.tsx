@@ -1,4 +1,4 @@
-import BusinessProfileScreen from "@/components/profiles/profileB";
+import BusinessProfileScreen from "@/components/perfil_Negocio/profileB";
 import { View } from "react-native";
 
 export default function BusinessProfile() {

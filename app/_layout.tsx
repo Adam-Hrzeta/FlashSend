@@ -47,35 +47,35 @@ export default function Layout() {
             options={{
               drawerLabel: "Autenticación",
               title: "Autenticación del tipo de Usuario",
-              drawerIcon: ({ color }) => <FontAwesome5 name="user-friends" size={24} color={color} />,
+              drawerIcon: ({ color }) => <FontAwesome5 name="user-cog" size={24} color={color} />,
             }}
           />
           <Drawer.Screen
-            name="dashboardClient"
+            name="perfil_Negocio"
             options={{
-              drawerLabel: "Servicios",
-              title: "Negocios y Servicios",
-              drawerIcon: ({ color }) => <AntDesign name="appstore-o" size={24} color={color} />,
-            }}
-          />
-          <Drawer.Screen
-            name="profiles"
-            options={{
-              drawerLabel: "Mi Perfil",
-              title: "Perfiles de Usuario",
-              drawerIcon: ({ color }) => <AntDesign name="profile" size={24} color={color} />,
-            }}
-          />
-          <Drawer.Screen
-            name="dashboardNegocio"
-            options={{
-              drawerLabel: "Mis productos",
-              title: "Mis productos",
+              drawerLabel: "Negocio",
+              title: "Mi Negocio",
               drawerIcon: ({ color }) => <AntDesign name="shoppingcart" size={24} color={color} />,
             }}
           />
           <Drawer.Screen
-            name="dashboardAdmin"
+            name="perfil_Cliente"
+            options={{
+              drawerLabel: "Cliente",
+              title: "Mi Perfil",
+              drawerIcon: ({ color }) => <AntDesign name="user" size={24} color={color} />,
+            }}
+          />
+          <Drawer.Screen
+            name="perfil_Repartidor"
+            options={{
+              drawerLabel: "Repartidor",
+              title: "Mi Perfil",
+              drawerIcon: ({ color }) => <AntDesign name="car" size={24} color={color} />,
+            }}
+          />
+          <Drawer.Screen
+            name="administracion"
             options={{
               drawerLabel: "Administración",
               title: "Peticiones de usuarios",

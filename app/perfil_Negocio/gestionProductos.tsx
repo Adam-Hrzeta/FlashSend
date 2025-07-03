@@ -1,4 +1,4 @@
-import CrudProducts from "@/components/dashboardBusisness/crudProducts";
+import CrudProducts from "@/components/perfil_Negocio/crudProducts";
 import { useState } from "react";
 import { Text } from "react-native";
 

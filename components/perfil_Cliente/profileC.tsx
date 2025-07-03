@@ -6,19 +6,18 @@ import * as ImagePicker from 'expo-image-picker';
 import { router, useFocusEffect } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Image,
-    Modal,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Image,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import ImagePickerComponent from './modal-foto/imagenpiker';
 
 
 export interface Cliente {
@@ -322,7 +321,7 @@ export default function ClientProfileScreen() {
             >
               {/* Sección de foto de perfil-------------------------------------------------- */}
               <View style={styles.imagePickerContainer}>
-                <ImagePickerComponent onImageSelected={handleImageSelected} />
+                {/* <ImagePickerComponent onImageSelected={handleImageSelected} /> */}
               </View>
               {/*------------------------------------------------- */}
             </TouchableOpacity>
