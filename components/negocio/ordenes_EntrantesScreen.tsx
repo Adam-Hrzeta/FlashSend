@@ -8,6 +8,8 @@ interface DetallePedido {
   producto_id: number;
   nombre?: string;
   cantidad: number;
+  precio_unitario?: number;
+  descripcion?: string;
 }
 
 interface PedidoEntrante {
@@ -18,7 +20,8 @@ interface PedidoEntrante {
   direccion_entrega?: string;
   estatus?: string;
   cliente_nombre?: string;
-  detalles?: DetallePedido[];
+  productos?: DetallePedido[];
+  detalles?: DetallePedido[]; // <- para compatibilidad y evitar error TS
 }
 
 export default function ordenes_EntrantesScreen() {
@@ -34,6 +37,7 @@ export default function ordenes_EntrantesScreen() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
+      console.log('PEDIDOS:', data.pedidos); // <-- Depuración
       setPedidos(data.pedidos || []);
     } catch (e) {
       Alert.alert('Error', 'No se pudieron cargar los pedidos');
@@ -116,29 +120,46 @@ export default function ordenes_EntrantesScreen() {
         keyExtractor={(item) => item.id?.toString() || Math.random().toString()}
         refreshing={refreshing}
         onRefresh={fetchPedidos}
-        renderItem={({ item }: { item: PedidoEntrante }) => (
-          <View style={styles.card}>
-            <Text style={styles.info}>
-              <Text style={styles.label}>Cliente:</Text> {item.cliente_nombre ? item.cliente_nombre : (clientes[item.cliente_id] ? clientes[item.cliente_id] : `ID: ${item.cliente_id}`)}
-            </Text>
-            <Text style={styles.info}><Text style={styles.label}>Dirección:</Text> {item.direccion_entrega || 'No disponible'}</Text>
-            <Text style={styles.info}><Text style={styles.label}>Total:</Text> ${item.total}</Text>
-            <Text style={styles.info}><Text style={styles.label}>Fecha:</Text> {formatearFecha(item.fecha)}</Text>
-            {item.detalles && item.detalles.length > 0 && (
-              <View style={{marginBottom: 6}}>
-                <Text style={styles.label}>Productos:</Text>
-                {item.detalles.map((detalle, idx) => (
-                  <Text key={idx} style={styles.info}>
-                    - {detalle.nombre ? detalle.nombre : `Producto ${detalle.producto_id}`}: {detalle.cantidad}
-                  </Text>
-                ))}
-              </View>
-            )}
-            <TouchableOpacity style={styles.boton} onPress={() => handleAceptar(item.id)}>
-              <Text style={styles.botonTexto}>Aceptar pedido</Text>
-            </TouchableOpacity>
-          </View>
-        )}
+        renderItem={({ item }: { item: PedidoEntrante }) => {
+          const detalles: DetallePedido[] = item.productos && item.productos.length > 0 ? item.productos : (item.detalles || []);
+          return (
+            <View style={styles.card}>
+              <Text style={styles.info}>
+                <Text style={styles.label}>Cliente:</Text> {item.cliente_nombre ? item.cliente_nombre : (clientes[item.cliente_id] ? clientes[item.cliente_id] : `ID: ${item.cliente_id}`)}
+              </Text>
+              <Text style={styles.info}><Text style={styles.label}>Dirección:</Text> {item.direccion_entrega || 'No disponible'}</Text>
+              <Text style={styles.info}><Text style={styles.label}>Total:</Text> ${item.total}</Text>
+              <Text style={styles.info}><Text style={styles.label}>Fecha:</Text> {formatearFecha(item.fecha)}</Text>
+              {detalles.length > 0 ? (
+                <View style={{marginBottom: 6}}>
+                  <Text style={styles.label}>Productos:</Text>
+                  {detalles.map((detalle: DetallePedido, idx: number) => {
+                    // Manejo robusto de precio_unitario
+                    const precio = detalle.precio_unitario;
+                    let precioDisplay = "N/A";
+                    if (precio !== undefined && precio !== null && !isNaN(Number(precio))) {
+                      precioDisplay = Number(precio).toFixed(2);
+                    }
+                    return (
+                      <Text key={idx} style={styles.info}>
+                        - {detalle.nombre ? detalle.nombre : `Producto ${detalle.producto_id}`}: {detalle.cantidad} x ${precioDisplay}
+                      </Text>
+                    );
+                  })}
+                </View>
+              ) : (
+                <Text style={styles.info}>
+                  Este pedido no tiene productos asociados.
+                  {item.productos && Array.isArray(item.productos) ? ` (productos: ${JSON.stringify(item.productos)})` : ''}
+                  {item.detalles && Array.isArray(item.detalles) ? ` (detalles: ${JSON.stringify(item.detalles)})` : ''}
+                </Text>
+              )}
+              <TouchableOpacity style={styles.boton} onPress={() => handleAceptar(item.id)}>
+                <Text style={styles.botonTexto}>Aceptar pedido</Text>
+              </TouchableOpacity>
+            </View>
+          );
+        }}
       />
     </View>
   );
