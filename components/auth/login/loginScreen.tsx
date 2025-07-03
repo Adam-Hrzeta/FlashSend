@@ -81,9 +81,9 @@ export default function LoginScreen() {
         } else if (data.tipo_usuario === 'cliente') {
           router.push('/perfil_Cliente/clientProfile');
         } else if (data.tipo_usuario === 'repartidor') {
-          router.push('/profiles/dealerProfile');
+          router.push('/perfil_Repartidor/dealerProfile');
         } else if (data.tipo_usuario === 'administrador') {
-          router.push('/dashboardAdmin/gestionUsers');
+          router.push('/administracion/crudUsuarios');
         } else {
           router.push('/');
         }
