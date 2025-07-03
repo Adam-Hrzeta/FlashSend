@@ -77,13 +77,13 @@ export default function LoginScreen() {
         // await AsyncStorage.setItem('tipo_usuario', data.tipo_usuario);
 
         if (data.tipo_usuario === 'negocio') {
-          router.push('/perfil_Negocio/busisnessProfile');
+          router.push('/negocio/perfil_Negocio');
         } else if (data.tipo_usuario === 'cliente') {
-          router.push('/perfil_Cliente/clientProfile');
+          router.push('/cliente/perfil_Cliente');
         } else if (data.tipo_usuario === 'repartidor') {
-          router.push('/perfil_Repartidor/dealerProfile');
+          router.push('/repartidor/perfil_Repartidor');
         } else if (data.tipo_usuario === 'administrador') {
-          router.push('/administracion/crudUsuarios');
+          router.push('/administracion/crud_Usuarios');
         } else {
           router.push('/');
         }
@@ -285,7 +285,7 @@ export default function LoginScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={() => router.push('/auth/select')}
+              onPress={() => router.push('/auth/seleccionar_Registro')}
               activeOpacity={0.7}
               disabled={isLoading}
             >

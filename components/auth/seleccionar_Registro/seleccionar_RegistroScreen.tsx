@@ -160,7 +160,7 @@ export default function Seleccionar_RegistroScreen() {
             >
               <TouchableOpacity
                 style={[styles.typeButton, styles.businessButton]}
-                onPress={() => router.push('/auth/registerBusiness')}
+                onPress={() => router.push('/auth/registro_Negocio')}
                 activeOpacity={0.8}
               >
                 <MaterialIcons name="store" size={24} color="white" />
@@ -169,7 +169,7 @@ export default function Seleccionar_RegistroScreen() {
 
               <TouchableOpacity
                 style={[styles.typeButton, styles.clientButton]}
-                onPress={() => router.push('/auth/registerClient')}
+                onPress={() => router.push('/auth/registro_Cliente')}
                 activeOpacity={0.8}
               >
                 <MaterialIcons name="person" size={24} color="white" />
@@ -178,7 +178,7 @@ export default function Seleccionar_RegistroScreen() {
 
               <TouchableOpacity
                 style={[styles.typeButton, styles.dealerButton]}
-                onPress={() => router.push('/auth/registerDealer')}
+                onPress={() => router.push('/auth/registro_Repartidor')}
                 activeOpacity={0.8}
               >
                 <MaterialIcons name="delivery-dining" size={24} color="white" />

@@ -4,7 +4,7 @@ import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Ionicons } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -17,25 +17,28 @@ export default function TabLayout() {
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
         tabBarStyle: {
-        //  display: 'none',
+        //display: 'none',
         },
       }}>
       <Tabs.Screen
-        name="dealerProfile"
+        name="perfil_Negocio"
         options={{
-          title: 'Mi perfil',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" color={color} size={size} />
-          ),
+          title: 'Mi Negocio',
+          tabBarIcon: ({ color, size }) => <Feather name="box" color={color} size={size} />,
         }}
       />
       <Tabs.Screen
-        name="pedidosAsignados"
+        name="crud_Productos"
         options={{
-          title: 'pedidos asignados',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="list" color={color} size={size} />
-          ),
+          title: 'Productos',
+          tabBarIcon: ({ color, size }) => <Feather name="grid" color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="ordenes_Entrantes"
+        options={{
+          title: 'Pedidos Entrantes',
+          tabBarIcon: ({ color, size }) => <Feather name="shopping-cart" color={color} size={size} />,
         }}
       />
     </Tabs>

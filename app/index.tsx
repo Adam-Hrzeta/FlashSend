@@ -5,17 +5,39 @@ import { router } from 'expo-router';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 export default function HomeScreen() {
+  // Acción para "Hacer mi primer pedido"
+  const handleFirstOrder = () => {
+    router.push('/cliente/negocios_Dashboard');
+  };
+
+  // Acción para registrar negocio
+  const handleRegisterBusiness = () => {
+    router.push('/auth/registro_Negocio');
+  };
+
   return (
     <View style={styles.container}>
+      {/* Menú superior */}
       <View style={styles.menuContainer}>
-        <TouchableOpacity style={styles.menuButton} onPress={() => { router.push('/auth/login') }}>
+        <TouchableOpacity
+          style={styles.menuButton}
+          onPress={() => router.push('/auth/login')}
+          accessibilityLabel="Iniciar sesión"
+          accessible
+        >
           <ThemedText style={styles.menuText}>Iniciar sesión</ThemedText>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.menuButton, styles.registerButton]} onPress={() => { router.push('/auth/select') }}>
+        <TouchableOpacity
+          style={[styles.menuButton, styles.registerButton]}
+          onPress={() => router.push('/auth/seleccionar_Registro')}
+          accessibilityLabel="Registrarme"
+          accessible
+        >
           <ThemedText style={[styles.menuText, styles.registerText]}>Registrarme</ThemedText>
         </TouchableOpacity>
       </View>
 
+      {/* Encabezado animado */}
       <View style={styles.headerContainer}>
         <Image
           source={require('../assets/Gif/fondo2.gif')}
@@ -29,110 +51,69 @@ export default function HomeScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.contentContainer}>
+        {/* Pasos */}
         <View style={styles.stepsRow}>
-          <View style={styles.stepCard}>
-            <MaterialIcons name="search" size={24} color="#7B1FA2" />
-            <ThemedText style={styles.stepCardTitle}>Paso 1</ThemedText>
-            <ThemedText style={styles.stepCardText}>Explora restaurantes y tiendas cerca de ti</ThemedText>
-          </View>
-          <View style={styles.stepCard}>
-            <MaterialIcons name="shopping-cart" size={24} color="#7B1FA2" />
-            <ThemedText style={styles.stepCardTitle}>Paso 2</ThemedText>
-            <ThemedText style={styles.stepCardText}>Ordena tus productos favoritos</ThemedText>
-          </View>
-          <View style={styles.stepCard}>
-            <MaterialIcons name="delivery-dining" size={24} color="#7B1FA2" />
-            <ThemedText style={styles.stepCardTitle}>Paso 3</ThemedText>
-            <ThemedText style={styles.stepCardText}>Recibe tu pedido en minutos</ThemedText>
-          </View>
+          <StepCard
+            icon={<MaterialIcons name="search" size={24} color="#7B1FA2" />}
+            title="Paso 1"
+            text="Explora restaurantes y tiendas cerca de ti"
+          />
+          <StepCard
+            icon={<MaterialIcons name="shopping-cart" size={24} color="#7B1FA2" />}
+            title="Paso 2"
+            text="Ordena tus productos favoritos"
+          />
+          <StepCard
+            icon={<MaterialIcons name="delivery-dining" size={24} color="#7B1FA2" />}
+            title="Paso 3"
+            text="Recibe tu pedido en minutos"
+          />
         </View>
 
-        <TouchableOpacity style={styles.orderButton}>
+        {/* Botón principal */}
+        <TouchableOpacity
+          style={styles.orderButton}
+          onPress={handleFirstOrder}
+          accessibilityLabel="Hacer mi primer pedido"
+          accessible
+        >
           <ThemedText style={styles.buttonText}>Hacer mi primer pedido</ThemedText>
           <MaterialIcons name="arrow-forward" size={20} color="white" />
         </TouchableOpacity>
 
+        {/* Beneficios */}
         <View style={styles.benefitsContainer}>
           <ThemedText type="title" style={styles.benefitsTitle}>¿Por qué elegir FlashSend?</ThemedText>
-          <View style={styles.benefitItem}>
-            <FontAwesome5 name="bolt" size={20} color="#7B1FA2" />
-            <ThemedText style={styles.benefitText}>Entregas ultrarrápidas en tu zona</ThemedText>
-          </View>
-          <View style={styles.benefitItem}>
-            <FontAwesome5 name="map-marked-alt" size={20} color="#7B1FA2" />
-            <ThemedText style={styles.benefitText}>Cobertura local y en expansión</ThemedText>
-          </View>
-          <View style={styles.benefitItem}>
-            <FontAwesome5 name="smile" size={20} color="#7B1FA2" />
-            <ThemedText style={styles.benefitText}>Atención rápida y confiable</ThemedText>
-          </View>
-          <View style={styles.benefitItem}>
-            <FontAwesome5 name="clock" size={20} color="#7B1FA2" />
-            <ThemedText style={styles.benefitText}>Disponible cuando lo necesites</ThemedText>
-          </View>
+          <BenefitItem icon={<FontAwesome5 name="bolt" size={20} color="#7B1FA2" />} text="Entregas ultrarrápidas en tu zona" />
+          <BenefitItem icon={<FontAwesome5 name="map-marked-alt" size={20} color="#7B1FA2" />} text="Cobertura local y en expansión" />
+          <BenefitItem icon={<FontAwesome5 name="smile" size={20} color="#7B1FA2" />} text="Atención rápida y confiable" />
+          <BenefitItem icon={<FontAwesome5 name="clock" size={20} color="#7B1FA2" />} text="Disponible cuando lo necesites" />
         </View>
-        {/* Sección: ¿Qué puedes ordenar? */}
+
+        {/* ¿Qué puedes ordenar? */}
         <View style={styles.sectionContainer}>
           <ThemedText type="title" style={styles.sectionTitle}>¿Qué puedes ordenar?</ThemedText>
-
-          {/* Comida */}
-          <View style={styles.sectionRow}>
-            <Image
-              source={require('../assets/Gif/comida.gif')}
-              style={styles.sectionImage}
-              contentFit="cover"
-            />
-            <View style={styles.sectionTextContainer}>
-              <ThemedText style={styles.sectionText}>
-                Disfruta de tus platos favoritos desde la comodidad de tu casa. Hamburguesas, sushi, pizza, arepas ¡y mucho más!
-              </ThemedText>
-            </View>
-          </View>
-
-          {/* Regalos */}
-          <View style={styles.sectionRowReverse}>
-            <View style={styles.sectionTextContainer}>
-              <ThemedText style={styles.sectionText}>
-                ¿Un cumpleaños sorpresa? Envía regalos, flores o detalles únicos a quienes más quieres, estés donde estés.
-              </ThemedText>
-            </View>
-            <Image
-              source={require('../assets/Gif/regalos.gif')}
-              style={styles.sectionImage}
-              contentFit="cover"
-            />
-          </View>
-
-          {/* Farmacéuticos */}
-          <View style={styles.sectionRow}>
-            <Image
-              source={require('../assets/Gif/farma.gif')}
-              style={styles.sectionImage}
-              contentFit="cover"
-            />
-            <View style={styles.sectionTextContainer}>
-              <ThemedText style={styles.sectionText}>
-                También puedes pedir productos farmacéuticos, artículos de cuidado personal o primeros auxilios, sin salir de casa.
-              </ThemedText>
-            </View>
-          </View>
-
-          {/* NUEVA SECCIÓN: Tienda, verdulería, productos del hogar */}
-          <View style={styles.sectionRowReverse}>
-            <View style={styles.sectionTextContainer}>
-              <ThemedText style={styles.sectionText}>
-                Ordena frutas frescas, verduras, productos para el hogar y todo lo que necesites de tu tienda o abasto más cercano.
-              </ThemedText>
-            </View>
-            <Image
-              source={require('../assets/Gif/tienda.gif')}
-              style={styles.sectionImage}
-              contentFit="cover"
-            />
-          </View>
+          <SectionRow
+            image={require('../assets/Gif/comida.gif')}
+            text="Disfruta de tus platos favoritos desde la comodidad de tu casa. Hamburguesas, sushi, pizza, arepas ¡y mucho más!"
+          />
+          <SectionRow
+            image={require('../assets/Gif/regalos.gif')}
+            text="¿Un cumpleaños sorpresa? Envía regalos, flores o detalles únicos a quienes más quieres, estés donde estés."
+            reverse
+          />
+          <SectionRow
+            image={require('../assets/Gif/farma.gif')}
+            text="También puedes pedir productos farmacéuticos, artículos de cuidado personal o primeros auxilios, sin salir de casa."
+          />
+          <SectionRow
+            image={require('../assets/Gif/tienda.gif')}
+            text="Ordena frutas frescas, verduras, productos para el hogar y todo lo que necesites de tu tienda o abasto más cercano."
+            reverse
+          />
         </View>
 
-
+        {/* Negocios */}
         <View style={styles.businessContainer}>
           <View style={styles.businessContent}>
             <View style={styles.businessTextContainer}>
@@ -145,13 +126,50 @@ export default function HomeScreen() {
               contentFit="contain"
             />
           </View>
-
-          <TouchableOpacity style={[styles.orderButton, styles.businessButton]} onPress={() => router.push('/auth/registerBusiness')}>
+          <TouchableOpacity
+            style={[styles.orderButton, styles.businessButton]}
+            onPress={handleRegisterBusiness}
+            accessibilityLabel="Registrar mi negocio"
+            accessible
+          >
             <ThemedText style={styles.buttonText}>Registrar mi negocio</ThemedText>
             <MaterialIcons name="store" size={20} color="white" />
           </TouchableOpacity>
         </View>
       </ScrollView>
+    </View>
+  );
+}
+
+// Componente para los pasos
+function StepCard({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
+  return (
+    <View style={styles.stepCard}>
+      {icon}
+      <ThemedText style={styles.stepCardTitle}>{title}</ThemedText>
+      <ThemedText style={styles.stepCardText}>{text}</ThemedText>
+    </View>
+  );
+}
+
+// Componente para los beneficios
+function BenefitItem({ icon, text }: { icon: React.ReactNode; text: string }) {
+  return (
+    <View style={styles.benefitItem}>
+      {icon}
+      <ThemedText style={styles.benefitText}>{text}</ThemedText>
+    </View>
+  );
+}
+
+// Componente para las secciones de "¿Qué puedes ordenar?"
+function SectionRow({ image, text, reverse }: { image: any; text: string; reverse?: boolean }) {
+  return (
+    <View style={reverse ? styles.sectionRowReverse : styles.sectionRow}>
+      <Image source={image} style={styles.sectionImage} contentFit="cover" />
+      <View style={styles.sectionTextContainer}>
+        <ThemedText style={styles.sectionText}>{text}</ThemedText>
+      </View>
     </View>
   );
 }

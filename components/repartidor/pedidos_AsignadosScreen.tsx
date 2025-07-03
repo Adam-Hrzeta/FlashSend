@@ -56,7 +56,7 @@ const Pedidos_AsignadosScreen = () => {
         )}
       />
 
-      <TouchableOpacity style={styles.botonVolver} onPress={() => router.push('/perfil_Repartidor/dealerProfile')}>
+      <TouchableOpacity style={styles.botonVolver} onPress={() => router.push('/repartidor/perfil_Repartidor')}>
         <MaterialIcons name="arrow-back" size={22} color="#fff" />
         <Text style={styles.textoBoton}>Volver al perfil</Text>
       </TouchableOpacity>

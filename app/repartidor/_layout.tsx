@@ -1,9 +1,10 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
 import { HapticTab } from '@/components/HapticTab';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { Tabs } from 'expo-router';
+import React from 'react';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -16,37 +17,25 @@ export default function TabLayout() {
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
         tabBarStyle: {
-          //display: 'none',
+        //  display: 'none',
         },
       }}>
       <Tabs.Screen
-        name="login"
+        name="perfil_Repartidor"
         options={{
-          title: 'Login',
+          title: 'Mi perfil',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person" color={color} size={size} />
+          ),
         }}
       />
       <Tabs.Screen
-        name="select"
+        name="pedidos_Asignados"
         options={{
-          title: 'Selector de Usuario',
-        }}
-      />
-      <Tabs.Screen
-        name="registerBusiness"
-        options={{
-          title: 'Registro de Negocios',
-        }}
-      />
-      <Tabs.Screen
-        name="registerClient"
-        options={{
-          title: 'Registro de Clientes',
-        }}
-      />
-      <Tabs.Screen
-        name="registerDealer"
-        options={{
-          title: 'Registro de repartidores',
+          title: 'pedidos asignados',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="list" color={color} size={size} />
+          ),
         }}
       />
     </Tabs>

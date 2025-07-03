@@ -15,7 +15,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import ImagePickerComponent from '../perfil_Cliente/modal-foto/imagenpiker';
+import ImagePickerComponent from '../cliente/modal-foto/imagenpiker';
 
 interface Repartidor {
   id: number;
@@ -280,7 +280,7 @@ export default function Perfil_RepartidorScreen() {
 
       <TouchableOpacity
         style={[styles.editButton, { marginTop: 8, backgroundColor: '#BA68C8', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }]}
-        onPress={() => router.push('/perfil_Repartidor/pedidosAsignados')} 
+        onPress={() => router.push('/repartidor/pedidos_Asignados')} 
       >
         <MaterialIcons name="assignment" size={20} color="#fff" />
         <Text style={[styles.editButtonText, { color: '#fff', marginLeft: 6 }]}>Ver pedidos asignados</Text>

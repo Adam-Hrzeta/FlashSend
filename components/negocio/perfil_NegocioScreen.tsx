@@ -7,7 +7,7 @@ import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useRegisterPushToken } from '../hooks/useRegisterPushToken';
-import { pickLocationAndGetAddress } from '../perfil_Cliente/LocationUtils';
+import { pickLocationAndGetAddress } from '../cliente/LocationUtils';
 
 export interface Negocio {
   id: number;
@@ -393,7 +393,7 @@ export default function Perfil_NegocioScreen() {
                 marginBottom: 8,
                 paddingLeft: 24, // Move content to the right
               }}
-              onPress={() => router.push('/perfil_Negocio/gestionProductos')}
+              onPress={() => router.push('/negocio/crud_Productos')}
             >
               <MaterialIcons name="inventory" size={22} color="#7E57C2" style={{ marginRight: 12 }} />
               <Text style={{ color: '#7E57C2', fontWeight: 'bold', marginLeft: -3, fontSize: 15, flexShrink: 1, flexWrap: 'wrap' }}>Gestionar productos</Text>
@@ -418,7 +418,7 @@ export default function Perfil_NegocioScreen() {
                 borderColor: '#E1BEE7',
                 marginBottom: 8,
               }}
-              onPress={() => router.push('/perfil_Negocio/incomingOrders')}
+              onPress={() => router.push('/negocio/ordenes_Entrantes')}
             >
               <MaterialIcons name="assignment" size={22} color="#7E57C2" />
               <Text style={{ color: '#7E57C2', fontWeight: 'bold', marginLeft: 10, fontSize: 15, flexShrink: 1, flexWrap: 'wrap' }}>Ver pedidos</Text>

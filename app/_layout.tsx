@@ -51,7 +51,7 @@ export default function Layout() {
             }}
           />
           <Drawer.Screen
-            name="perfil_Negocio"
+            name="negocio"
             options={{
               drawerLabel: "Negocio",
               title: "Mi Negocio",
@@ -59,7 +59,7 @@ export default function Layout() {
             }}
           />
           <Drawer.Screen
-            name="perfil_Cliente"
+            name="cliente"
             options={{
               drawerLabel: "Cliente",
               title: "Mi Perfil",
@@ -67,7 +67,7 @@ export default function Layout() {
             }}
           />
           <Drawer.Screen
-            name="perfil_Repartidor"
+            name="repartidor"
             options={{
               drawerLabel: "Repartidor",
               title: "Mi Perfil",

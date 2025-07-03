@@ -16,11 +16,11 @@ export default function TabLayout() {
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
         tabBarStyle: {
-          display: 'none',
+        //  display: 'none',
         },
       }}>
       <Tabs.Screen
-        name="gestionUsers"
+        name="crud_Usuarios"
         options={{
           title: 'Gestión de Usuarios',
         }}

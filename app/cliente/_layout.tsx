@@ -21,14 +21,14 @@ export default function TabLayout() {
       },
       }}>
       <Tabs.Screen
-      name="busisnessDashboard"
+      name="negocios_Dashboard"
       options={{
         title: 'Pantalla Principal',
         tabBarIcon: ({ color, size }) => <Feather name="home" color={color} size={size} />,
       }}
       />
       <Tabs.Screen
-      name="clientProfile"
+      name="perfil_Cliente"
       options={{
         title: 'Perfil del Cliente',
         tabBarIcon: ({ color, size }) => <Feather name="user" color={color} size={size} />,
