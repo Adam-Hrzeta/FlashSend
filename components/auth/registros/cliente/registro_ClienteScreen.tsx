@@ -236,7 +236,7 @@ export default function Registro_ClienteScreen() {
               </Animated.View>
 
               <TouchableOpacity
-                onPress={() => router.push('/auth/select')}
+                onPress={() => router.push('/auth/seleccionar_Registro')}
                 style={styles.backCircleButton}
                 activeOpacity={0.8}
               >

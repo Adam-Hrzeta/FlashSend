@@ -103,7 +103,7 @@ export default function Negocios_DashboardScreen() {
   const renderBusinessCard = ({ item }: { item: Negocio }) => (
     <TouchableOpacity style={styles.horizontalCard} activeOpacity={0.93}
       onPress={() => {
-        navigation.navigate('publicBusinessProfile', { negocioId: item.id });
+        navigation.navigate('hidden/componentes_Perfil_Cliente/perfil_Publico_Negocio', { negocioId: item.id });
       }}
     >
       <View style={styles.imageContainer}>

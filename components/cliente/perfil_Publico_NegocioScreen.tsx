@@ -5,17 +5,17 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Dimensions,
-    FlatList,
-    Image,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    ToastAndroid,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Dimensions,
+  FlatList,
+  Image,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  ToastAndroid,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 interface NegocioPublico {
@@ -249,7 +249,7 @@ export default function Perfil_Publico_NegocioScreen() {
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
           <Text style={[styles.sectionTitle, { textAlign: 'right', flex: 0 }]}>Productos</Text>
           <View style={{ width: 16 }} />
-          <TouchableOpacity style={styles.viewCartButtonSmall} onPress={() => navigation.navigate('shoppingCart')}>
+          <TouchableOpacity style={styles.viewCartButtonSmall} onPress={() => navigation.navigate('hidden/componentes_Perfil_Cliente/carrito_Compras')}>
             <MaterialIcons name="shopping-cart" size={20} color="#fff" />
             <Text style={styles.viewCartTextSmall}>Ver mi carrito ({productosCarrito.reduce((acc, p) => acc + p.cantidad, 0)})</Text>
           </TouchableOpacity>

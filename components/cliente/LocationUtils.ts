@@ -1,7 +1,11 @@
 import * as Linking from 'expo-linking';
 import * as Location from 'expo-location';
 
-export async function pickLocationAndGetAddress(setEditData, setNegocio) {
+// Puedes definir tipos más específicos si tienes las interfaces de tus estados
+export async function pickLocationAndGetAddress(
+  setEditData: (fn: (prev: any) => any) => void,
+  setNegocio: (fn: (prev: any) => any) => void
+) {
   // Solicitar permisos
   let { status } = await Location.requestForegroundPermissionsAsync();
   if (status !== 'granted') {
@@ -23,8 +27,8 @@ export async function pickLocationAndGetAddress(setEditData, setNegocio) {
   let address = await Location.reverseGeocodeAsync({ latitude: lat, longitude: lng });
   if (address && address.length > 0) {
     const dir = `${address[0].street || ''} ${address[0].name || ''}, ${address[0].city || ''}, ${address[0].region || ''}`;
-    setEditData((prev) => ({ ...prev, direccion: dir }));
-    setNegocio((prev) => prev ? { ...prev, direccion: dir } : prev);
+    setEditData((prev: any) => ({ ...prev, direccion: dir }));
+    setNegocio((prev: any) => prev ? { ...prev, direccion: dir } : prev);
     return dir;
   }
 }
