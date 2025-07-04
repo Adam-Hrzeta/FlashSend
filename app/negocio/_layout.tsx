@@ -41,6 +41,13 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => <Feather name="shopping-cart" color={color} size={size} />,
         }}
       />
+      <Tabs.Screen
+        name="repartidores_Aliados"
+        options={{
+          title: 'Repartidores',
+          tabBarIcon: ({ color, size }) => <Feather name="truck" color={color} size={size} />,
+        }}
+      />
     </Tabs>
   );
 }

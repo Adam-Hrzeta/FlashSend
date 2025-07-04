@@ -37,7 +37,7 @@ export default function Perfil_NegocioScreen() {
     setError(null);
     try {
       const token = await AsyncStorage.getItem('access_token');
-      const response = await fetch(`${API_BASE_URL}/api/perfilNegocio/perfilNegocio`, {
+      const response = await fetch(`${API_BASE_URL}/api/negocio/perfilNegocio`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -85,7 +85,7 @@ export default function Perfil_NegocioScreen() {
 
    const handleSaveEdit = async () => {
     const token = await AsyncStorage.getItem('access_token');
-    fetch(`${API_BASE_URL}/api/perfilNegocio/editarPerfil`, { // CORREGIDO
+    fetch(`${API_BASE_URL}/api/negocio/editarPerfil`, { // CORREGIDO
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -123,7 +123,7 @@ export default function Perfil_NegocioScreen() {
         name: `avatar_${Date.now()}.jpg`
       } as any);
 
-      const uploadResponse = await fetch(`${API_BASE_URL}/api/perfilNegocio/upload_profile_image`, {
+      const uploadResponse = await fetch(`${API_BASE_URL}/api/negocio/upload_profile_image`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -136,7 +136,7 @@ export default function Perfil_NegocioScreen() {
         throw new Error(data?.mensaje || 'Error al actualizar la foto');
       }
 
-      const profileRes = await fetch(`${API_BASE_URL}/api/perfilNegocio/perfilNegocio`, {
+      const profileRes = await fetch(`${API_BASE_URL}/api/negocio/perfilNegocio`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -302,7 +302,7 @@ export default function Perfil_NegocioScreen() {
               setNegocio(prev => prev ? { ...prev, disponibilidad: newDisponibilidad } : prev);
               try {
                 const token = await AsyncStorage.getItem('access_token');
-                const res = await fetch(`${API_BASE_URL}/api/perfilNegocio/editarPerfil`, {
+                const res = await fetch(`${API_BASE_URL}/api/negocio/editarPerfil`, {
                   method: 'PUT',
                   headers: {
                     'Authorization': `Bearer ${token}`,
@@ -350,7 +350,7 @@ export default function Perfil_NegocioScreen() {
                       if (dir) {
                         // Actualizar en backend
                         const token = await AsyncStorage.getItem('access_token');
-                        await fetch(`${API_BASE_URL}/api/perfilNegocio/editarPerfil`, {
+                        await fetch(`${API_BASE_URL}/api/negocio/editarPerfil`, {
                           method: 'PUT',
                           headers: {
                             'Authorization': `Bearer ${token}`,

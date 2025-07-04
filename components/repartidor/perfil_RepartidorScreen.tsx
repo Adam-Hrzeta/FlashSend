@@ -46,7 +46,6 @@ export default function Perfil_RepartidorScreen() {
   const [tipoServicio, setTipoServicio] = useState<string>('');
   const [isUpdatingPhoto, setIsUpdatingPhoto] = useState(false);
   const [busquedaNombre, setBusquedaNombre] = useState('');
-  const [busquedaCategoria, setBusquedaCategoria] = useState('');
   const [negociosEncontrados, setNegociosEncontrados] = useState<Negocio[]>([]);
   const [buscando, setBuscando] = useState(false);
   const [showImagePicker, setShowImagePicker] = useState(false);
@@ -138,7 +137,7 @@ export default function Perfil_RepartidorScreen() {
     const token = await AsyncStorage.getItem('access_token');
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/perfilRepartidor/buscarNegocios?nombre=${encodeURIComponent(busquedaNombre)}&categoria=${encodeURIComponent(busquedaCategoria)}`,
+        `${API_BASE_URL}/api/perfilRepartidor/buscarNegocios?nombre=${encodeURIComponent(busquedaNombre)}`,
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -146,7 +145,7 @@ export default function Perfil_RepartidorScreen() {
         }
       );
       const data = await response.json();
-      setNegociosEncontrados(data.negocios);
+      setNegociosEncontrados(Array.isArray(data.negocios) ? data.negocios : []);
     } catch (error) {
       Alert.alert('Error', 'No se pudo buscar negocios');
     } finally {
@@ -157,17 +156,13 @@ export default function Perfil_RepartidorScreen() {
   const enviarSolicitudAliado = async (negocioId: number) => {
     const token = await AsyncStorage.getItem('access_token');
     try {
-      const response = await fetch(`${API_BASE_URL}/api/perfilRepartidor/editarPerfil`, {
-        method: 'PUT',
+      const response = await fetch(`${API_BASE_URL}/api/perfilRepartidor/solicitud_aliado`, {
+        method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          ...repartidor,
-          tipo_servicio: 'Aliado',
-          negocio_id: negocioId
-        })
+        body: JSON.stringify({ negocio_id: negocioId })
       });
 
       if (!response.ok) {
@@ -175,9 +170,7 @@ export default function Perfil_RepartidorScreen() {
         throw new Error(data?.mensaje || 'Error al aliarse');
       }
 
-      const updated = await response.json();
-      setRepartidor(updated.repartidor);
-      Alert.alert('Éxito', 'Te has aliado con este negocio');
+      Alert.alert('Éxito', 'Solicitud de alianza enviada');
     } catch (error: any) {
       Alert.alert('Error', error.message || 'No se pudo completar la alianza');
     }
@@ -228,6 +221,30 @@ export default function Perfil_RepartidorScreen() {
       Alert.alert('Error', 'No se pudo actualizar la foto de perfil');
     } finally {
       setIsUpdatingPhoto(false);
+    }
+  };
+
+  // Cambiar disponibilidad del repartidor
+  const handleToggleDisponibilidad = async () => {
+    if (!repartidor) return;
+    try {
+      const token = await AsyncStorage.getItem('access_token');
+      const nuevaDisponibilidad = repartidor.disponibilidad === 'disponible' ? 'no disponible' : 'disponible';
+      const res = await fetch(`${API_BASE_URL}/api/perfilRepartidor/cambiar_disponibilidad`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ disponibilidad: nuevaDisponibilidad })
+      });
+      if (res.ok) {
+        setRepartidor({ ...repartidor, disponibilidad: nuevaDisponibilidad });
+      } else {
+        Alert.alert('Error', 'No se pudo cambiar la disponibilidad');
+      }
+    } catch (e) {
+      Alert.alert('Error', 'No se pudo cambiar la disponibilidad');
     }
   };
 
@@ -334,6 +351,14 @@ export default function Perfil_RepartidorScreen() {
         <Text style={[styles.editButtonText, { color: '#fff', marginLeft: 6 }]}>Ver pedidos asignados</Text>
       </TouchableOpacity>
 
+      <TouchableOpacity
+        style={[styles.editButton, { marginTop: 8, backgroundColor: '#43A047', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }]}
+        onPress={handleToggleDisponibilidad}
+      >
+        <MaterialIcons name="toggle-on" size={22} color="#fff" />
+        <Text style={[styles.editButtonText, { color: '#fff', marginLeft: 6 }]}>Cambiar disponibilidad</Text>
+      </TouchableOpacity>
+
       <View style={styles.infoCard}>
         <Text style={styles.infoText}>
           <MaterialIcons name="badge" size={18} color="#7E57C2" /> Nombre: {repartidor?.nombre}
@@ -379,30 +404,20 @@ export default function Perfil_RepartidorScreen() {
 
         {tipoServicio === 'Aliado' && (
           <>
-            <Text style={[styles.infoText, { marginTop: 14, fontWeight: 'bold' }]}>Buscar negocios para aliarse</Text>
+            <Text style={[styles.infoText, { marginTop: 14, fontWeight: 'bold' }]}>Negocios disponibles para aliarse</Text>
             <View style={styles.inputRow}>
               <MaterialIcons name="search" size={20} color="#BA68C8" style={styles.inputIcon} />
               <TextInput
                 style={styles.inputCustom}
-                placeholder="Nombre del negocio"
+                placeholder="Buscar por nombre de negocio"
                 placeholderTextColor="#BA68C8"
                 value={busquedaNombre}
                 onChangeText={setBusquedaNombre}
               />
             </View>
-            <View style={styles.inputRow}>
-              <MaterialIcons name="category" size={20} color="#BA68C8" style={styles.inputIcon} />
-              <TextInput
-                style={styles.inputCustom}
-                placeholder="Categoría"
-                placeholderTextColor="#BA68C8"
-                value={busquedaCategoria}
-                onChangeText={setBusquedaCategoria}
-              />
-            </View>
             <TouchableOpacity style={styles.modalButton} onPress={buscarNegocios}>
               <Text style={styles.modalButtonText}>
-                <MaterialIcons name="search" size={18} color="#fff" /> Buscar negocios
+                <MaterialIcons name="search" size={18} color="#fff" /> Buscar
               </Text>
             </TouchableOpacity>
             {buscando && <ActivityIndicator color="#7E57C2" style={{ marginTop: 8 }} />}
@@ -413,7 +428,6 @@ export default function Perfil_RepartidorScreen() {
               negociosEncontrados.map(item => (
                 <View key={item.id} style={styles.infoCard}>
                   <Text style={styles.infoText}><MaterialIcons name="store" size={16} color="#7E57C2" /> {item.nombre}</Text>
-                  <Text style={styles.infoText}><MaterialIcons name="category" size={16} color="#7E57C2" /> {item.categoria}</Text>
                   <Text style={styles.infoText}>{item.descripcion}</Text>
                   <TouchableOpacity
                     style={[styles.modalButton, { marginTop: 8 }]}
