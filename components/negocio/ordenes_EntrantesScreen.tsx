@@ -2,7 +2,7 @@ import { API_BASE_URL } from '@/constants/ApiConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, Button, FlatList, Modal, StyleSheet, Text, TouchableHighlight, TouchableOpacity, View } from "react-native";
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 interface DetallePedido {
@@ -29,6 +29,11 @@ export default function ordenes_EntrantesScreen() {
   const [pedidos, setPedidos] = useState<PedidoEntrante[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [pedidoAEnviar, setPedidoAEnviar] = useState<number | null>(null);
+  const [repartidoresAliados, setRepartidoresAliados] = useState<any[]>([]);
+  const [repartidorSeleccionado, setRepartidorSeleccionado] = useState<any | null>(null);
+  const [loadingRepartidores, setLoadingRepartidores] = useState(false);
 
   const fetchPedidos = async () => {
     setLoading(true);
@@ -68,24 +73,57 @@ export default function ordenes_EntrantesScreen() {
     }
   };
 
-  // Enviar pedido (cambiar estatus a 'enviado')
-  const handleEnviar = async (pedidoId: number) => {
+  // Obtener repartidores aliados aceptados y disponibles
+  const fetchRepartidoresAliados = async () => {
+    setLoadingRepartidores(true);
     try {
       const token = await AsyncStorage.getItem('access_token');
-      const res = await fetch(`${API_BASE_URL}/api/pedidos_negocio/enviar_pedido/${pedidoId}`, {
-        method: 'POST',
+      const res = await fetch(`${API_BASE_URL}/api/negocio/solicitudes_aliados`, {
         headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      // Filtrar solo aceptados (y opcional: disponibles)
+      const aliadosAceptados = (data.solicitudes || []).filter((s: any) => s.estatus === 'aceptada');
+      setRepartidoresAliados(aliadosAceptados);
+    } catch (e) {
+      setRepartidoresAliados([]);
+    } finally {
+      setLoadingRepartidores(false);
+    }
+  };
+
+  // Mostrar modal y cargar repartidores aliados
+  const abrirModalAsignar = (pedidoId: number) => {
+    setPedidoAEnviar(pedidoId);
+    setModalVisible(true);
+    setRepartidorSeleccionado(null);
+    fetchRepartidoresAliados();
+  };
+
+  // Enviar pedido (cambiar estatus a 'enviado' y asignar repartidor)
+  const handleEnviar = async () => {
+    if (!pedidoAEnviar || !repartidorSeleccionado) return;
+    try {
+      const token = await AsyncStorage.getItem('access_token');
+      const res = await fetch(`${API_BASE_URL}/api/pedidos_negocio/enviar_pedido/${pedidoAEnviar}`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ repartidor_id: repartidorSeleccionado.repartidor_id })
       });
       const data = await res.json();
       if (res.ok) {
         Alert.alert('Éxito', data.mensaje || 'Pedido enviado al repartidor');
         fetchPedidos();
       } else {
-        Alert.alert('Error', data.error || 'No se pudo enviar el pedido');
+        // Mostrar mensaje de error exacto del backend
+        Alert.alert('Error', data.error || data.mensaje || JSON.stringify(data) || 'No se pudo enviar el pedido');
       }
     } catch (e) {
       Alert.alert('Error', 'No se pudo enviar el pedido');
     }
+    setModalVisible(false);
+    setRepartidorSeleccionado(null);
+    setPedidoAEnviar(null);
   };
 
   // Obtener nombre de cliente por id
@@ -135,6 +173,52 @@ export default function ordenes_EntrantesScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: '#F3EFFF', padding: 16 }}>
+      {/* Modal para seleccionar repartidor aliado */}
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.3)' }}>
+          <View style={{ backgroundColor: '#fff', padding: 24, borderRadius: 16, width: 320, maxHeight: 400 }}>
+            <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 12 }}>Selecciona un repartidor aliado</Text>
+            {loadingRepartidores ? (
+              <ActivityIndicator color="#7E57C2" />
+            ) : (
+              <FlatList
+                data={repartidoresAliados}
+                keyExtractor={item => item.repartidor_id.toString()}
+                renderItem={({ item }) => (
+                  <TouchableHighlight
+                    underlayColor="#E1BEE7"
+                    style={{
+                      padding: 10,
+                      borderRadius: 8,
+                      backgroundColor: repartidorSeleccionado?.repartidor_id === item.repartidor_id ? '#7E57C2' : '#F3EFFF',
+                      marginBottom: 6,
+                    }}
+                    onPress={() => setRepartidorSeleccionado(item)}
+                  >
+                    <Text style={{ color: repartidorSeleccionado?.repartidor_id === item.repartidor_id ? '#fff' : '#7E57C2', fontWeight: 'bold' }}>
+                      {item.repartidor_nombre} (ID: {item.repartidor_id})
+                    </Text>
+                  </TouchableHighlight>
+                )}
+                ListEmptyComponent={<Text style={{ color: '#7E57C2', textAlign: 'center', marginTop: 10 }}>No hay repartidores aliados disponibles.</Text>}
+                style={{ marginBottom: 16, maxHeight: 200 }}
+              />
+            )}
+            <Button
+              title="Enviar pedido"
+              color="#7E57C2"
+              onPress={handleEnviar}
+              disabled={!repartidorSeleccionado}
+            />
+            <Button title="Cancelar" color="#BDBDBD" onPress={() => setModalVisible(false)} />
+          </View>
+        </View>
+      </Modal>
       <Text style={styles.titulo}>Pedidos entrantes</Text>
       <FlatList
         data={pedidos}
@@ -215,14 +299,28 @@ export default function ordenes_EntrantesScreen() {
                 </TouchableOpacity>
               )}
               {item.estatus === 'preparando' && (
-                <TouchableOpacity style={[styles.boton, { backgroundColor: '#43A047' }]} onPress={() => handleEnviar(item.id)}>
+                <TouchableOpacity style={styles.boton} onPress={() => abrirModalAsignar(item.id)}>
+                  <MaterialIcons name="local-shipping" size={18} color="#fff" />
                   <Text style={styles.botonTexto}>Enviar con repartidor</Text>
                 </TouchableOpacity>
               )}
               {item.estatus === 'enviado' && (
-                <View style={[styles.boton, { backgroundColor: '#BDBDBD' }]}> 
-                  <Text style={[styles.botonTexto, { color: '#fff' }]}>Enviado al repartidor</Text>
-                </View>
+                <TouchableOpacity style={[styles.boton, { backgroundColor: '#BDBDBD' }]} disabled>
+                  <MaterialIcons name="local-shipping" size={18} color="#fff" />
+                  <Text style={styles.botonTexto}>En reparto</Text>
+                </TouchableOpacity>
+              )}
+              {item.estatus === 'en_camino' && (
+                <TouchableOpacity style={[styles.boton, { backgroundColor: '#BDBDBD' }]} disabled>
+                  <MaterialIcons name="done" size={18} color="#fff" />
+                  <Text style={styles.botonTexto}>En camino</Text>
+                </TouchableOpacity>
+              )}
+              {item.estatus === 'entregado' && (
+                <TouchableOpacity style={[styles.boton, { backgroundColor: '#388E3C' }]} disabled>
+                  <MaterialIcons name="check" size={18} color="#fff" />
+                  <Text style={styles.botonTexto}>Entregado</Text>
+                </TouchableOpacity>
               )}
             </View>
           );

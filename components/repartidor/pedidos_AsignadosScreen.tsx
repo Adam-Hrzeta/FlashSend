@@ -1,61 +1,155 @@
+import { API_BASE_URL } from '@/constants/ApiConfig';
 import { MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import React from 'react';
-import { FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-// Datos simulados (mock)
-const pedidosMock = [
-  {
-    id: '1',
-    cliente: { id: 'c1', nombre: 'Juan Pérez', telefono: '555-123-4567' },
-    negocio: { id: 'n1', nombre: 'Tacos De perro', telefono: '555-987-6543', categoria: 'Comida Rápida' }
-  },
-  {
-    id: '2',
-    cliente: { id: 'c2', nombre: 'Laura Martínez', telefono: '555-333-2211' },
-    negocio: { id: 'n2', nombre: 'Farmacia Vida', telefono: '555-888-7777', categoria: 'Farmacia' }
-  },
-  {
-    id: '3',
-    cliente: { id: 'c3', nombre: 'Carlos Gómez', telefono: '555-444-5566' },
-    negocio: { id: 'n3', nombre: 'Librería El Saber', telefono: '555-222-3333', categoria: 'Librería' }
-  },
-  {
-    id: '4',
-    cliente: { id: 'c4', nombre: 'Ana Torres', telefono: '555-999-0000' },
-    negocio: { id: 'n4', nombre: 'Panadería Dulce Aroma', telefono: '555-111-2222', categoria: 'Panadería' }
-  },
-  {
-    id: '5',
-    cliente: { id: 'c5', nombre: 'Luis Fernández', telefono: '555-777-8888' },
-    negocio: { id: 'n5', nombre: 'Electrodomésticos Rápidos', telefono: '555-444-5555', categoria: 'Electrodomésticos' }
-  }
-];
+interface ProductoPedido {
+  producto_id: number;
+  nombre?: string;
+  cantidad: number;
+  precio_unitario?: number;
+  descripcion?: string;
+  precio?: number;
+  imagen?: string;
+}
+
+interface Pedido {
+  id: number;
+  cliente_nombre: string;
+  cliente_telefono: string;
+  negocio_nombre: string;
+  negocio_telefono: string;
+  categoria: string;
+  estatus: string;
+  direccion_entrega?: string;
+  total?: number;
+  fecha?: string;
+  productos?: ProductoPedido[];
+}
 
 const Pedidos_AsignadosScreen = () => {
   const router = useRouter();
+  const [pedidos, setPedidos] = useState<Pedido[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchPedidos = async () => {
+    setLoading(true);
+    try {
+      const token = await AsyncStorage.getItem('access_token');
+      const res = await fetch(`${API_BASE_URL}/api/pedidos/pedidos_asignados`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      setPedidos(data.pedidos || []);
+    } catch (e) {
+      Alert.alert('Error', 'No se pudieron cargar los pedidos');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchPedidos(); }, []);
+
+  const handleAceptar = async (pedidoId: number) => {
+    try {
+      const token = await AsyncStorage.getItem('access_token');
+      const res = await fetch(`${API_BASE_URL}/api/pedidos/aceptar_pedido/${pedidoId}`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        Alert.alert('Éxito', data.mensaje || 'Pedido aceptado');
+        fetchPedidos();
+      } else {
+        Alert.alert('Error', data.error || 'No se pudo aceptar el pedido');
+      }
+    } catch (e) {
+      Alert.alert('Error', 'No se pudo aceptar el pedido');
+    }
+  };
+
+  const handleEntregar = async (pedidoId: number) => {
+    try {
+      const token = await AsyncStorage.getItem('access_token');
+      const res = await fetch(`${API_BASE_URL}/api/pedidos/entregar_pedido/${pedidoId}`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        Alert.alert('Éxito', data.mensaje || 'Pedido entregado');
+        fetchPedidos();
+      } else {
+        Alert.alert('Error', data.error || 'No se pudo entregar el pedido');
+      }
+    } catch (e) {
+      Alert.alert('Error', 'No se pudo entregar el pedido');
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.titulo}>📦 Pedidos Asignados</Text>
-
-      <FlatList
-        data={pedidosMock}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.subtitulo}>👤 Cliente</Text>
-            <Text style={styles.text}>Nombre: {item.cliente.nombre}</Text>
-            <Text style={styles.text}>Teléfono: {item.cliente.telefono}</Text>
-
-            <Text style={styles.subtitulo}>🏪 Negocio</Text>
-            <Text style={styles.text}>Nombre: {item.negocio.nombre}</Text>
-            <Text style={styles.text}>Teléfono: {item.negocio.telefono}</Text>
-            <Text style={styles.text}>Categoría: {item.negocio.categoria}</Text>
-          </View>
-        )}
-      />
-
+      {loading ? <ActivityIndicator color="#7B1FA2" /> : (
+        <FlatList
+          data={pedidos}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <View style={styles.card}>
+              <Text style={styles.subtitulo}>👤 Cliente</Text>
+              <Text style={styles.text}>Nombre: {item.cliente_nombre}</Text>
+              <Text style={styles.text}>Teléfono: {item.cliente_telefono}</Text>
+              <Text style={styles.text}>Dirección: {item.direccion_entrega || 'No disponible'}</Text>
+              <Text style={styles.subtitulo}>🏪 Negocio</Text>
+              <Text style={styles.text}>Nombre: {item.negocio_nombre}</Text>
+              <Text style={styles.text}>Teléfono: {item.negocio_telefono}</Text>
+              <Text style={styles.text}>Categoría: {item.categoria}</Text>
+              <Text style={styles.subtitulo}>🗓️ Pedido</Text>
+              <Text style={styles.text}>Fecha: {item.fecha ? new Date(item.fecha).toLocaleString('es-MX') : 'No disponible'}</Text>
+              <Text style={styles.text}>
+                Total: ${item.total !== undefined && !isNaN(Number(item.total)) ? Number(item.total).toFixed(2) : 'N/A'}
+              </Text>
+              <Text style={styles.text}>Estatus: {item.estatus}</Text>
+              <Text style={styles.subtitulo}>🛒 Productos</Text>
+              {item.productos && item.productos.length > 0 ? (
+                item.productos.map((prod, idx) => (
+                  <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2, marginLeft: 8 }}>
+                    <MaterialIcons name="check-circle" size={16} color="#7E57C2" />
+                    <Text style={{ color: '#7E57C2', marginLeft: 6, fontSize: 14 }}>
+                      {prod.nombre ? prod.nombre : `Producto ${prod.producto_id}`} <Text style={{ fontWeight: 'bold' }}>x{prod.cantidad}</Text> <Text style={{ color: '#5E35B1' }}>@ ${prod.precio_unitario ?? prod.precio ?? 'N/A'}</Text>
+                    </Text>
+                  </View>
+                ))
+              ) : (
+                <Text style={{ color: '#7E57C2', fontStyle: 'italic', marginLeft: 8 }}>
+                  No hay productos asociados a este pedido.
+                </Text>
+              )}
+              {item.estatus === 'enviado' && (
+                <TouchableOpacity style={styles.botonVolver} onPress={() => handleAceptar(item.id)}>
+                  <MaterialIcons name="check" size={22} color="#fff" />
+                  <Text style={styles.textoBoton}>Aceptar pedido</Text>
+                </TouchableOpacity>
+              )}
+              {item.estatus === 'en_camino' && (
+                <TouchableOpacity style={[styles.botonVolver, { backgroundColor: '#43A047' }]} onPress={() => handleEntregar(item.id)}>
+                  <MaterialIcons name="local-shipping" size={22} color="#fff" />
+                  <Text style={styles.textoBoton}>Entregar pedido</Text>
+                </TouchableOpacity>
+              )}
+              {item.estatus === 'entregado' && (
+                <TouchableOpacity style={[styles.botonVolver, { backgroundColor: '#BDBDBD' }]} disabled>
+                  <MaterialIcons name="check" size={22} color="#fff" />
+                  <Text style={styles.textoBoton}>Entregado</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
+        />
+      )}
       <TouchableOpacity style={styles.botonVolver} onPress={() => router.push('/repartidor/perfil_Repartidor')}>
         <MaterialIcons name="arrow-back" size={22} color="#fff" />
         <Text style={styles.textoBoton}>Volver al perfil</Text>
