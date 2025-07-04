@@ -68,6 +68,26 @@ export default function ordenes_EntrantesScreen() {
     }
   };
 
+  // Enviar pedido (cambiar estatus a 'enviado')
+  const handleEnviar = async (pedidoId: number) => {
+    try {
+      const token = await AsyncStorage.getItem('access_token');
+      const res = await fetch(`${API_BASE_URL}/api/pedidos_negocio/enviar_pedido/${pedidoId}`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        Alert.alert('Éxito', data.mensaje || 'Pedido enviado al repartidor');
+        fetchPedidos();
+      } else {
+        Alert.alert('Error', data.error || 'No se pudo enviar el pedido');
+      }
+    } catch (e) {
+      Alert.alert('Error', 'No se pudo enviar el pedido');
+    }
+  };
+
   // Obtener nombre de cliente por id
   const [clientes, setClientes] = useState<{[key: number]: string}>({});
   const fetchClienteNombre = async (clienteId: number) => {
@@ -188,9 +208,22 @@ export default function ordenes_EntrantesScreen() {
                   </Text>
                 )}
               </View>
-              <TouchableOpacity style={styles.boton} onPress={() => handleAceptar(item.id)}>
-                <Text style={styles.botonTexto}>Aceptar pedido</Text>
-              </TouchableOpacity>
+              {/* Botón dinámico según estatus */}
+              {item.estatus === 'pendiente' && (
+                <TouchableOpacity style={styles.boton} onPress={() => handleAceptar(item.id)}>
+                  <Text style={styles.botonTexto}>Aceptar pedido</Text>
+                </TouchableOpacity>
+              )}
+              {item.estatus === 'preparando' && (
+                <TouchableOpacity style={[styles.boton, { backgroundColor: '#43A047' }]} onPress={() => handleEnviar(item.id)}>
+                  <Text style={styles.botonTexto}>Enviar con repartidor</Text>
+                </TouchableOpacity>
+              )}
+              {item.estatus === 'enviado' && (
+                <View style={[styles.boton, { backgroundColor: '#BDBDBD' }]}> 
+                  <Text style={[styles.botonTexto, { color: '#fff' }]}>Enviado al repartidor</Text>
+                </View>
+              )}
             </View>
           );
         }}

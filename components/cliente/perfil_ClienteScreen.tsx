@@ -467,7 +467,7 @@ export default function Perfil_ClienteScreen() {
                       <MaterialIcons name="attach-money" size={18} color="#7E57C2" /> <Text style={{ fontWeight: 'bold' }}>Total:</Text> ${pedido.total}
                     </Text>
                     <Text style={{ color: '#7E57C2', fontSize: 15 }}>
-                      <MaterialIcons name="info" size={18} color="#7E57C2" /> <Text style={{ fontWeight: 'bold' }}>Estatus:</Text> {pedido.estatus}
+                      <MaterialIcons name="info" size={18} color="#7E57C2" /> <Text style={{ fontWeight: 'bold' }}>Estatus:</Text> {pedido.estatus === 'enviado' ? 'En camino' : pedido.estatus}
                     </Text>
                     <Text style={{ color: '#7E57C2', fontSize: 15 }}>
                       <MaterialIcons name="location-on" size={18} color="#7E57C2" /> <Text style={{ fontWeight: 'bold' }}>Dirección de entrega:</Text> {pedido.direccion_entrega}
