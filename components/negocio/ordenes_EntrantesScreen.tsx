@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 interface DetallePedido {
   producto_id: number;
@@ -122,38 +123,71 @@ export default function ordenes_EntrantesScreen() {
         onRefresh={fetchPedidos}
         renderItem={({ item }: { item: PedidoEntrante }) => {
           const detalles: DetallePedido[] = item.productos && item.productos.length > 0 ? item.productos : (item.detalles || []);
+          const fechaLegible = formatearFecha(item.fecha);
           return (
-            <View style={styles.card}>
-              <Text style={styles.info}>
-                <Text style={styles.label}>Cliente:</Text> {item.cliente_nombre ? item.cliente_nombre : (clientes[item.cliente_id] ? clientes[item.cliente_id] : `ID: ${item.cliente_id}`)}
-              </Text>
-              <Text style={styles.info}><Text style={styles.label}>Dirección:</Text> {item.direccion_entrega || 'No disponible'}</Text>
-              <Text style={styles.info}><Text style={styles.label}>Total:</Text> ${item.total}</Text>
-              <Text style={styles.info}><Text style={styles.label}>Fecha:</Text> {formatearFecha(item.fecha)}</Text>
-              {detalles.length > 0 ? (
-                <View style={{marginBottom: 6}}>
-                  <Text style={styles.label}>Productos:</Text>
-                  {detalles.map((detalle: DetallePedido, idx: number) => {
-                    // Manejo robusto de precio_unitario
+            <View style={{
+              marginBottom: 22,
+              backgroundColor: '#fff',
+              borderRadius: 20,
+              padding: 0,
+              elevation: 6,
+              shadowColor: '#7E57C2',
+              shadowOffset: { width: 0, height: 6 },
+              shadowOpacity: 0.13,
+              shadowRadius: 12,
+              overflow: 'hidden',
+              borderWidth: 1.5,
+              borderColor: '#E1BEE7',
+            }}>
+              {/* Header */}
+              <View style={{ backgroundColor: '#7E57C2', padding: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18 }}>
+                  <MaterialIcons name="assignment" size={22} color="#fff" /> Pedido #{item.id}
+                </Text>
+                <Text style={{ color: '#fff', fontSize: 14, fontWeight: '600' }}>{fechaLegible}</Text>
+              </View>
+              {/* Info principal */}
+              <View style={{ padding: 16, gap: 6 }}>
+                <Text style={{ color: '#5E35B1', fontWeight: 'bold', fontSize: 16 }}>
+                  <MaterialIcons name="person" size={18} color="#7E57C2" /> {item.cliente_nombre ? item.cliente_nombre : (clientes[item.cliente_id] ? clientes[item.cliente_id] : `ID: ${item.cliente_id}`)}
+                </Text>
+                <Text style={{ color: '#7E57C2', fontSize: 15 }}>
+                  <MaterialIcons name="location-on" size={18} color="#7E57C2" /> <Text style={{ fontWeight: 'bold' }}>Dirección de entrega:</Text> {item.direccion_entrega || 'No disponible'}
+                </Text>
+                <Text style={{ color: '#7E57C2', fontSize: 15 }}>
+                  <MaterialIcons name="attach-money" size={18} color="#7E57C2" /> <Text style={{ fontWeight: 'bold' }}>Total:</Text> ${item.total}
+                </Text>
+                <Text style={{ color: '#7E57C2', fontSize: 15 }}>
+                  <MaterialIcons name="info" size={18} color="#7E57C2" /> <Text style={{ fontWeight: 'bold' }}>Estatus:</Text> {item.estatus || 'Pendiente'}
+                </Text>
+              </View>
+              {/* Productos */}
+              <View style={{ backgroundColor: '#F3EFFF', paddingHorizontal: 16, paddingBottom: 12, paddingTop: 8 }}>
+                <Text style={{ color: '#5E35B1', fontWeight: 'bold', fontSize: 15, marginBottom: 2 }}>
+                  <MaterialIcons name="shopping-cart" size={18} color="#7E57C2" /> Productos solicitados:
+                </Text>
+                {detalles.length > 0 ? (
+                  detalles.map((detalle, idx) => {
                     const precio = detalle.precio_unitario;
                     let precioDisplay = "N/A";
                     if (precio !== undefined && precio !== null && !isNaN(Number(precio))) {
                       precioDisplay = Number(precio).toFixed(2);
                     }
                     return (
-                      <Text key={idx} style={styles.info}>
-                        - {detalle.nombre ? detalle.nombre : `Producto ${detalle.producto_id}`}: {detalle.cantidad} x ${precioDisplay}
-                      </Text>
+                      <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2, marginLeft: 8 }}>
+                        <MaterialIcons name="check-circle" size={16} color="#7E57C2" />
+                        <Text style={{ color: '#7E57C2', marginLeft: 6, fontSize: 14 }}>
+                          {detalle.nombre ? detalle.nombre : `Producto ${detalle.producto_id}`} <Text style={{ fontWeight: 'bold' }}>x{detalle.cantidad}</Text> <Text style={{ color: '#5E35B1' }}>@ ${precioDisplay}</Text>
+                        </Text>
+                      </View>
                     );
-                  })}
-                </View>
-              ) : (
-                <Text style={styles.info}>
-                  Este pedido no tiene productos asociados.
-                  {item.productos && Array.isArray(item.productos) ? ` (productos: ${JSON.stringify(item.productos)})` : ''}
-                  {item.detalles && Array.isArray(item.detalles) ? ` (detalles: ${JSON.stringify(item.detalles)})` : ''}
-                </Text>
-              )}
+                  })
+                ) : (
+                  <Text style={{ color: '#7E57C2', fontStyle: 'italic', marginLeft: 8 }}>
+                    No hay productos asociados a este pedido.
+                  </Text>
+                )}
+              </View>
               <TouchableOpacity style={styles.boton} onPress={() => handleAceptar(item.id)}>
                 <Text style={styles.botonTexto}>Aceptar pedido</Text>
               </TouchableOpacity>
