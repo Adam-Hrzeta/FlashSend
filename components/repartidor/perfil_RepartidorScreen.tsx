@@ -4,16 +4,16 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Image,
-    Modal,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Image,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import ImagePickerComponent from '../cliente/modal-foto/imagenpiker';
 
@@ -49,6 +49,7 @@ export default function Perfil_RepartidorScreen() {
   const [busquedaCategoria, setBusquedaCategoria] = useState('');
   const [negociosEncontrados, setNegociosEncontrados] = useState<Negocio[]>([]);
   const [buscando, setBuscando] = useState(false);
+  const [showImagePicker, setShowImagePicker] = useState(false);
 
   useEffect(() => {
     const fetchRepartidor = async () => {
@@ -248,6 +249,17 @@ export default function Perfil_RepartidorScreen() {
 
   return (
     <ScrollView style={styles.container}>
+      {/* Selector de imagen para cambiar foto de perfil */}
+      {showImagePicker && (
+        <ImagePickerComponent
+          visible={showImagePicker}
+          onRequestClose={() => setShowImagePicker(false)}
+          onImageSelected={async (uri) => {
+            await handleImageSelected(uri);
+            setShowImagePicker(false);
+          }}
+        />
+      )}
       <View style={styles.headerRow}>
         <View style={styles.avatarCircle}>
           <Image 
@@ -256,12 +268,48 @@ export default function Perfil_RepartidorScreen() {
             }} 
             style={styles.avatar} 
           />
-          <TouchableOpacity 
-            style={styles.changePhotoButton}
-            onPress={() => !isUpdatingPhoto && setEditModalVisible(true)}
-          >
-            <MaterialIcons name="camera-alt" size={24} color="#fff" />
-          </TouchableOpacity>
+          {/* Botón de cambio de foto con ImagePickerComponent */}
+          <View style={{
+            position: 'absolute',
+            top: -80,
+            alignSelf: 'center',
+            backgroundColor: '#fff',
+            borderRadius: 90,
+            width: 180,
+            height: 180,
+            justifyContent: 'center',
+            alignItems: 'center',
+            elevation: 10,
+            shadowColor: '#7E57C2',
+            shadowOffset: { width: 0, height: 8 },
+            shadowOpacity: 0.20,
+            shadowRadius: 18,
+          }}>
+            {repartidor?.avatar && (
+              <Image
+                source={{ uri: repartidor.avatar + `?t=${Date.now()}` }}
+                style={{ width: 165, height: 165, borderRadius: 82.5 }}
+              />
+            )}
+            <TouchableOpacity
+              style={{
+                position: 'absolute',
+                bottom: 14,
+                right: 14,
+                backgroundColor: '#fff',
+                borderRadius: 30,
+                padding: 10,
+                elevation: 4,
+                shadowColor: '#7E57C2',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.13,
+                shadowRadius: 4,
+              }}
+              onPress={() => !isUpdatingPhoto && setShowImagePicker(true)}
+            >
+              <MaterialIcons name="camera-alt" size={28} color="#7E57C2" />
+            </TouchableOpacity>
+          </View>
         </View>
         <View style={styles.infoSide}>
           <Text style={styles.nameOnly}>
@@ -401,7 +449,24 @@ export default function Perfil_RepartidorScreen() {
             <ScrollView style={styles.modalScrollView}>
               <View style={styles.imagePickerContainer}>
                 <Text style={styles.imagePickerLabel}>Cambiar foto de perfil</Text>
-                <ImagePickerComponent onImageSelected={handleImageSelected} />
+                <TouchableOpacity
+                  style={{
+                    position: 'absolute',
+                    bottom: 14,
+                    right: 14,
+                    backgroundColor: '#fff',
+                    borderRadius: 30,
+                    padding: 10,
+                    elevation: 4,
+                    shadowColor: '#7E57C2',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.13,
+                    shadowRadius: 4,
+                  }}
+                  onPress={() => !isUpdatingPhoto && setShowImagePicker(true)}
+                >
+                  <MaterialIcons name="camera-alt" size={28} color="#7E57C2" />
+                </TouchableOpacity>
               </View>
 
               <View style={styles.formSection}>

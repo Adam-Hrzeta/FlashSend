@@ -1,20 +1,22 @@
 //FlashSend/components/profiles/modal_imagen/imagenPiker.tsx
-import React, { useState } from 'react';
-import { View, Modal, TouchableOpacity, Text, StyleSheet, Alert, ActivityIndicator } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
+import React, { useState } from 'react';
+import { ActivityIndicator, Alert, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { CameraComponent } from './cameraComponent';
 import { PhotoPreview } from './photoPreview';
 
+// Recibe showModal y setShowModal como props para control externo
 interface Props {
   onImageSelected: (uri: string) => void;
+  visible: boolean;
+  onRequestClose: () => void;
 }
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/jpg'];
 
-const ImagePickerComponent = ({ onImageSelected }: Props) => {
-  const [modalVisible, setModalVisible] = useState(false);
+const ImagePickerComponent = ({ onImageSelected, visible, onRequestClose }: Props) => {
   const [showCamera, setShowCamera] = useState(false);
   const [previewUri, setPreviewUri] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -91,8 +93,8 @@ const ImagePickerComponent = ({ onImageSelected }: Props) => {
     try {
       setIsLoading(true);
       await onImageSelected(uri);
-      setModalVisible(false);
       setPreviewUri(null);
+      onRequestClose();
     } catch (error) {
       Alert.alert('Error', 'No se pudo actualizar la foto de perfil');
     } finally {
@@ -101,71 +103,65 @@ const ImagePickerComponent = ({ onImageSelected }: Props) => {
   };
 
   const handleCancel = () => {
-    setModalVisible(false);
     setPreviewUri(null);
     setShowCamera(false);
+    onRequestClose();
   };
 
   return (
-    <View>
-      <TouchableOpacity onPress={() => setModalVisible(true)}>
-        <Ionicons name="camera-outline" size={32} color="black" />
-      </TouchableOpacity>
-
-      <Modal 
-        visible={modalVisible} 
-        animationType="slide"
-        onRequestClose={handleCancel}
-      >
-        {isLoading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#7E57C2" />
-            <Text style={styles.loadingText}>Procesando imagen...</Text>
-          </View>
-        ) : showCamera ? (
-          <CameraComponent 
-            onPictureTaken={handlePictureTaken} 
-            onCancel={() => setShowCamera(false)} 
-          />
-        ) : previewUri ? (
-          <PhotoPreview 
-            uri={previewUri} 
-            onSave={() => {}} 
-            onCancel={handleCancel} 
-            newPhoto={() => setShowCamera(true)}
-            onUseAsProfile={handleUseAsProfile}
-            isLoading={isLoading}
-          />
-        ) : (
-          <View style={styles.modalContent}>
-            <TouchableOpacity 
-              style={styles.button} 
-              onPress={pickImage}
-              disabled={isLoading}
-            >
-              <Ionicons name="images-outline" size={24} color="#fff" />
-              <Text style={styles.text}>Elegir de galería</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.button} 
-              onPress={() => setShowCamera(true)}
-              disabled={isLoading}
-            >
-              <Ionicons name="camera-outline" size={24} color="#fff" />
-              <Text style={styles.text}>Tomar foto</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.button, styles.cancelButton]} 
-              onPress={handleCancel}
-              disabled={isLoading}
-            >
-              <Ionicons name="close-outline" size={24} color="#fff" />
-              <Text style={styles.text}>Cancelar</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </Modal>
-    </View>
+    <Modal 
+      visible={visible} 
+      animationType="slide"
+      onRequestClose={handleCancel}
+    >
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#7E57C2" />
+          <Text style={styles.loadingText}>Procesando imagen...</Text>
+        </View>
+      ) : showCamera ? (
+        <CameraComponent 
+          onPictureTaken={handlePictureTaken} 
+          onCancel={() => setShowCamera(false)} 
+        />
+      ) : previewUri ? (
+        <PhotoPreview 
+          uri={previewUri} 
+          onSave={() => {}} 
+          onCancel={handleCancel} 
+          newPhoto={() => setShowCamera(true)}
+          onUseAsProfile={handleUseAsProfile}
+          isLoading={isLoading}
+        />
+      ) : (
+        <View style={styles.modalContent}>
+          <TouchableOpacity 
+            style={styles.button} 
+            onPress={pickImage}
+            disabled={isLoading}
+          >
+            <Ionicons name="images-outline" size={24} color="#fff" />
+            <Text style={styles.text}>Elegir de galería</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.button} 
+            onPress={() => setShowCamera(true)}
+            disabled={isLoading}
+          >
+            <Ionicons name="camera-outline" size={24} color="#fff" />
+            <Text style={styles.text}>Tomar foto</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.button, styles.cancelButton]} 
+            onPress={handleCancel}
+            disabled={isLoading}
+          >
+            <Ionicons name="close-outline" size={24} color="#fff" />
+            <Text style={styles.text}>Cancelar</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    </Modal>
   );
 };
 

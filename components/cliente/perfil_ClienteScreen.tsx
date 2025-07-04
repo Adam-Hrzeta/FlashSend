@@ -18,7 +18,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-
+import ImagePickerComponent from '../cliente/modal-foto/imagenpiker';
 
 export interface Cliente {
   id: number;
@@ -50,6 +50,7 @@ export default function Perfil_ClienteScreen() {
   const [localAvatar, setLocalAvatar] = useState<string | null>(null);
   const [historial, setHistorial] = useState<PedidoHistorial[]>([]);
   const [loadingHistorial, setLoadingHistorial] = useState(true);
+  const [showImagePicker, setShowImagePicker] = useState(false);
 
   const fetchCliente = async () => {
     setLoading(true);
@@ -263,6 +264,17 @@ export default function Perfil_ClienteScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: '#F3EFFF', justifyContent: 'center' }}>
+      {/* Selector de imagen para cambiar foto de perfil */}
+      {showImagePicker && (
+        <ImagePickerComponent
+          visible={showImagePicker}
+          onRequestClose={() => setShowImagePicker(false)}
+          onImageSelected={async (uri: string) => {
+            await handleImageSelected(uri);
+            setShowImagePicker(false);
+          }}
+        />
+      )}
       <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 32 }}>
         {/* Tarjeta principal */}
         <View style={{
@@ -317,13 +329,9 @@ export default function Perfil_ClienteScreen() {
                 shadowOpacity: 0.13,
                 shadowRadius: 4,
               }}
-              onPress={() => !isUpdatingPhoto && handlePickImage()}
+              onPress={() => !isUpdatingPhoto && setShowImagePicker(true)}
             >
-              {/* Sección de foto de perfil-------------------------------------------------- */}
-              <View style={styles.imagePickerContainer}>
-                {/* <ImagePickerComponent onImageSelected={handleImageSelected} /> */}
-              </View>
-              {/*------------------------------------------------- */}
+              <MaterialIcons name="camera-alt" size={28} color="#7E57C2" />
             </TouchableOpacity>
           </View>
 
@@ -639,16 +647,5 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: 16,
     letterSpacing: 0.5,
-  },
-
-  imagePickerContainer: {
-    marginBottom: 2,
-    alignItems: 'center',
-  },
-  imagePickerLabel: {
-    fontSize: 16,
-    color: '#311B92',
-    marginBottom: 10,
-    fontWeight: 'bold',
   },
 });
