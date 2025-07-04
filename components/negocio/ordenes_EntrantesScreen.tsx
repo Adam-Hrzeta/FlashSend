@@ -163,6 +163,9 @@ export default function ordenes_EntrantesScreen() {
     }, [])
   );
 
+  // Mostrar todos los pedidos menos los cancelados (si existieran), incluyendo 'entregado'
+  const pedidosVisibles = pedidos.filter(p => p.estatus !== 'cancelado');
+
   if (loading) {
     return <ActivityIndicator size="large" color="#7E57C2" style={{ marginTop: 40 }} />;
   }
@@ -221,7 +224,7 @@ export default function ordenes_EntrantesScreen() {
       </Modal>
       <Text style={styles.titulo}>Pedidos entrantes</Text>
       <FlatList
-        data={pedidos}
+        data={pedidosVisibles}
         keyExtractor={(item) => item.id?.toString() || Math.random().toString()}
         refreshing={refreshing}
         onRefresh={fetchPedidos}
