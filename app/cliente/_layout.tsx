@@ -23,7 +23,7 @@ export default function TabLayout() {
       <Tabs.Screen
       name="negocios_Dashboard"
       options={{
-        title: 'Pantalla Principal',
+        title: 'Negocios y Servicios',
         tabBarIcon: ({ color, size }) => <Feather name="home" color={color} size={size} />,
       }}
       />
@@ -32,6 +32,13 @@ export default function TabLayout() {
       options={{
         title: 'Mi Perfil',
         tabBarIcon: ({ color, size }) => <Feather name="user" color={color} size={size} />,
+      }}
+      />
+      <Tabs.Screen
+      name="historial_Pedidos"
+      options={{
+        title: 'Historial de Pedidos',
+        tabBarIcon: ({ color, size }) => <Feather name="clock" color={color} size={size} />,    
       }}
       />
     </Tabs>

@@ -4,6 +4,7 @@ import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Tabs } from 'expo-router';
 import React from 'react';
+import { FontAwesome } from '@expo/vector-icons';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -20,9 +21,17 @@ export default function TabLayout() {
         },
       }}>
       <Tabs.Screen
+        name="crud_Solicitudes"
+        options={{
+          tabBarIcon: ({ color, size }) => <FontAwesome name="list" color={color} size={size} />,
+          title: 'Solicitudes de Usuarios',
+        }}
+      />
+      <Tabs.Screen
         name="crud_Usuarios"
         options={{
-          title: 'Gestión de Usuarios',
+        tabBarIcon: ({ color, size }) => <FontAwesome name="users" color={color} size={size} />,
+          title: 'Administración de Usuarios',
         }}
       />
     </Tabs>

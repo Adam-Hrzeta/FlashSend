@@ -42,6 +42,13 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="historial_Ordenes"
+        options={{
+          title: 'Historial de Pedidos',
+          tabBarIcon: ({ color, size }) => <Feather name="clock" color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
         name="repartidores_Aliados"
         options={{
           title: 'Repartidores',

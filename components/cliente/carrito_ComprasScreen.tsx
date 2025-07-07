@@ -1,10 +1,11 @@
 import { useCarrito } from "@/components/context/CarritoContext";
 import { API_BASE_URL } from "@/constants/ApiConfig";
 import { getToken } from "@/utils/authToken";
+import { MaterialIcons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
+import { router } from 'expo-router';
 import { useState } from "react";
 import { Alert, FlatList, Image, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { router } from 'expo-router';
 
 export default function Carrito_ComprasScreen() {
   const { productos, quitarProducto, neto, total, limpiarCarrito } = useCarrito();
@@ -114,20 +115,29 @@ export default function Carrito_ComprasScreen() {
     </View>
   );
 
+  // Obtener el negocioId del primer producto del carrito (si existe)
+  const negocioId = productos.length > 0 ? productos[0].negocio_id : null;
+
   return (
     <View style={styles.container}>
       {/* Botón de regresar y título en la misma fila */}
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginBottom: 8 }}>
         <Text style={styles.title}>Mi Carrito</Text>
         <TouchableOpacity
-          onPress={() => router.replace('/cliente/negocios_Dashboard')}
+          onPress={() => {
+            if (negocioId) {
+              router.replace({ pathname: '/hidden/componentes_Perfil_Cliente/perfil_Publico_Negocio', params: { negocioId } });
+            } else {
+              router.replace('/cliente/negocios_Dashboard');
+            }
+          }}
           style={styles.backButtonRow}
           activeOpacity={0.9}
           accessibilityLabel="Regresar"
           accessible
         >
-          <Text style={styles.backButtonIcon}>⟲</Text>
-          <Text style={styles.backButtonText}>Volver a Negicios</Text>
+          <MaterialIcons name="store" size={20} color="#7E57C2" style={{ marginRight: 5 }} />
+          <Text style={styles.backButtonText}>Volver al Negocio</Text>
         </TouchableOpacity>
       </View>
       <FlatList

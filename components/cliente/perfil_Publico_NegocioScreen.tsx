@@ -3,6 +3,7 @@ import { useCarrito } from "@/components/context/CarritoContext";
 import { API_BASE_URL } from '@/constants/ApiConfig';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
+import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -17,7 +18,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { router } from 'expo-router';
 
 interface NegocioPublico {
   id: number;
@@ -46,11 +46,12 @@ interface Producto {
 
 const { width: screenWidth } = Dimensions.get('window');
 
-export default function Perfil_Publico_NegocioScreen() {
+export default function Perfil_Publico_NegocioScreen({ negocioId: propNegocioId }: { negocioId?: any }) {
   const route = useRoute();
-  const navigation = useNavigation<any>();
   // @ts-ignore
-  const { negocioId } = route.params || {};
+  const { negocioId: routeNegocioId } = route.params || {};
+  const negocioId = propNegocioId || routeNegocioId;
+  const navigation = useNavigation<any>();
   const [negocio, setNegocio] = useState<NegocioPublico | null>(null);
   const [productos, setProductos] = useState<Producto[]>([]);
   const [loading, setLoading] = useState(true);

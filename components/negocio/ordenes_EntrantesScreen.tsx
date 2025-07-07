@@ -182,8 +182,8 @@ export default function ordenes_EntrantesScreen() {
     }, [])
   );
 
-  // Mostrar todos los pedidos menos los cancelados (si existieran), incluyendo 'entregado'
-  const pedidosVisibles = pedidos.filter(p => p.estatus !== 'cancelado');
+  // Mostrar todos los pedidos menos los cancelados y entregados
+  const pedidosVisibles = pedidos.filter(p => p.estatus !== 'cancelado' && p.estatus !== 'entregado');
 
   if (loading) {
     return <ActivityIndicator size="large" color="#7E57C2" style={{ marginTop: 40 }} />;

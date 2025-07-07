@@ -6,17 +6,17 @@ import * as ImagePicker from 'expo-image-picker';
 import { router, useFocusEffect } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  Modal,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+ ActivityIndicator,
+ Alert,
+ Image,
+ Modal,
+ Platform,
+ ScrollView,
+ StyleSheet,
+ Text,
+ TextInput,
+ TouchableOpacity,
+ View,
 } from 'react-native';
 import ImagePickerComponent from '../cliente/modal-foto/imagenpiker';
 
@@ -429,80 +429,84 @@ export default function Perfil_ClienteScreen() {
           ) : historial.length === 0 ? (
             <Text style={{ color: '#7E57C2', textAlign: 'center', paddingVertical: 20 }}>No hay pedidos recientes</Text>
           ) : (
-            historial.map((pedido) => {
-              const fechaLegible = new Intl.DateTimeFormat('es-MX', {
-                year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit'
-              }).format(new Date(pedido.fecha));
-              const productos = pedido.productos && pedido.productos.length > 0 ? pedido.productos : (pedido.detalles || []);
-              return (
-                <View key={pedido.id} style={{
-                  marginBottom: 22,
-                  backgroundColor: '#fff',
-                  borderRadius: 20,
-                  padding: 0,
-                  elevation: 6,
-                  shadowColor: '#7E57C2',
-                  shadowOffset: { width: 0, height: 6 },
-                  shadowOpacity: 0.13,
-                  shadowRadius: 12,
-                  overflow: 'hidden',
-                  borderWidth: 1.5,
-                  borderColor: '#E1BEE7',
-                }}>
-                  {/* Header */}
-                  <View style={{ backgroundColor: '#7E57C2', padding: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18 }}>
-                      <MaterialIcons name="receipt" size={22} color="#fff" /> Pedido #{pedido.id}
-                    </Text>
-                    <Text style={{ color: '#fff', fontSize: 14, fontWeight: '600' }}>
-                      {fechaLegible}
-                    </Text>
-                  </View>
-                  {/* Info principal */}
-                  <View style={{ padding: 16, gap: 6 }}>
-                    <Text style={{ color: '#5E35B1', fontWeight: 'bold', fontSize: 16 }}>
-                      <MaterialIcons name="store" size={18} color="#7E57C2" /> {pedido.negocio_nombre || pedido.negocio_id}
-                    </Text>
-                    <Text style={{ color: '#7E57C2', fontSize: 15 }}>
-                      <MaterialIcons name="attach-money" size={18} color="#7E57C2" /> <Text style={{ fontWeight: 'bold' }}>Total:</Text> ${pedido.total}
-                    </Text>
-                    <Text style={{ color: '#7E57C2', fontSize: 15 }}>
-                      <MaterialIcons name="info" size={18} color="#7E57C2" /> <Text style={{ fontWeight: 'bold' }}>Estatus:</Text> {pedido.estatus === 'enviado' ? 'En camino' : pedido.estatus}
-                    </Text>
-                    <Text style={{ color: '#7E57C2', fontSize: 15 }}>
-                      <MaterialIcons name="location-on" size={18} color="#7E57C2" /> <Text style={{ fontWeight: 'bold' }}>Dirección de entrega:</Text> {pedido.direccion_entrega}
-                    </Text>
-                  </View>
-                  {/* Productos */}
-                  <View style={{ backgroundColor: '#F3EFFF', paddingHorizontal: 16, paddingBottom: 12, paddingTop: 8 }}>
-                    <Text style={{ color: '#5E35B1', fontWeight: 'bold', fontSize: 15, marginBottom: 2 }}>
-                      <MaterialIcons name="shopping-cart" size={18} color="#7E57C2" /> Productos solicitados:
-                    </Text>
-                    {productos.length > 0 ? (
-                      productos.map((prod, idx) => {
-                        const precio = prod.precio_unitario;
-                        let precioDisplay = "N/A";
-                        if (precio !== undefined && precio !== null && !isNaN(Number(precio))) {
-                          precioDisplay = Number(precio).toFixed(2);
-                        }
-                        return (
-                          <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2, marginLeft: 8 }}>
-                            <MaterialIcons name="check-circle" size={16} color="#7E57C2" />
-                            <Text style={{ color: '#7E57C2', marginLeft: 6, fontSize: 14 }}>
-                              {prod.nombre ? prod.nombre : `Producto ${prod.producto_id}`} <Text style={{ fontWeight: 'bold' }}>x{prod.cantidad}</Text> <Text style={{ color: '#5E35B1' }}>@ ${precioDisplay}</Text>
-                            </Text>
-                          </View>
-                        );
-                      })
-                    ) : (
-                      <Text style={{ color: '#7E57C2', fontStyle: 'italic', marginLeft: 8 }}>
-                        No hay productos asociados a este pedido.
+            historial.filter(pedido => pedido.estatus !== 'entregado').length === 0 ? (
+              <Text style={{ color: '#7E57C2', textAlign: 'center', paddingVertical: 20 }}>No hay pedidos activos</Text>
+            ) : (
+              historial.filter(pedido => pedido.estatus !== 'entregado').map((pedido) => {
+                const fechaLegible = new Intl.DateTimeFormat('es-MX', {
+                  year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit'
+                }).format(new Date(pedido.fecha));
+                const productos = pedido.productos && pedido.productos.length > 0 ? pedido.productos : (pedido.detalles || []);
+                return (
+                  <View key={pedido.id} style={{
+                    marginBottom: 22,
+                    backgroundColor: '#fff',
+                    borderRadius: 20,
+                    padding: 0,
+                    elevation: 6,
+                    shadowColor: '#7E57C2',
+                    shadowOffset: { width: 0, height: 6 },
+                    shadowOpacity: 0.13,
+                    shadowRadius: 12,
+                    overflow: 'hidden',
+                    borderWidth: 1.5,
+                    borderColor: '#E1BEE7',
+                  }}>
+                    {/* Header */}
+                    <View style={{ backgroundColor: '#7E57C2', padding: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18 }}>
+                        <MaterialIcons name="receipt" size={22} color="#fff" /> Pedido #{pedido.id}
                       </Text>
-                    )}
+                      <Text style={{ color: '#fff', fontSize: 14, fontWeight: '600' }}>
+                        {fechaLegible}
+                      </Text>
+                    </View>
+                    {/* Info principal */}
+                    <View style={{ padding: 16, gap: 6 }}>
+                      <Text style={{ color: '#5E35B1', fontWeight: 'bold', fontSize: 16 }}>
+                        <MaterialIcons name="store" size={18} color="#7E57C2" /> {pedido.negocio_nombre || pedido.negocio_id}
+                      </Text>
+                      <Text style={{ color: '#7E57C2', fontSize: 15 }}>
+                        <MaterialIcons name="attach-money" size={18} color="#7E57C2" /> <Text style={{ fontWeight: 'bold' }}>Total:</Text> ${pedido.total}
+                      </Text>
+                      <Text style={{ color: '#7E57C2', fontSize: 15 }}>
+                        <MaterialIcons name="info" size={18} color="#7E57C2" /> <Text style={{ fontWeight: 'bold' }}>Estatus:</Text> {pedido.estatus === 'enviado' ? 'En camino' : pedido.estatus}
+                      </Text>
+                      <Text style={{ color: '#7E57C2', fontSize: 15 }}>
+                        <MaterialIcons name="location-on" size={18} color="#7E57C2" /> <Text style={{ fontWeight: 'bold' }}>Dirección de entrega:</Text> {pedido.direccion_entrega}
+                      </Text>
+                    </View>
+                    {/* Productos */}
+                    <View style={{ backgroundColor: '#F3EFFF', paddingHorizontal: 16, paddingBottom: 12, paddingTop: 8 }}>
+                      <Text style={{ color: '#5E35B1', fontWeight: 'bold', fontSize: 15, marginBottom: 2 }}>
+                        <MaterialIcons name="shopping-cart" size={18} color="#7E57C2" /> Productos solicitados:
+                      </Text>
+                      {productos.length > 0 ? (
+                        productos.map((prod, idx) => {
+                          const precio = prod.precio_unitario;
+                          let precioDisplay = "N/A";
+                          if (precio !== undefined && precio !== null && !isNaN(Number(precio))) {
+                            precioDisplay = Number(precio).toFixed(2);
+                          }
+                          return (
+                            <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2, marginLeft: 8 }}>
+                              <MaterialIcons name="check-circle" size={16} color="#7E57C2" />
+                              <Text style={{ color: '#7E57C2', marginLeft: 6, fontSize: 14 }}>
+                                {prod.nombre ? prod.nombre : `Producto ${prod.producto_id}`} <Text style={{ fontWeight: 'bold' }}>x{prod.cantidad}</Text> <Text style={{ color: '#5E35B1' }}>@ ${precioDisplay}</Text>
+                              </Text>
+                            </View>
+                          );
+                        })
+                      ) : (
+                        <Text style={{ color: '#7E57C2', fontStyle: 'italic', marginLeft: 8 }}>
+                          No hay productos asociados a este pedido.
+                        </Text>
+                      )}
+                    </View>
                   </View>
-                </View>
-              );
-            })
+                );
+              })
+            )
           )}
         </View>
 
