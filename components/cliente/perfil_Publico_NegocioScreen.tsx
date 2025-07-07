@@ -17,6 +17,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { router } from 'expo-router';
 
 interface NegocioPublico {
   id: number;
@@ -29,7 +30,7 @@ interface NegocioPublico {
   disponibilidad?: boolean;
   tipo_entrega?: string;
   avatar?: string;
-  profile_image?: string; 
+  profile_image?: string;
 }
 
 interface Producto {
@@ -211,6 +212,19 @@ export default function Perfil_Publico_NegocioScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+      {/* Botón de regresar */}
+      <View style={{ width: '100%', alignItems: 'flex-start' }}>
+        <TouchableOpacity
+          onPress={() => router.push('/cliente/negocios_Dashboard')}
+          style={styles.backButtonRow}
+          activeOpacity={0.85}
+          accessibilityLabel="Regresar"
+          accessible
+        >
+          <MaterialIcons name="arrow-back" size={24} color="#7E57C2" />
+          <Text style={styles.backButtonText}>Regresar</Text>
+        </TouchableOpacity>
+      </View>
       {/* Eliminar imagen superior */}
       {/* ----------Tarjeta principal horizontal */}
       <View style={styles.mainCardResponsiveHorizontal}>
@@ -550,5 +564,28 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     flexWrap: 'wrap',
     maxWidth: 90,
+  },
+  backButtonRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EDE7F6',
+    borderRadius: 18,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    marginTop: 14,
+    marginLeft: 12,
+    marginBottom: 6,
+    elevation: 1,
+    shadowColor: '#7E57C2',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+  },
+  backButtonText: {
+    color: '#7E57C2',
+    fontWeight: 'bold',
+    fontSize: 13,
+    marginLeft: 6,
+    letterSpacing: 0.2,
   },
 });

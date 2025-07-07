@@ -4,6 +4,7 @@ import { getToken } from "@/utils/authToken";
 import * as Location from 'expo-location';
 import { useState } from "react";
 import { Alert, FlatList, Image, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { router } from 'expo-router';
 
 export default function Carrito_ComprasScreen() {
   const { productos, quitarProducto, neto, total, limpiarCarrito } = useCarrito();
@@ -32,7 +33,7 @@ export default function Carrito_ComprasScreen() {
           const g = geocode[0];
           address = `${g.street || ''} ${g.name || ''}, ${g.city || ''}, ${g.region || ''}, ${g.country || ''}`;
         }
-      } catch {}
+      } catch { }
       setDireccionEntrega(address);
       return address;
     } catch (e) {
@@ -96,7 +97,20 @@ export default function Carrito_ComprasScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Mi Carrito</Text>
+      {/* Botón de regresar y título en la misma fila */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginBottom: 8 }}>
+        <Text style={styles.title}>Mi Carrito</Text>
+        <TouchableOpacity
+          onPress={() => router.replace('/cliente/negocios_Dashboard')}
+          style={styles.backButtonRow}
+          activeOpacity={0.9}
+          accessibilityLabel="Regresar"
+          accessible
+        >
+          <Text style={styles.backButtonIcon}>⟲</Text>
+          <Text style={styles.backButtonText}>Volver a Negicios</Text>
+        </TouchableOpacity>
+      </View>
       <FlatList
         data={productos}
         renderItem={renderItem}
@@ -155,4 +169,37 @@ const styles = StyleSheet.create({
   clearBtn: { backgroundColor: '#E1BEE7', borderRadius: 8, padding: 10, alignItems: 'center', marginTop: 8 },
   clearText: { color: '#7E57C2', fontWeight: 'bold' },
   empty: { color: '#7E57C2', textAlign: 'center', marginTop: 32 },
+  backButtonRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 22,
+    paddingVertical: 7,
+    paddingHorizontal: 18,
+    marginTop: 14,
+    marginRight: 12,
+    marginBottom: 6,
+    elevation: 2,
+    shadowColor: '#7E57C2',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.13,
+    shadowRadius: 4,
+    borderWidth: 1.2,
+    borderColor: '#E1BEE7',
+  },
+  backButtonIcon: {
+    fontSize: 18,
+    color: '#7E57C2',
+    marginRight: 7,
+    fontWeight: 'bold',
+    textShadowColor: '#E1BEE7',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+  backButtonText: {
+    color: '#7E57C2',
+    fontWeight: 'bold',
+    fontSize: 15,
+    letterSpacing: 0.3,
+  },
 });
