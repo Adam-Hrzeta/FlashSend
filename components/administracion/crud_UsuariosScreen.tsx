@@ -2,7 +2,7 @@ import { API_BASE_URL } from "@/constants/ApiConfig";
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface Negocio {
@@ -20,6 +20,7 @@ export default function Crud_UsuariosScreen({ setNotAuth }: { setNotAuth?: (v: b
   const [negocios, setNegocios] = useState<Negocio[]>([]);
   const [repartidores, setRepartidores] = useState<Repartidor[]>([]);
   const [loading, setLoading] = useState(true);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchPendientes = async () => {
     setLoading(true);
@@ -52,7 +53,15 @@ export default function Crud_UsuariosScreen({ setNotAuth }: { setNotAuth?: (v: b
     setLoading(false);
   };
 
-  useEffect(() => { fetchPendientes(); }, []);
+  useEffect(() => {
+    fetchPendientes();
+    intervalRef.current = setInterval(() => {
+      fetchPendientes();
+    }, 5000);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
 
   const aprobar = async (tipo: 'negocio' | 'repartidor', id: number) => {
     const token = await AsyncStorage.getItem('access_token');

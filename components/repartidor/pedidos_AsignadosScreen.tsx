@@ -2,7 +2,7 @@ import { API_BASE_URL } from '@/constants/ApiConfig';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface ProductoPedido {
@@ -33,7 +33,9 @@ const Pedidos_AsignadosScreen = () => {
   const router = useRouter();
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [loading, setLoading] = useState(true);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Fetch principal (con spinner)
   const fetchPedidos = async () => {
     setLoading(true);
     try {
@@ -50,7 +52,25 @@ const Pedidos_AsignadosScreen = () => {
     }
   };
 
-  useEffect(() => { fetchPedidos(); }, []);
+  // Polling discreto (sin spinner)
+  const fetchPedidosSilent = async () => {
+    try {
+      const token = await AsyncStorage.getItem('access_token');
+      const res = await fetch(`${API_BASE_URL}/api/pedidos/pedidos_asignados`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      setPedidos(data.pedidos || []);
+    } catch {}
+  };
+
+  useEffect(() => {
+    fetchPedidos();
+    intervalRef.current = setInterval(fetchPedidosSilent, 5000);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
 
   const handleAceptar = async (pedidoId: number) => {
     try {
@@ -97,6 +117,12 @@ const Pedidos_AsignadosScreen = () => {
         <FlatList
           data={pedidos}
           keyExtractor={(item) => item.id.toString()}
+          refreshing={loading}
+          onRefresh={async () => {
+            setLoading(true);
+            await fetchPedidos();
+            setLoading(false);
+          }}
           renderItem={({ item }) => (
             <View style={styles.card}>
               <Text style={styles.subtitulo}>👤 Cliente</Text>

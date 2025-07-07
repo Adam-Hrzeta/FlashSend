@@ -1,7 +1,7 @@
 import { API_BASE_URL } from '@/constants/ApiConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Alert, Button, FlatList, Modal, StyleSheet, Text, TouchableHighlight, TouchableOpacity, View } from "react-native";
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
@@ -34,7 +34,9 @@ export default function ordenes_EntrantesScreen() {
   const [repartidoresAliados, setRepartidoresAliados] = useState<any[]>([]);
   const [repartidorSeleccionado, setRepartidorSeleccionado] = useState<any | null>(null);
   const [loadingRepartidores, setLoadingRepartidores] = useState(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Fetch principal (con spinner)
   const fetchPedidos = async () => {
     setLoading(true);
     try {
@@ -43,7 +45,6 @@ export default function ordenes_EntrantesScreen() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
-      // console.log('PEDIDOS:', data.pedidos); // <-- Depuración
       setPedidos(data.pedidos || []);
     } catch (e) {
       Alert.alert('Error', 'No se pudieron cargar los pedidos');
@@ -52,7 +53,25 @@ export default function ordenes_EntrantesScreen() {
     }
   };
 
-  useEffect(() => { fetchPedidos(); }, []);
+  // Polling discreto (sin spinner)
+  const fetchPedidosSilent = async () => {
+    try {
+      const token = await AsyncStorage.getItem('access_token');
+      const res = await fetch(`${API_BASE_URL}/api/pedidos_negocio/pedidos_pendientes`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      setPedidos(data.pedidos || []);
+    } catch {}
+  };
+
+  useEffect(() => {
+    fetchPedidos();
+    intervalRef.current = setInterval(fetchPedidosSilent, 5000);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
 
   const handleAceptar = async (pedidoId: number) => {
     try {
@@ -227,7 +246,11 @@ export default function ordenes_EntrantesScreen() {
         data={pedidosVisibles}
         keyExtractor={(item) => item.id?.toString() || Math.random().toString()}
         refreshing={refreshing}
-        onRefresh={fetchPedidos}
+        onRefresh={async () => {
+          setRefreshing(true);
+          await fetchPedidos();
+          setRefreshing(false);
+        }}
         renderItem={({ item }: { item: PedidoEntrante }) => {
           const detalles: DetallePedido[] = item.productos && item.productos.length > 0 ? item.productos : (item.detalles || []);
           const fechaLegible = formatearFecha(item.fecha);
