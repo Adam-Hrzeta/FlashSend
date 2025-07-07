@@ -12,6 +12,8 @@ export default function Carrito_ComprasScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [direccionEntrega, setDireccionEntrega] = useState<string | null>(null);
   const [obteniendoUbicacion, setObteniendoUbicacion] = useState(false);
+  const [direccionManual, setDireccionManual] = useState("");
+  const [seleccionUbicacion, setSeleccionUbicacion] = useState<"actual"|"manual"|null>(null);
 
   const solicitarUbicacion = async () => {
     setObteniendoUbicacion(true);
@@ -43,9 +45,24 @@ export default function Carrito_ComprasScreen() {
   };
 
   const realizarPedido = async () => {
-    if (!direccionEntrega) {
-      const address = await solicitarUbicacion();
-      if (!address) return;
+    let direccionFinal = direccionEntrega;
+    if (!direccionFinal) {
+      if (seleccionUbicacion === "actual") {
+        const address = await solicitarUbicacion();
+        if (!address) return;
+        direccionFinal = address;
+      } else if (seleccionUbicacion === "manual") {
+        if (!direccionManual.trim()) {
+          Alert.alert("Error", "Por favor ingresa una dirección válida.");
+          return;
+        }
+        direccionFinal = direccionManual.trim();
+        setDireccionEntrega(direccionFinal);
+      } else {
+        // Mostrar modal para elegir ubicación
+        setModalVisible(true);
+        return;
+      }
     }
     setLoading(true);
     try {
@@ -61,7 +78,7 @@ export default function Carrito_ComprasScreen() {
           productos: productos.map(p => ({ id: p.id, cantidad: p.cantidad, precio: p.precio })),
           total,
           negocio_id,
-          direccion_entrega: direccionEntrega
+          direccion_entrega: direccionFinal
         })
       });
       const data = await res.json();
@@ -69,6 +86,8 @@ export default function Carrito_ComprasScreen() {
         Alert.alert("Pedido realizado", "Tu pedido ha sido registrado con éxito.");
         limpiarCarrito();
         setDireccionEntrega(null);
+        setDireccionManual("");
+        setSeleccionUbicacion(null);
       } else {
         Alert.alert("Error", data.message || "No se pudo realizar el pedido.");
       }
@@ -112,26 +131,58 @@ export default function Carrito_ComprasScreen() {
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.clearBtn, { backgroundColor: '#7E57C2', marginTop: 12 }]}
-        onPress={realizarPedido}
+        onPress={() => setModalVisible(true)}
         disabled={productos.length === 0 || loading || obteniendoUbicacion}
       >
         <Text style={[styles.clearText, { color: '#fff' }]}>{loading ? 'Enviando...' : obteniendoUbicacion ? 'Obteniendo ubicación...' : 'Realizar pedido'}</Text>
       </TouchableOpacity>
       <Modal visible={modalVisible} transparent animationType="slide">
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.2)' }}>
-          <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 24, width: '85%' }}>
-            <Text style={{ color: '#7E57C2', fontWeight: 'bold', fontSize: 18, marginBottom: 12 }}>Dirección de entrega</Text>
-            <TextInput
-              placeholder="Ingresa la dirección de entrega o usa tu ubicación"
-              value={direccion}
-              onChangeText={setDireccion}
-              style={{ borderWidth: 1, borderColor: '#E1BEE7', borderRadius: 8, padding: 10, marginBottom: 16, color: '#5E35B1' }}
-            />
-            <TouchableOpacity style={[styles.clearBtn, { backgroundColor: '#7E57C2' }]} onPress={realizarPedido}>
-              <Text style={[styles.clearText, { color: '#fff' }]}>{loading ? 'Enviando...' : 'Confirmar pedido'}</Text>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.3)' }}>
+          <View style={{ backgroundColor: '#fff', padding: 24, borderRadius: 16, width: 320 }}>
+            <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 12 }}>Selecciona la dirección de entrega</Text>
+            <TouchableOpacity
+              style={{ backgroundColor: seleccionUbicacion === 'actual' ? '#7E57C2' : '#F3EFFF', padding: 12, borderRadius: 8, marginBottom: 8 }}
+              onPress={async () => {
+                setSeleccionUbicacion('actual');
+                setModalVisible(false);
+                await realizarPedido();
+              }}
+            >
+              <Text style={{ color: seleccionUbicacion === 'actual' ? '#fff' : '#7E57C2', fontWeight: 'bold' }}>Usar mi ubicación actual</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.clearBtn, { marginTop: 8 }]} onPress={() => setModalVisible(false)}>
-              <Text style={styles.clearText}>Cancelar</Text>
+            <TouchableOpacity
+              style={{ backgroundColor: seleccionUbicacion === 'manual' ? '#7E57C2' : '#F3EFFF', padding: 12, borderRadius: 8, marginBottom: 8 }}
+              onPress={() => setSeleccionUbicacion('manual')}
+            >
+              <Text style={{ color: seleccionUbicacion === 'manual' ? '#fff' : '#7E57C2', fontWeight: 'bold' }}>Ingresar otra dirección</Text>
+            </TouchableOpacity>
+            {seleccionUbicacion === 'manual' && (
+              <TextInput
+                style={{ borderWidth: 1, borderColor: '#7E57C2', borderRadius: 8, padding: 8, marginBottom: 12 }}
+                placeholder="Escribe la dirección de entrega"
+                value={direccionManual}
+                onChangeText={setDireccionManual}
+              />
+            )}
+            {seleccionUbicacion === 'manual' && (
+              <TouchableOpacity
+                style={{ backgroundColor: '#7E57C2', padding: 12, borderRadius: 8, marginBottom: 8 }}
+                onPress={async () => {
+                  setModalVisible(false);
+                  await realizarPedido();
+                }}
+              >
+                <Text style={{ color: '#fff', fontWeight: 'bold' }}>Confirmar dirección manual</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              style={{ backgroundColor: '#BDBDBD', padding: 12, borderRadius: 8 }}
+              onPress={() => {
+                setModalVisible(false);
+                setSeleccionUbicacion(null);
+              }}
+            >
+              <Text style={{ color: '#fff', fontWeight: 'bold' }}>Cancelar</Text>
             </TouchableOpacity>
           </View>
         </View>
