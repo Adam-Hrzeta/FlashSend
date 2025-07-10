@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import NotAuthorized from "@/components/ui/NotAuthorized";
 
 interface SolicitudAliado {
   id: number;
@@ -12,18 +13,31 @@ interface SolicitudAliado {
   fecha: string;
 }
 
-export default function Repartidores_AliadosScreen() {
+export default function Repartidores_AliadosScreen({ setNotAuth }: { setNotAuth?: (v: boolean) => void }) {
   const [solicitudes, setSolicitudes] = useState<SolicitudAliado[]>([]);
   const [loading, setLoading] = useState(true);
   const [negocioId, setNegocioId] = useState<number | null>(null);
+  const [notAuthState, setNotAuthState] = useState(false);
 
   const fetchSolicitudes = async () => {
     setLoading(true);
     try {
       const token = await AsyncStorage.getItem('access_token');
+      if (!token) {
+        setNotAuth && setNotAuth(true);
+        setNotAuthState(true);
+        setLoading(false);
+        return;
+      }
       const res = await fetch(`${API_BASE_URL}/api/negocio/solicitudes_aliados`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
+      if (res.status === 403) {
+        setNotAuth && setNotAuth(true);
+        setNotAuthState(true);
+        setLoading(false);
+        return;
+      }
       const data = await res.json();
       setSolicitudes(data.solicitudes || []);
     } catch (e) {
@@ -55,8 +69,12 @@ export default function Repartidores_AliadosScreen() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) fetchSolicitudes();
-    } catch {}
+    } catch { }
   };
+
+  if (notAuthState) {
+    return <NotAuthorized message="No autorizado: solo negocios pueden acceder a este panel." />;
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: '#F3EFFF', padding: 16 }}>

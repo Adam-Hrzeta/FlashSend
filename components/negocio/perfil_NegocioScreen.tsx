@@ -8,6 +8,7 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { pickLocationAndGetAddress } from '../cliente/LocationUtils';
 import { useRegisterPushToken } from '../hooks/useRegisterPushToken';
+import NotAuthorized from "@/components/ui/NotAuthorized";
 
 export interface Negocio {
   id: number;
@@ -22,10 +23,11 @@ export interface Negocio {
   disponibilidad: boolean;
 }
 
-export default function Perfil_NegocioScreen() {
+export default function Perfil_NegocioScreen({ setNotAuth }: { setNotAuth?: (v: boolean) => void }) {
   const [negocio, setNegocio] = useState<Negocio | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [notAuthState, setNotAuthState] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editData, setEditData] = useState<Partial<Negocio>>({});
   const [uploading, setUploading] = useState(false);
@@ -37,18 +39,28 @@ export default function Perfil_NegocioScreen() {
     setError(null);
     try {
       const token = await AsyncStorage.getItem('access_token');
+      if (!token) {
+        setNotAuth && setNotAuth(true);
+        setNotAuthState(true);
+        setLoading(false);
+        return;
+      }
       const response = await fetch(`${API_BASE_URL}/api/negocio/perfilNegocio`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-
+      if (response.status === 403) {
+        setNotAuth && setNotAuth(true);
+        setNotAuthState(true);
+        setLoading(false);
+        return;
+      }
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
         throw new Error(data?.error || 'Solo los negocios pueden acceder a este modulo.');
       }
-
       const data = await response.json();
       setNegocio(data.negocio);
       setEditData(data.negocio);
@@ -83,7 +95,7 @@ export default function Perfil_NegocioScreen() {
     setEditModalVisible(true);
   };
 
-   const handleSaveEdit = async () => {
+  const handleSaveEdit = async () => {
     const token = await AsyncStorage.getItem('access_token');
     fetch(`${API_BASE_URL}/api/negocio/editarPerfil`, { // CORREGIDO
       method: 'PUT',
@@ -208,6 +220,10 @@ export default function Perfil_NegocioScreen() {
         <Text style={styles.errorText}>{error}</Text>
       </View>
     );
+  }
+
+  if (notAuthState) {
+    return <NotAuthorized message="No autorizado: solo negocios pueden acceder a este panel." />;
   }
 
   return (
@@ -460,7 +476,7 @@ export default function Perfil_NegocioScreen() {
                   <MaterialIcons name="edit" size={38} color="#fff" />
                 </View>
                 <Text style={styles.modalTitleCustom}>Editar información</Text>
-                
+
                 <View style={styles.inputRow}>
                   <MaterialIcons name="person" size={20} color="#BA68C8" style={styles.inputIcon} />
                   <TextInput
@@ -471,7 +487,7 @@ export default function Perfil_NegocioScreen() {
                     onChangeText={text => setEditData({ ...editData, nombre: text })}
                   />
                 </View>
-                
+
                 <View style={styles.inputRow}>
                   <MaterialIcons name="email" size={20} color="#BA68C8" style={styles.inputIcon} />
                   <TextInput
@@ -483,7 +499,7 @@ export default function Perfil_NegocioScreen() {
                     keyboardType="email-address"
                   />
                 </View>
-                
+
                 <View style={styles.inputRow}>
                   <MaterialIcons name="phone" size={20} color="#BA68C8" style={styles.inputIcon} />
                   <TextInput
@@ -495,7 +511,7 @@ export default function Perfil_NegocioScreen() {
                     keyboardType="phone-pad"
                   />
                 </View>
-                
+
                 <View style={styles.inputRow}>
                   <MaterialIcons name="info" size={20} color="#BA68C8" style={styles.inputIcon} />
                   <TextInput
@@ -507,18 +523,18 @@ export default function Perfil_NegocioScreen() {
                     multiline
                   />
                 </View>
-                
-                <TouchableOpacity 
-                  style={styles.modalButton} 
+
+                <TouchableOpacity
+                  style={styles.modalButton}
                   onPress={handleSaveEdit}
                 >
                   <Text style={styles.modalButtonText}>
                     <MaterialIcons name="save" size={18} color="#fff" /> Guardar
                   </Text>
                 </TouchableOpacity>
-                
-                <TouchableOpacity 
-                  style={styles.cancelButtonCustom} 
+
+                <TouchableOpacity
+                  style={styles.cancelButtonCustom}
                   onPress={() => setEditModalVisible(false)}
                 >
                   <Text style={styles.cancelButtonText}>

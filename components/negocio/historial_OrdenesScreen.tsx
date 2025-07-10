@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import NotAuthorized from "@/components/ui/NotAuthorized";
 
 interface DetallePedido {
   producto_id: number;
@@ -24,18 +25,31 @@ interface PedidoEntrante {
   detalles?: DetallePedido[];
 }
 
-export default function Historial_OrdenesScreen() {
+export default function Historial_OrdenesScreen({ setNotAuth }: { setNotAuth?: (v: boolean) => void }) {
   const [pedidos, setPedidos] = useState<PedidoEntrante[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [notAuthState, setNotAuthState] = useState(false);
 
   const fetchPedidos = async () => {
     setLoading(true);
     try {
       const token = await AsyncStorage.getItem('access_token');
-      const res = await fetch(`${API_BASE_URL}/api/pedidos_negocio/pedidos_pendientes`, {
+      if (!token) {
+        setNotAuth && setNotAuth(true);
+        setNotAuthState(true);
+        setLoading(false);
+        return;
+      }
+      const res = await fetch(`${API_BASE_URL}/api/pedidos_negocio/todos`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
+      if (res.status === 403) {
+        setNotAuth && setNotAuth(true);
+        setNotAuthState(true);
+        setLoading(false);
+        return;
+      }
       const data = await res.json();
       setPedidos(data.pedidos || []);
     } catch (e) {
@@ -53,6 +67,10 @@ export default function Historial_OrdenesScreen() {
 
   if (loading) {
     return <ActivityIndicator size="large" color="#7E57C2" style={{ marginTop: 40 }} />;
+  }
+
+  if (notAuthState) {
+    return <NotAuthorized message="No autorizado: solo negocios pueden acceder a este panel." />;
   }
 
   if (!pedidosEntregados.length) {

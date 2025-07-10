@@ -1,13 +1,11 @@
 import Crud_ProductosScreen from "@/components/negocio/crud_ProductosScreen";
+import NotAuthorized from "@/components/ui/NotAuthorized";
 import { useState } from "react";
-import { Text } from "react-native";
 
 export default function crud_Productos() {
   const [notAuth, setNotAuth] = useState(false);
   return notAuth ? (
-    <Text style={{ color: "red", margin: 40, fontSize: 18, textAlign: "center" }}>
-      No autorizado: solo negocios pueden acceder a este panel.
-    </Text>
+    <NotAuthorized message="No autorizado: solo negocios pueden acceder a este panel." />
   ) : (
     <Crud_ProductosScreen setNotAuth={setNotAuth} />
   );

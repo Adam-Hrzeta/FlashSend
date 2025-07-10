@@ -12,7 +12,7 @@ interface Usuario {
   tipo: string;
 }
 
-export default function Crud_UsuariosScreen() {
+export default function Crud_UsuariosScreen({ setNotAuth }: { setNotAuth?: (v: boolean) => void }) {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
@@ -25,15 +25,22 @@ export default function Crud_UsuariosScreen() {
 
   const fetchUsuarios = async () => {
     setLoading(true);
+    const token = await AsyncStorage.getItem('access_token');
+    if (!token) {
+      setNotAuth && setNotAuth(true);
+      setLoading(false);
+      return;
+    }
     try {
-      const token = await AsyncStorage.getItem('access_token');
       const res = await fetch(`${API_BASE_URL}/api/dashboard_admin/usuarios`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const data = await res.json();
-      if (!res.ok) {
-        console.log('Status:', res.status, 'Body:', data);
+      if (res.status === 403) {
+        setNotAuth && setNotAuth(true);
+        setLoading(false);
+        return;
       }
+      const data = await res.json();
       if (Array.isArray(data)) {
         setUsuarios(data);
       } else {

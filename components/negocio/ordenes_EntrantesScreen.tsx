@@ -4,6 +4,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Alert, Button, FlatList, Modal, StyleSheet, Text, TouchableHighlight, TouchableOpacity, View } from "react-native";
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import NotAuthorized from "@/components/ui/NotAuthorized";
 
 interface DetallePedido {
   producto_id: number;
@@ -25,7 +26,7 @@ interface PedidoEntrante {
   detalles?: DetallePedido[]; // <- para compatibilidad y evitar error TS
 }
 
-export default function ordenes_EntrantesScreen() {
+export default function ordenes_EntrantesScreen({ setNotAuth }: { setNotAuth?: (v: boolean) => void }) {
   const [pedidos, setPedidos] = useState<PedidoEntrante[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -34,6 +35,7 @@ export default function ordenes_EntrantesScreen() {
   const [repartidoresAliados, setRepartidoresAliados] = useState<any[]>([]);
   const [repartidorSeleccionado, setRepartidorSeleccionado] = useState<any | null>(null);
   const [loadingRepartidores, setLoadingRepartidores] = useState(false);
+  const [notAuthState, setNotAuthState] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Fetch principal (con spinner)
@@ -41,10 +43,25 @@ export default function ordenes_EntrantesScreen() {
     setLoading(true);
     try {
       const token = await AsyncStorage.getItem('access_token');
-      const res = await fetch(`${API_BASE_URL}/api/pedidos_negocio/pedidos_pendientes`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+      if (!token) {
+        setNotAuth && setNotAuth(true);
+        setNotAuthState(true);
+        setLoading(false);
+        return;
+      }
+      const response = await fetch(`${API_BASE_URL}/api/pedidos_negocio/pedidos_pendientes`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
       });
-      const data = await res.json();
+      if (response.status === 403) {
+        setNotAuth && setNotAuth(true);
+        setNotAuthState(true);
+        setLoading(false);
+        return;
+      }
+      const data = await response.json();
       setPedidos(data.pedidos || []);
     } catch (e) {
       Alert.alert('Error', 'No se pudieron cargar los pedidos');
@@ -62,7 +79,7 @@ export default function ordenes_EntrantesScreen() {
       });
       const data = await res.json();
       setPedidos(data.pedidos || []);
-    } catch {}
+    } catch { }
   };
 
   useEffect(() => {
@@ -146,7 +163,7 @@ export default function ordenes_EntrantesScreen() {
   };
 
   // Obtener nombre de cliente por id
-  const [clientes, setClientes] = useState<{[key: number]: string}>({});
+  const [clientes, setClientes] = useState<{ [key: number]: string }>({});
   const fetchClienteNombre = async (clienteId: number) => {
     if (clientes[clienteId]) return clientes[clienteId];
     try {
@@ -159,7 +176,7 @@ export default function ordenes_EntrantesScreen() {
         setClientes(prev => ({ ...prev, [clienteId]: data.cliente.nombre }));
         return data.cliente.nombre;
       }
-    } catch {}
+    } catch { }
     return clienteId;
   };
 
@@ -191,6 +208,10 @@ export default function ordenes_EntrantesScreen() {
 
   if (!pedidos.length) {
     return <Text style={{ textAlign: 'center', marginTop: 40 }}>No hay pedidos entrantes</Text>;
+  }
+
+  if (notAuthState) {
+    return <NotAuthorized message="No autorizado: solo negocios pueden acceder a este panel." />;
   }
 
   return (

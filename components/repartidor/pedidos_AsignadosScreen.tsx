@@ -29,7 +29,7 @@ interface Pedido {
   productos?: ProductoPedido[];
 }
 
-const Pedidos_AsignadosScreen = () => {
+const Pedidos_AsignadosScreen = ({ setNotAuth }: { setNotAuth?: (v: boolean) => void }) => {
   const router = useRouter();
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,11 +38,21 @@ const Pedidos_AsignadosScreen = () => {
   // Fetch principal (con spinner)
   const fetchPedidos = async () => {
     setLoading(true);
+    const token = await AsyncStorage.getItem('access_token');
+    if (!token) {
+      setNotAuth && setNotAuth(true);
+      setLoading(false);
+      return;
+    }
     try {
-      const token = await AsyncStorage.getItem('access_token');
       const res = await fetch(`${API_BASE_URL}/api/pedidos/pedidos_asignados`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
+      if (res.status === 403) {
+        setNotAuth && setNotAuth(true);
+        setLoading(false);
+        return;
+      }
       const data = await res.json();
       setPedidos(data.pedidos || []);
     } catch (e) {
@@ -56,12 +66,20 @@ const Pedidos_AsignadosScreen = () => {
   const fetchPedidosSilent = async () => {
     try {
       const token = await AsyncStorage.getItem('access_token');
+      if (!token) {
+        setNotAuth && setNotAuth(true);
+        return;
+      }
       const res = await fetch(`${API_BASE_URL}/api/pedidos/pedidos_asignados`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
+      if (res.status === 403) {
+        setNotAuth && setNotAuth(true);
+        return;
+      }
       const data = await res.json();
       setPedidos(data.pedidos || []);
-    } catch {}
+    } catch { }
   };
 
   useEffect(() => {

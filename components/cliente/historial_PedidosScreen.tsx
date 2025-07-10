@@ -23,24 +23,31 @@ interface PedidoHistorial {
   detalles?: DetallePedido[];
 }
 
-export default function Historial_PedidosScreen() {
+export default function Historial_PedidosScreen({ setNotAuth }: { setNotAuth?: (v: boolean) => void }) {
   const [historial, setHistorial] = useState<PedidoHistorial[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const fetchHistorial = async () => {
     setLoading(true);
+    const token = await AsyncStorage.getItem('access_token');
+    if (!token) {
+      setNotAuth && setNotAuth(true);
+      setLoading(false);
+      return;
+    }
     try {
-      const token = await AsyncStorage.getItem('access_token');
-      const response = await fetch(`${API_BASE_URL}/api/pedidos_cliente/historial`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+      const res = await fetch(`${API_BASE_URL}/api/pedidos_cliente/historial`, {
+        headers: { 'Authorization': `Bearer ${token}` }
       });
-      const data = await response.json();
+      if (res.status === 403) {
+        setNotAuth && setNotAuth(true);
+        setLoading(false);
+        return;
+      }
+      const data = await res.json();
       setHistorial(data.pedidos || []);
-    } catch (e) {
+    } catch {
       setHistorial([]);
     } finally {
       setLoading(false);

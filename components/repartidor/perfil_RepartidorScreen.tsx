@@ -37,7 +37,7 @@ interface Negocio {
   descripcion: string;
 }
 
-export default function Perfil_RepartidorScreen() {
+export default function Perfil_RepartidorScreen({ setNotAuth }: { setNotAuth?: (v: boolean) => void }) {
   const [repartidor, setRepartidor] = useState<Repartidor | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -53,6 +53,11 @@ export default function Perfil_RepartidorScreen() {
   useEffect(() => {
     const fetchRepartidor = async () => {
       const token = await AsyncStorage.getItem('access_token');
+      if (!token) {
+        setNotAuth && setNotAuth(true);
+        setLoading(false);
+        return;
+      }
       fetch(`${API_BASE_URL}/api/perfilRepartidor/perfilRepartidor`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -60,6 +65,11 @@ export default function Perfil_RepartidorScreen() {
         }
       })
         .then(async res => {
+          if (res.status === 403) {
+            setNotAuth && setNotAuth(true);
+            setLoading(false);
+            return;
+          }
           if (!res.ok) {
             const data = await res.json().catch(() => ({}));
             throw new Error(data?.mensaje || 'No autorizado');
@@ -279,11 +289,11 @@ export default function Perfil_RepartidorScreen() {
       )}
       <View style={styles.headerRow}>
         <View style={styles.avatarCircle}>
-          <Image 
-            source={{ 
-              uri: repartidor?.avatar ? `${repartidor.avatar}&t=${Date.now()}` : undefined 
-            }} 
-            style={styles.avatar} 
+          <Image
+            source={{
+              uri: repartidor?.avatar ? `${repartidor.avatar}&t=${Date.now()}` : undefined
+            }}
+            style={styles.avatar}
           />
           {/* Botón de cambio de foto con ImagePickerComponent */}
           <View style={{
@@ -345,7 +355,7 @@ export default function Perfil_RepartidorScreen() {
 
       <TouchableOpacity
         style={[styles.editButton, { marginTop: 8, backgroundColor: '#BA68C8', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }]}
-        onPress={() => router.push('/repartidor/pedidos_Asignados')} 
+        onPress={() => router.push('/repartidor/pedidos_Asignados')}
       >
         <MaterialIcons name="assignment" size={20} color="#fff" />
         <Text style={[styles.editButtonText, { color: '#fff', marginLeft: 6 }]}>Ver pedidos asignados</Text>
@@ -459,7 +469,7 @@ export default function Perfil_RepartidorScreen() {
               </View>
               <Text style={styles.modalTitleCustom}>Editar información</Text>
             </View>
-            
+
             <ScrollView style={styles.modalScrollView}>
               <View style={styles.imagePickerContainer}>
                 <Text style={styles.imagePickerLabel}>Cambiar foto de perfil</Text>

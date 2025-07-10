@@ -5,6 +5,7 @@ import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Animated, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import NotAuthorized from "@/components/ui/NotAuthorized";
 
 interface Producto {
   id: number;
@@ -36,16 +37,24 @@ export default function Crud_ProductosScreen({ setNotAuth }: { setNotAuth?: (v: 
   const [image, setImage] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [fadeAnim] = useState(new Animated.Value(0));
-  const [errors, setErrors] = useState<{[key:string]: string}>({});
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [notAuthState, setNotAuthState] = useState(false);
 
   const fetchProductos = async () => {
     setLoading(true);
     const token = await AsyncStorage.getItem('access_token');
+    if (!token) {
+      setNotAuth && setNotAuth(true);
+      setNotAuthState(true);
+      setLoading(false);
+      return;
+    }
     const res = await fetch(`${API_BASE_URL}/api/productos/`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     if (res.status === 403) {
       setNotAuth && setNotAuth(true);
+      setNotAuthState(true);
       setLoading(false);
       return;
     }
@@ -93,7 +102,7 @@ export default function Crud_ProductosScreen({ setNotAuth }: { setNotAuth?: (v: 
   };
 
   const validate = () => {
-    const newErrors: {[key:string]: string} = {};
+    const newErrors: { [key: string]: string } = {};
     if (!editProducto?.nombre || editProducto.nombre.trim() === '') newErrors.nombre = 'El nombre es obligatorio';
     if (!editProducto?.descripcion || editProducto.descripcion.trim() === '') newErrors.descripcion = 'La descripción es obligatoria';
     if (editProducto?.precio === undefined || editProducto.precio <= 0) newErrors.precio = 'El precio debe ser mayor a 0';
@@ -134,6 +143,10 @@ export default function Crud_ProductosScreen({ setNotAuth }: { setNotAuth?: (v: 
     }
     setUploading(false);
   };
+
+  if (notAuthState) {
+    return <NotAuthorized message="No autorizado: solo negocios pueden acceder a este panel." />;
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: '#fff', padding: 20 }}>
@@ -183,56 +196,56 @@ export default function Crud_ProductosScreen({ setNotAuth }: { setNotAuth?: (v: 
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>{editProducto?.id ? 'Editar producto' : 'Agregar producto'}</Text>
-            <Text style={{color:'#7E57C2', marginBottom:4}}>* Campos obligatorios</Text>
+            <Text style={{ color: '#7E57C2', marginBottom: 4 }}>* Campos obligatorios</Text>
             <TouchableOpacity style={styles.imagePickerBtn} onPress={pickImage}>
               <MaterialIcons name="image" size={28} color="#7E57C2" />
               <Text style={styles.imagePickerText}>{image ? 'Cambiar imagen' : 'Seleccionar imagen'}</Text>
             </TouchableOpacity>
             {image && <Image source={{ uri: image }} style={styles.modalImage} />}
-            <View style={{width:'100%'}}>
-              <TextInput 
-                style={[styles.input, {paddingLeft: 36}]}
+            <View style={{ width: '100%' }}>
+              <TextInput
+                style={[styles.input, { paddingLeft: 36 }]}
                 placeholder="Nombre del producto *"
                 value={editProducto?.nombre}
-                onChangeText={t => { setEditProducto({ ...editProducto, nombre: t }); setErrors({...errors, nombre: ''}); }}
+                onChangeText={t => { setEditProducto({ ...editProducto, nombre: t }); setErrors({ ...errors, nombre: '' }); }}
               />
-              <MaterialIcons name="drive-file-rename-outline" size={22} color="#7E57C2" style={{position:'absolute', top:14, left:8}} />
+              <MaterialIcons name="drive-file-rename-outline" size={22} color="#7E57C2" style={{ position: 'absolute', top: 14, left: 8 }} />
             </View>
-            {errors.nombre && <Text style={{color:'red', alignSelf:'flex-start'}}>{errors.nombre}</Text>}
-            <View style={{width:'100%'}}>
-              <TextInput 
-                style={[styles.input, {paddingLeft: 36}]}
+            {errors.nombre && <Text style={{ color: 'red', alignSelf: 'flex-start' }}>{errors.nombre}</Text>}
+            <View style={{ width: '100%' }}>
+              <TextInput
+                style={[styles.input, { paddingLeft: 36 }]}
                 placeholder="Descripción detallada *"
                 value={editProducto?.descripcion}
-                onChangeText={t => { setEditProducto({ ...editProducto, descripcion: t }); setErrors({...errors, descripcion: ''}); }}
+                onChangeText={t => { setEditProducto({ ...editProducto, descripcion: t }); setErrors({ ...errors, descripcion: '' }); }}
                 multiline
               />
-              <MaterialIcons name="description" size={22} color="#7E57C2" style={{position:'absolute', top:14, left:8}} />
+              <MaterialIcons name="description" size={22} color="#7E57C2" style={{ position: 'absolute', top: 14, left: 8 }} />
             </View>
-            {errors.descripcion && <Text style={{color:'red', alignSelf:'flex-start'}}>{errors.descripcion}</Text>}
-            <View style={{width:'100%'}}>
-              <TextInput 
-                style={[styles.input, {paddingLeft: 36}]}
+            {errors.descripcion && <Text style={{ color: 'red', alignSelf: 'flex-start' }}>{errors.descripcion}</Text>}
+            <View style={{ width: '100%' }}>
+              <TextInput
+                style={[styles.input, { paddingLeft: 36 }]}
                 placeholder="Precio en pesos (ej: $12000) *"
                 value={editProducto?.precio !== undefined ? `$${editProducto?.precio}` : ''}
                 onChangeText={t => {
                   const val = t.replace(/[^\d]/g, '');
                   setEditProducto({ ...editProducto, precio: Number(val) });
-                  setErrors({...errors, precio: ''});
+                  setErrors({ ...errors, precio: '' });
                 }}
                 keyboardType="number-pad"
               />
-              <MaterialIcons name="attach-money" size={22} color="#43A047" style={{position:'absolute', top:14, left:8}} />
+              <MaterialIcons name="attach-money" size={22} color="#43A047" style={{ position: 'absolute', top: 14, left: 8 }} />
             </View>
-            {errors.precio && <Text style={{color:'red', alignSelf:'flex-start'}}>{errors.precio}</Text>}
-            <View style={{width:'100%', marginBottom: 10}}>
-              <Text style={{marginLeft: 4, color: '#9575CD', fontWeight: 'bold', marginBottom: 2}}>Categoría *</Text>
-              <View style={{flexDirection: 'row', alignItems: 'center', backgroundColor: '#F8F5FF', borderRadius: 8, borderWidth: 1, borderColor: '#BA68C8'}}>
-                <MaterialIcons name="category" size={22} color="#9575CD" style={{marginLeft: 10, marginRight: 4}} />
+            {errors.precio && <Text style={{ color: 'red', alignSelf: 'flex-start' }}>{errors.precio}</Text>}
+            <View style={{ width: '100%', marginBottom: 10 }}>
+              <Text style={{ marginLeft: 4, color: '#9575CD', fontWeight: 'bold', marginBottom: 2 }}>Categoría *</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#F8F5FF', borderRadius: 8, borderWidth: 1, borderColor: '#BA68C8' }}>
+                <MaterialIcons name="category" size={22} color="#9575CD" style={{ marginLeft: 10, marginRight: 4 }} />
                 <Picker
                   selectedValue={editProducto?.categoria}
-                  style={{flex: 1, height: 50, color: '#5E35B1', backgroundColor: 'transparent'}} // remove width, use flex
-                  onValueChange={t => { setEditProducto({ ...editProducto, categoria: t }); setErrors({...errors, categoria: ''}); }}
+                  style={{ flex: 1, height: 50, color: '#5E35B1', backgroundColor: 'transparent' }} // remove width, use flex
+                  onValueChange={t => { setEditProducto({ ...editProducto, categoria: t }); setErrors({ ...errors, categoria: '' }); }}
                   dropdownIconColor="#9575CD"
                 >
                   <Picker.Item label="Selecciona una categoría" value="" color="#aaa" />
@@ -242,22 +255,22 @@ export default function Crud_ProductosScreen({ setNotAuth }: { setNotAuth?: (v: 
                 </Picker>
               </View>
             </View>
-            {errors.categoria && <Text style={{color:'red', alignSelf:'flex-start'}}>{errors.categoria}</Text>}
-            <View style={{width:'100%'}}>
-              <TextInput 
-                style={[styles.input, {paddingLeft: 36}]}
+            {errors.categoria && <Text style={{ color: 'red', alignSelf: 'flex-start' }}>{errors.categoria}</Text>}
+            <View style={{ width: '100%' }}>
+              <TextInput
+                style={[styles.input, { paddingLeft: 36 }]}
                 placeholder="Stock disponible (ej: 10) *"
                 value={editProducto?.stock !== undefined ? editProducto?.stock.toString() : ''}
                 onChangeText={t => {
                   const val = t.replace(/[^\d]/g, '');
                   setEditProducto({ ...editProducto, stock: Number(val) });
-                  setErrors({...errors, stock: ''});
+                  setErrors({ ...errors, stock: '' });
                 }}
                 keyboardType="number-pad"
               />
-              <MaterialIcons name="inventory" size={22} color="#BA68C8" style={{position:'absolute', top:14, left:8}} />
+              <MaterialIcons name="inventory" size={22} color="#BA68C8" style={{ position: 'absolute', top: 14, left: 8 }} />
             </View>
-            {errors.stock && <Text style={{color:'red', alignSelf:'flex-start'}}>{errors.stock}</Text>}
+            {errors.stock && <Text style={{ color: 'red', alignSelf: 'flex-start' }}>{errors.stock}</Text>}
             <TouchableOpacity style={styles.saveBtn} onPress={handleSave} disabled={uploading}>
               {uploading ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveBtnText}>Guardar</Text>}
             </TouchableOpacity>

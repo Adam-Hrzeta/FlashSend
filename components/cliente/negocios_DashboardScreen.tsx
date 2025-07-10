@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from '../../constants/ApiConfig';
 
 const categoryEmojis = {
@@ -43,7 +44,7 @@ interface Negocio {
   categoria?: string;
 }
 
-export default function Negocios_DashboardScreen() {
+export default function Negocios_DashboardScreen({ setNotAuth }: { setNotAuth?: (v: boolean) => void }) {
   const navigation = useNavigation<any>();
   const [searchText, setSearchText] = useState('');
   const [businesses, setBusinesses] = useState<Negocio[]>([]);
@@ -54,28 +55,52 @@ export default function Negocios_DashboardScreen() {
   useFocusEffect(
     React.useCallback(() => {
       setLoading(true);
-      fetch(`${API_BASE_URL}/api/dashboard_mostrar_negocios/dashboard_negocios`)
-        .then(res => res.json())
-        .then(data => {
+      const fetchNegocios = async () => {
+        try {
+          const token = await AsyncStorage.getItem('access_token');
+          const res = await fetch(`${API_BASE_URL}/api/dashboard_mostrar_negocios/dashboard_negocios`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (res.status === 403) {
+            setNotAuth && setNotAuth(true);
+            setLoading(false);
+            return;
+          }
+          const data = await res.json();
           if (data.status === 'success' && Array.isArray(data.negocios)) {
             setBusinesses(data.negocios);
-            setFetchError(null);
           } else {
-            setFetchError('No se pudo cargar la lista de negocios.');
+            setBusinesses([]);
           }
+        } catch {
+          setBusinesses([]);
+        } finally {
           setLoading(false);
-        })
-        .catch(() => {
-          setLoading(false);
-          setFetchError('No se pudo cargar la lista de negocios.');
-        });
+        }
+      };
+      fetchNegocios();
     }, [])
   );
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/dashboard_mostrar_negocios/dashboard_negocios`)
-      .then(res => res.json())
-      .then(data => {
+    const fetchNegocios = async () => {
+      setLoading(true);
+      const token = await AsyncStorage.getItem('access_token');
+      if (!token) {
+        setNotAuth && setNotAuth(true);
+        setLoading(false);
+        return;
+      }
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/dashboard_mostrar_negocios/dashboard_negocios`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.status === 403) {
+          setNotAuth && setNotAuth(true);
+          setLoading(false);
+          return;
+        }
+        const data = await res.json();
         if (data.status === 'success' && Array.isArray(data.negocios)) {
           setBusinesses(data.negocios);
           setFetchError(null);
@@ -83,11 +108,12 @@ export default function Negocios_DashboardScreen() {
           setFetchError('No se pudo cargar la lista de negocios.');
         }
         setLoading(false);
-      })
-      .catch(() => {
+      } catch {
         setLoading(false);
         setFetchError('No se pudo cargar la lista de negocios.');
-      });
+      }
+    };
+    fetchNegocios();
   }, []);
 
   // Unificar búsqueda: texto y categoría

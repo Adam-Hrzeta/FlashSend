@@ -6,17 +6,17 @@ import * as ImagePicker from 'expo-image-picker';
 import { router, useFocusEffect } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
- ActivityIndicator,
- Alert,
- Image,
- Modal,
- Platform,
- ScrollView,
- StyleSheet,
- Text,
- TextInput,
- TouchableOpacity,
- View,
+  ActivityIndicator,
+  Alert,
+  Image,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import ImagePickerComponent from '../cliente/modal-foto/imagenpiker';
 
@@ -48,7 +48,7 @@ interface PedidoHistorial {
   detalles?: DetallePedido[];
 }
 
-export default function Perfil_ClienteScreen() {
+export default function Perfil_ClienteScreen({ setNotAuth }: { setNotAuth?: (v: boolean) => void }) {
   const [cliente, setCliente] = useState<Cliente | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -66,18 +66,26 @@ export default function Perfil_ClienteScreen() {
     setError(null);
     try {
       const token = await AsyncStorage.getItem('access_token');
+      if (!token) {
+        setNotAuth && setNotAuth(true);
+        setLoading(false);
+        return;
+      }
       const response = await fetch(`${API_BASE_URL}/api/perfilCliente/perfilCliente`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
-
+      if (response.status === 403) {
+        setNotAuth && setNotAuth(true);
+        setLoading(false);
+        return;
+      }
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
         throw new Error(data?.mensaje || 'Solo los clientes pueden acceder a este modulo.');
       }
-
       const data = await response.json();
       setCliente(data.cliente);
       setEditData(data.cliente);
@@ -96,12 +104,22 @@ export default function Perfil_ClienteScreen() {
     setLoadingHistorial(true);
     try {
       const token = await AsyncStorage.getItem('access_token');
+      if (!token) {
+        setNotAuth && setNotAuth(true);
+        setLoadingHistorial(false);
+        return;
+      }
       const response = await fetch(`${API_BASE_URL}/api/pedidos_cliente/historial`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
+      if (response.status === 403) {
+        setNotAuth && setNotAuth(true);
+        setLoadingHistorial(false);
+        return;
+      }
       const data = await response.json();
       setHistorial(data.pedidos || []);
     } catch (e) {
