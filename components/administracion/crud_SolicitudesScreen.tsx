@@ -1,9 +1,10 @@
 import { API_BASE_URL } from "@/constants/ApiConfig";
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Alert, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, RefreshControl, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { ThemedView } from '@/components/ThemedView';
+import { ThemedText } from '@/components/ThemedText';
 
 interface Negocio {
   id: number;
@@ -94,64 +95,64 @@ export default function Crud_SolicitudesScreen({ setNotAuth }: { setNotAuth?: (v
     setRefreshing(false);
   };
 
-  if (loading) return <ActivityIndicator size="large" style={{marginTop: 40}} />;
+
+  if (loading) return (
+    <ThemedView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <ActivityIndicator size="large" style={{ marginTop: 40 }} />
+    </ThemedView>
+  );
 
   return (
-    <LinearGradient
-      colors={["#F06292", "#BA68C8", "#9575CD", "#7E57C2", "#F06292"]}
-      style={styles.gradient}
-      start={{ x: 0.1, y: 0 }}
-      end={{ x: 1, y: 1 }}
-    >
-      <ScrollView contentContainerStyle={styles.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#7E57C2"]} tintColor="#7E57C2" />}>
-        <Text style={styles.title}>Negocios pendientes</Text>
-        {negocios.length === 0 && <Text style={styles.empty}>No hay negocios pendientes</Text>}
+    <ThemedView style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={styles.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#0a7ea4"]} tintColor="#0a7ea4" />}>
+        <ThemedText type="title" style={styles.title}>Negocios pendientes</ThemedText>
+        {negocios.length === 0 && <ThemedText style={styles.empty}>No hay negocios pendientes</ThemedText>}
         {Array.isArray(negocios) && negocios.map((n) => (
           <View key={n.id} style={styles.card}>
             <View style={{flexDirection:'row', alignItems:'center'}}>
-              <MaterialIcons name="store" size={32} color="#7E57C2" style={{marginRight:8}} />
+              <MaterialIcons name="store" size={32} color="#0a7ea4" style={{marginRight:8}} />
               <View>
-                <Text style={styles.name}>{n.nombre}</Text>
-                <Text style={styles.email}>{n.correo}</Text>
+                <ThemedText style={styles.name}>{n.nombre}</ThemedText>
+                <ThemedText style={styles.email}>{n.correo}</ThemedText>
               </View>
             </View>
             <View style={styles.actions}>
               <TouchableOpacity style={styles.approveBtn} onPress={() => aprobar('negocio', n.id)}>
                 <MaterialIcons name="check-circle" size={24} color="#fff" />
-                <Text style={styles.btnText}>Aprobar</Text>
+                <ThemedText style={styles.btnText}>Aprobar</ThemedText>
               </TouchableOpacity>
               <TouchableOpacity style={styles.rejectBtn} onPress={() => rechazar('negocio', n.id)}>
                 <MaterialIcons name="cancel" size={24} color="#fff" />
-                <Text style={styles.btnText}>Rechazar</Text>
+                <ThemedText style={styles.btnText}>Rechazar</ThemedText>
               </TouchableOpacity>
             </View>
           </View>
         ))}
-        <Text style={styles.title}>Repartidores pendientes</Text>
-        {repartidores.length === 0 && <Text style={styles.empty}>No hay repartidores pendientes</Text>}
+        <ThemedText type="title" style={styles.title}>Repartidores pendientes</ThemedText>
+        {repartidores.length === 0 && <ThemedText style={styles.empty}>No hay repartidores pendientes</ThemedText>}
         {repartidores.map((r) => (
           <View key={r.id} style={styles.card}>
             <View style={{flexDirection:'row', alignItems:'center'}}>
-              <MaterialIcons name="delivery-dining" size={32} color="#7E57C2" style={{marginRight:8}} />
+              <MaterialIcons name="delivery-dining" size={32} color="#0a7ea4" style={{marginRight:8}} />
               <View>
-                <Text style={styles.name}>{r.nombre}</Text>
-                <Text style={styles.email}>{r.correo}</Text>
+                <ThemedText style={styles.name}>{r.nombre}</ThemedText>
+                <ThemedText style={styles.email}>{r.correo}</ThemedText>
               </View>
             </View>
             <View style={styles.actions}>
               <TouchableOpacity style={styles.approveBtn} onPress={() => aprobar('repartidor', r.id)}>
                 <MaterialIcons name="check-circle" size={24} color="#fff" />
-                <Text style={styles.btnText}>Aprobar</Text>
+                <ThemedText style={styles.btnText}>Aprobar</ThemedText>
               </TouchableOpacity>
               <TouchableOpacity style={styles.rejectBtn} onPress={() => rechazar('repartidor', r.id)}>
                 <MaterialIcons name="cancel" size={24} color="#fff" />
-                <Text style={styles.btnText}>Rechazar</Text>
+                <ThemedText style={styles.btnText}>Rechazar</ThemedText>
               </TouchableOpacity>
             </View>
           </View>
         ))}
       </ScrollView>
-    </LinearGradient>
+    </ThemedView>
   );
 }
 

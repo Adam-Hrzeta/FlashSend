@@ -1,9 +1,10 @@
 import { API_BASE_URL } from "@/constants/ApiConfig";
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Alert, FlatList, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, FlatList, Modal, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
+import { ThemedView } from '@/components/ThemedView';
+import { ThemedText } from '@/components/ThemedText';
 
 interface Usuario {
   id: number;
@@ -14,6 +15,7 @@ interface Usuario {
 
 export default function Crud_UsuariosScreen({ setNotAuth }: { setNotAuth?: (v: boolean) => void }) {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [editUser, setEditUser] = useState<Usuario | null>(null);
@@ -121,47 +123,56 @@ export default function Crud_UsuariosScreen({ setNotAuth }: { setNotAuth?: (v: b
     }
   };
 
+  // Filtro de búsqueda
+  const filteredUsuarios = usuarios.filter(u =>
+    u.nombre.toLowerCase().includes(search.toLowerCase()) ||
+    u.correo.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
-    <LinearGradient
-      colors={["#F06292", "#BA68C8", "#9575CD", "#7E57C2", "#F06292"]}
-      style={styles.gradient}
-      start={{ x: 0.1, y: 0 }}
-      end={{ x: 1, y: 1 }}
-    >
+    <ThemedView style={{ flex: 1 }}>
       <View style={styles.headerRow}>
-        <Text style={styles.title}>Usuarios</Text>
+        <ThemedText type="title" style={styles.title}>Usuarios</ThemedText>
         <TouchableOpacity style={styles.addBtn} onPress={openCreate}>
           <MaterialIcons name="person-add" size={24} color="#fff" />
-          <Text style={styles.addBtnText}>Crear admin</Text>
+          <ThemedText style={styles.addBtnText}>Crear admin</ThemedText>
         </TouchableOpacity>
       </View>
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Buscar por nombre o correo..."
+        value={search}
+        onChangeText={setSearch}
+        autoCapitalize="none"
+        placeholderTextColor="#aaa"
+      />
       {loading ? <ActivityIndicator size="large" style={{ marginTop: 40 }} /> : (
         <FlatList
-          data={usuarios}
+          data={filteredUsuarios}
           keyExtractor={u => `${u.tipo}-${u.id}`}
           contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
           ListEmptyComponent={<View>
-            <Text style={styles.empty}>No hay usuarios</Text>
-            {error ? <Text style={{ color: 'red', marginTop: 10, textAlign: 'center' }}>{error}</Text> : null}
+            <ThemedText style={styles.empty}>No hay usuarios</ThemedText>
+            {error ? <ThemedText style={{ color: 'red', marginTop: 10, textAlign: 'center' }}>{error}</ThemedText> : null}
           </View>}
           renderItem={({ item }) => (
             <View style={styles.card}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <MaterialIcons name="person" size={32} color="#7E57C2" style={{ marginRight: 8 }} />
+                <MaterialIcons name="person" size={32} color="#0a7ea4" style={{ marginRight: 8 }} />
                 <View>
-                  <Text style={styles.name}>{item.nombre}</Text>
-                  <Text style={styles.email}>{item.correo}</Text>
-                  <Text style={styles.tipo}>{item.tipo}</Text>
+                  <ThemedText style={styles.name}>{item.nombre}</ThemedText>
+                  <ThemedText style={styles.email}>{item.correo}</ThemedText>
+                  <ThemedText style={styles.tipo}>{item.tipo}</ThemedText>
                 </View>
               </View>
               <View style={styles.actions}>
                 <TouchableOpacity style={styles.editBtn} onPress={() => openEdit(item)}>
                   <MaterialIcons name="edit" size={22} color="#fff" />
-                  <Text style={styles.btnText}>Editar</Text>
+                  <ThemedText style={styles.btnText}>Editar</ThemedText>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.deleteBtn} onPress={() => handleDelete(item.id, item.tipo)}>
                   <MaterialIcons name="delete" size={22} color="#fff" />
-                  <Text style={styles.btnText}>Eliminar</Text>
+                  <ThemedText style={styles.btnText}>Eliminar</ThemedText>
                 </TouchableOpacity>
               </View>
             </View>
@@ -171,31 +182,43 @@ export default function Crud_UsuariosScreen({ setNotAuth }: { setNotAuth?: (v: b
       <Modal visible={modalVisible} animationType="slide" transparent onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalBg}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>{editUser ? 'Editar usuario' : 'Crear administrador'}</Text>
+            <ThemedText style={styles.modalTitle}>{editUser ? 'Editar usuario' : 'Crear administrador'}</ThemedText>
             <TextInput style={styles.input} placeholder="Nombre" value={nombre} onChangeText={setNombre} />
             <TextInput style={styles.input} placeholder="Correo" value={correo} onChangeText={setCorreo} autoCapitalize="none" keyboardType="email-address" />
             <TextInput style={styles.input} placeholder="Tipo (cliente, repartidor, negocio, administrador)" value={tipo} onChangeText={setTipo} />
             <TextInput style={styles.input} placeholder="Contraseña" value={contrasena} onChangeText={setContrasena} secureTextEntry />
-            {error ? <Text style={{ color: 'red', marginBottom: 8 }}>{error}</Text> : null}
+            {error ? <ThemedText style={{ color: 'red', marginBottom: 8 }}>{error}</ThemedText> : null}
             <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
               <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
                 <MaterialIcons name="save" size={22} color="#fff" />
-                <Text style={styles.btnText}>Guardar</Text>
+                <ThemedText style={styles.btnText}>Guardar</ThemedText>
               </TouchableOpacity>
               <TouchableOpacity style={styles.cancelBtn} onPress={() => setModalVisible(false)}>
                 <MaterialIcons name="cancel" size={22} color="#fff" />
-                <Text style={styles.btnText}>Cancelar</Text>
+                <ThemedText style={styles.btnText}>Cancelar</ThemedText>
               </TouchableOpacity>
             </View>
           </View>
         </View>
       </Modal>
-    </LinearGradient>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   gradient: { flex: 1 },
+  searchInput: {
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 8,
+    padding: 10,
+    marginHorizontal: 20,
+    marginTop: 10,
+    marginBottom: 0,
+    fontSize: 16,
+    backgroundColor: '#f7f7f7',
+    color: '#11181C',
+  },
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 20, paddingBottom: 0 },
   title: { fontWeight: 'bold', fontSize: 22, color: '#fff' },
   addBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#7E57C2', padding: 8, borderRadius: 8 },
