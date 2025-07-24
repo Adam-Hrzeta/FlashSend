@@ -1,3 +1,4 @@
+import NotAuthorized from "@/components/ui/NotAuthorized";
 import { API_BASE_URL } from '@/constants/ApiConfig';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -8,7 +9,6 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { pickLocationAndGetAddress } from '../cliente/LocationUtils';
 import { useRegisterPushToken } from '../hooks/useRegisterPushToken';
-import NotAuthorized from "@/components/ui/NotAuthorized";
 
 export interface Negocio {
   id: number;
@@ -30,7 +30,6 @@ export default function Perfil_NegocioScreen({ setNotAuth }: { setNotAuth?: (v: 
   const [notAuthState, setNotAuthState] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editData, setEditData] = useState<Partial<Negocio>>({});
-  const [uploading, setUploading] = useState(false);
   const [isUpdatingPhoto, setIsUpdatingPhoto] = useState(false);
   const [localAvatar, setLocalAvatar] = useState<string | null>(null);
 
@@ -91,9 +90,6 @@ export default function Perfil_NegocioScreen({ setNotAuth }: { setNotAuth?: (v: 
     }
   }, [negocio?.avatar]);
 
-  const handleEdit = () => {
-    setEditModalVisible(true);
-  };
 
   const handleSaveEdit = async () => {
     const token = await AsyncStorage.getItem('access_token');
@@ -226,58 +222,17 @@ export default function Perfil_NegocioScreen({ setNotAuth }: { setNotAuth?: (v: 
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#F3EFFF', justifyContent: 'center' }}>
-      <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 32 }}>
+    <View style={styles.mainContainer}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Tarjeta principal */}
-        <View style={{
-          width: '92%',
-          backgroundColor: '#fff',
-          borderRadius: 28,
-          paddingTop: 70,
-          paddingBottom: 32,
-          paddingHorizontal: 24,
-          alignItems: 'center',
-          elevation: 8,
-          shadowColor: '#7E57C2',
-          shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: 0.13,
-          shadowRadius: 16,
-          marginTop: 60,
-        }}>
+        <View style={styles.card}>
           {/* Avatar superpuesto */}
-          <View style={{
-            position: 'absolute',
-            top: -80,
-            alignSelf: 'center',
-            backgroundColor: '#fff',
-            borderRadius: 90,
-            width: 180,
-            height: 180,
-            justifyContent: 'center',
-            alignItems: 'center',
-            elevation: 10,
-            shadowColor: '#7E57C2',
-            shadowOffset: { width: 0, height: 8 },
-            shadowOpacity: 0.20,
-            shadowRadius: 18,
-          }}>
+          <View style={styles.avatarContainer}>
             {negocio?.avatar && (
-              <Image source={{ uri: localAvatar || negocio.avatar + `?t=${Date.now()}` }} style={{ width: 165, height: 165, borderRadius: 82.5 }} />
+              <Image source={{ uri: localAvatar || negocio.avatar + `?t=${Date.now()}` }} style={styles.avatarImage} />
             )}
             <TouchableOpacity
-              style={{
-                position: 'absolute',
-                bottom: 14,
-                right: 14,
-                backgroundColor: '#fff',
-                borderRadius: 30,
-                padding: 10,
-                elevation: 4,
-                shadowColor: '#7E57C2',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.13,
-                shadowRadius: 4,
-              }}
+              style={styles.avatarButton}
               onPress={() => !isUpdatingPhoto && handlePickImage()}
             >
               <MaterialIcons name="camera-alt" size={28} color="#7E57C2" />
@@ -285,32 +240,17 @@ export default function Perfil_NegocioScreen({ setNotAuth }: { setNotAuth?: (v: 
           </View>
 
           {/* Nombre y categoría */}
-          <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#5E35B1', marginTop: 40 }}>{negocio?.nombre}</Text>
+          <Text style={styles.nombre}>{negocio?.nombre}</Text>
           {/* Etiqueta de categoría tipo chip */}
           {negocio?.categoria && (
-            <View style={{
-              backgroundColor: '#E1BEE7',
-              borderRadius: 16,
-              paddingHorizontal: 14,
-              paddingVertical: 4,
-              alignSelf: 'center',
-              marginTop: 8,
-              marginBottom: 8,
-            }}>
-              <Text style={{ color: '#7E57C2', fontWeight: 'bold', fontSize: 14 }}>{negocio.categoria}</Text>
+            <View style={styles.categoriaChip}>
+              <Text style={styles.categoriaText}>{negocio.categoria}</Text>
             </View>
           )}
 
           {/* Botón para cambiar estado */}
           <TouchableOpacity
-            style={{
-              backgroundColor: negocio?.disponibilidad ? '#4CAF50' : '#F44336',
-              borderRadius: 16,
-              paddingHorizontal: 18,
-              paddingVertical: 8,
-              marginBottom: 10,
-              alignSelf: 'center',
-            }}
+            style={[styles.estadoButton, { backgroundColor: negocio?.disponibilidad ? '#4CAF50' : '#F44336' }]}
             onPress={async () => {
               if (!negocio) return;
               const newDisponibilidad = !negocio.disponibilidad;
@@ -334,13 +274,13 @@ export default function Perfil_NegocioScreen({ setNotAuth }: { setNotAuth?: (v: 
               }
             }}
           >
-            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 15 }}>
+            <Text style={styles.estadoButtonText}>
               {negocio?.disponibilidad ? 'Disponible' : 'No disponible'}
             </Text>
           </TouchableOpacity>
 
           {/* Datos con iconos */}
-          <View style={{ width: '100%', marginTop: 18, marginBottom: 18 }}>
+          <View style={styles.infoList}>
             {[{
               icon: 'email', value: negocio?.correo
             }, {
@@ -351,12 +291,12 @@ export default function Perfil_NegocioScreen({ setNotAuth }: { setNotAuth?: (v: 
             }, {
               icon: 'info', value: negocio?.descripcion || 'Sin descripción'
             }].map((item, idx) => (
-              <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: idx === 4 ? 0 : 14 }}>
+              <View key={idx} style={styles.infoRow}>
                 <MaterialIcons name={item.icon as any} size={22} color={'#7E57C2'} />
-                <Text style={{ fontSize: 16, color: '#5E35B1', marginLeft: 14, flex: 1, flexWrap: 'wrap' }}>{item.value}</Text>
+                <Text style={styles.infoText}>{item.value}</Text>
                 {item.isLocation && (
                   <TouchableOpacity
-                    style={{ marginLeft: 8, backgroundColor: '#E1BEE7', borderRadius: 12, padding: 6 }}
+                    style={styles.locationButton}
                     onPress={async () => {
                       // Seleccionar ubicación y actualizar en backend
                       const dir = await pickLocationAndGetAddress(setEditData, setNegocio);
@@ -384,29 +324,14 @@ export default function Perfil_NegocioScreen({ setNotAuth }: { setNotAuth?: (v: 
           </View>
 
           {/* Botones principales */}
-          <View style={{ width: '100%', marginTop: 28, gap: 0, alignItems: 'center' }}>
+          <View style={styles.logoutContainer}>
             {/* Botón cerrar sesión */}
             <TouchableOpacity
-              style={{
-                width: '100%',
-                backgroundColor: '#7E57C2',
-                borderRadius: 16,
-                paddingVertical: 16,
-                alignItems: 'center',
-                elevation: 2,
-                shadowColor: '#7E57C2',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.13,
-                shadowRadius: 4,
-                flexDirection: 'row',
-                justifyContent: 'center',
-                marginBottom: 0,
-                minHeight: 54,
-              }}
+              style={styles.logoutButton}
               onPress={handleLogout}
             >
-              <MaterialIcons name="logout" size={24} color="#fff" style={{ marginRight: 14 }} />
-              <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 17 }}>Cerrar sesión</Text>
+              <MaterialIcons name="logout" size={24} color="#fff" style={styles.logoutIcon} />
+              <Text style={styles.logoutText}>Cerrar sesión</Text>
             </TouchableOpacity>
           </View>
 
@@ -498,10 +423,149 @@ export default function Perfil_NegocioScreen({ setNotAuth }: { setNotAuth?: (v: 
 }
 
 const styles = StyleSheet.create({
-  container: {
+  mainContainer: {
     flex: 1,
-    backgroundColor: '#F8F5FF',
-    padding: 0,
+    backgroundColor: '#F3EFFF',
+    justifyContent: 'center',
+  },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 32,
+  },
+  card: {
+    width: '92%',
+    backgroundColor: '#fff',
+    borderRadius: 28,
+    paddingTop: 70,
+    paddingBottom: 32,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    elevation: 8,
+    shadowColor: '#7E57C2',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.13,
+    shadowRadius: 16,
+    marginTop: 60,
+  },
+  avatarContainer: {
+    position: 'absolute',
+    top: -80,
+    alignSelf: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 90,
+    width: 180,
+    height: 180,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 10,
+    shadowColor: '#7E57C2',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.20,
+    shadowRadius: 18,
+  },
+  avatarImage: {
+    width: 165,
+    height: 165,
+    borderRadius: 82.5,
+  },
+  avatarButton: {
+    position: 'absolute',
+    bottom: 14,
+    right: 14,
+    backgroundColor: '#fff',
+    borderRadius: 30,
+    padding: 10,
+    elevation: 4,
+    shadowColor: '#7E57C2',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.13,
+    shadowRadius: 4,
+  },
+  nombre: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#5E35B1',
+    marginTop: 40,
+  },
+  categoriaChip: {
+    backgroundColor: '#E1BEE7',
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 4,
+    alignSelf: 'center',
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  categoriaText: {
+    color: '#7E57C2',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  estadoButton: {
+    borderRadius: 16,
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+    marginBottom: 10,
+    alignSelf: 'center',
+  },
+  estadoButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 15,
+  },
+  infoList: {
+    width: '100%',
+    marginTop: 18,
+    marginBottom: 18,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  infoText: {
+    fontSize: 16,
+    color: '#5E35B1',
+    marginLeft: 14,
+    flex: 1,
+    flexWrap: 'wrap',
+  },
+  locationButton: {
+    marginLeft: 8,
+    backgroundColor: '#E1BEE7',
+    borderRadius: 12,
+    padding: 6,
+  },
+  logoutContainer: {
+    width: '100%',
+    marginTop: 28,
+    alignItems: 'center',
+  },
+  logoutButton: {
+    width: '100%',
+    backgroundColor: '#7E57C2',
+    borderRadius: 16,
+    paddingVertical: 16,
+    alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#7E57C2',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.13,
+    shadowRadius: 4,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 0,
+    minHeight: 54,
+  },
+  logoutIcon: {
+    marginRight: 14,
+  },
+  logoutText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 17,
   },
   loadingContainer: {
     flex: 1,
@@ -516,117 +580,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8F5FF',
     padding: 20,
   },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-    backgroundColor: '#7E57C2',
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
-    paddingBottom: 24,
-    paddingTop: 24,
-    elevation: 8,
-    shadowColor: '#7E57C2',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.18,
-    shadowRadius: 16,
-    paddingHorizontal: 18,
-    justifyContent: 'flex-start',
-  },
-  avatarCircle: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 18,
-    elevation: 6,
-    shadowColor: '#7E57C2',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.18,
-    shadowRadius: 8,
-  },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-  },
-  infoSide: {
-    flex: 1,
-    justifyContent: 'center',
-    gap: 2,
-    paddingLeft: 10,
-  },
-  nameOnly: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 2,
-    textAlign: 'left',
-    letterSpacing: 1.1,
-  },
-  emailOnly: {
-    fontSize: 16,
-    color: '#FFD6F6',
-    marginBottom: 6,
-    textAlign: 'left',
-    fontWeight: '600',
-  },
-  categoriaText: {
-    fontSize: 14,
-    color: '#E1BEE7',
-    fontWeight: '500',
-    textAlign: 'left',
-  },
-  infoCard: {
-    backgroundColor: '#fff',
-    padding: 18,
-    borderRadius: 16,
-    marginHorizontal: 18,
-    marginBottom: 18,
-    elevation: 2,
-    shadowColor: '#B39DDB',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.13,
-    shadowRadius: 8,
-    gap: 12,
-  },
-  infoText: {
-    fontSize: 16,
-    marginBottom: 8,
-    color: '#7E57C2',
-    fontWeight: '500',
-    textAlign: 'left',
-  },
   errorText: {
     color: '#C62828',
     textAlign: 'center',
     marginTop: 10,
     fontWeight: 'bold',
     fontSize: 16,
-  },
-  editButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-end',
-    marginRight: 24,
-    marginBottom: 8,
-    backgroundColor: '#fff',
-    borderRadius: 20,
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    elevation: 2,
-    shadowColor: '#7E57C2',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.13,
-    shadowRadius: 4,
-  },
-  editButtonText: {
-    color: '#7E57C2',
-    fontWeight: 'bold',
-    marginLeft: 6,
-    fontSize: 15,
   },
   modalContainer: {
     flex: 1,
@@ -721,18 +680,5 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: 16,
     letterSpacing: 0.5,
-  },
-  uploadButton: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    backgroundColor: '#fff',
-    borderRadius: 50,
-    padding: 6,
-    elevation: 4,
-    shadowColor: '#7E57C2',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.13,
-    shadowRadius: 4,
   },
 });
