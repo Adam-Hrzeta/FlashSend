@@ -13,7 +13,6 @@ interface Producto {
   descripcion: string;
   precio: number;
   categoria?: string;
-  stock: number;
   fecha_creacion: string;
   imagen_url?: string;
 }
@@ -74,7 +73,7 @@ export default function Crud_ProductosScreen({ setNotAuth }: { setNotAuth?: (v: 
   }, []);
 
   const handleAdd = () => {
-    setEditProducto({ nombre: '', descripcion: '', precio: 0, categoria: '', stock: 0 });
+    setEditProducto({ nombre: '', descripcion: '', precio: 0, categoria: ''});
     setImage(null);
     setModalVisible(true);
   };
@@ -107,7 +106,6 @@ export default function Crud_ProductosScreen({ setNotAuth }: { setNotAuth?: (v: 
     if (!editProducto?.descripcion || editProducto.descripcion.trim() === '') newErrors.descripcion = 'La descripción es obligatoria';
     if (editProducto?.precio === undefined || editProducto.precio <= 0) newErrors.precio = 'El precio debe ser mayor a 0';
     if (!editProducto?.categoria || editProducto.categoria.trim() === '') newErrors.categoria = 'La categoría es obligatoria';
-    if (editProducto?.stock === undefined || editProducto.stock < 0) newErrors.stock = 'El stock no puede ser negativo';
     return newErrors;
   };
 
@@ -124,7 +122,6 @@ export default function Crud_ProductosScreen({ setNotAuth }: { setNotAuth?: (v: 
     if (editProducto?.descripcion) formData.append('descripcion', editProducto.descripcion);
     if (editProducto?.precio) formData.append('precio', String(editProducto.precio));
     if (editProducto?.categoria) formData.append('categoria', editProducto.categoria);
-    if (editProducto?.stock !== undefined) formData.append('stock', String(editProducto.stock));
     if (image) {
       formData.append('imagen', { uri: image, type: 'image/jpeg', name: `producto_${Date.now()}.jpg` } as any);
     }
@@ -174,7 +171,6 @@ export default function Crud_ProductosScreen({ setNotAuth }: { setNotAuth?: (v: 
                   <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', marginBottom: 2 }}>
                     <Text style={styles.productNameBetter} numberOfLines={1}>{producto.nombre}</Text>
                     <Text style={styles.productPriceBetter}>${producto.precio}</Text>
-                    <Text style={styles.productStockBetter}>Stock: {producto.stock}</Text>
                   </View>
                   <Text style={styles.productDescBetter} numberOfLines={2}>{producto.descripcion}</Text>
                   <Text style={styles.productCatBetter}>{producto.categoria}</Text>
@@ -196,7 +192,6 @@ export default function Crud_ProductosScreen({ setNotAuth }: { setNotAuth?: (v: 
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>{editProducto?.id ? 'Editar producto' : 'Agregar producto'}</Text>
-            <Text style={{ color: '#7E57C2', marginBottom: 4 }}>* Campos obligatorios</Text>
             <TouchableOpacity style={styles.imagePickerBtn} onPress={pickImage}>
               <MaterialIcons name="image" size={28} color="#7E57C2" />
               <Text style={styles.imagePickerText}>{image ? 'Cambiar imagen' : 'Seleccionar imagen'}</Text>
@@ -205,7 +200,7 @@ export default function Crud_ProductosScreen({ setNotAuth }: { setNotAuth?: (v: 
             <View style={{ width: '100%' }}>
               <TextInput
                 style={[styles.input, { paddingLeft: 36 }]}
-                placeholder="Nombre del producto *"
+                placeholder="Nombre del producto"
                 value={editProducto?.nombre}
                 onChangeText={t => { setEditProducto({ ...editProducto, nombre: t }); setErrors({ ...errors, nombre: '' }); }}
               />
@@ -215,7 +210,7 @@ export default function Crud_ProductosScreen({ setNotAuth }: { setNotAuth?: (v: 
             <View style={{ width: '100%' }}>
               <TextInput
                 style={[styles.input, { paddingLeft: 36 }]}
-                placeholder="Descripción detallada *"
+                placeholder="Descripción del producto"
                 value={editProducto?.descripcion}
                 onChangeText={t => { setEditProducto({ ...editProducto, descripcion: t }); setErrors({ ...errors, descripcion: '' }); }}
                 multiline
@@ -226,7 +221,7 @@ export default function Crud_ProductosScreen({ setNotAuth }: { setNotAuth?: (v: 
             <View style={{ width: '100%' }}>
               <TextInput
                 style={[styles.input, { paddingLeft: 36 }]}
-                placeholder="Precio en pesos (ej: $12000) *"
+                placeholder="Precio en pesos"
                 value={editProducto?.precio !== undefined ? `$${editProducto?.precio}` : ''}
                 onChangeText={t => {
                   const val = t.replace(/[^\d]/g, '');
@@ -239,16 +234,16 @@ export default function Crud_ProductosScreen({ setNotAuth }: { setNotAuth?: (v: 
             </View>
             {errors.precio && <Text style={{ color: 'red', alignSelf: 'flex-start' }}>{errors.precio}</Text>}
             <View style={{ width: '100%', marginBottom: 10 }}>
-              <Text style={{ marginLeft: 4, color: '#9575CD', fontWeight: 'bold', marginBottom: 2 }}>Categoría *</Text>
+              <Text style={{ marginLeft: 4, color: '#9575CD', fontWeight: 'bold', marginBottom: 2 }}>Categoría</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#F8F5FF', borderRadius: 8, borderWidth: 1, borderColor: '#BA68C8' }}>
                 <MaterialIcons name="category" size={22} color="#9575CD" style={{ marginLeft: 10, marginRight: 4 }} />
                 <Picker
                   selectedValue={editProducto?.categoria}
-                  style={{ flex: 1, height: 50, color: '#5E35B1', backgroundColor: 'transparent' }} // remove width, use flex
+                  style={{ flex: 1, height: 50, color: '#5E35B1', backgroundColor: 'transparent' }} 
                   onValueChange={t => { setEditProducto({ ...editProducto, categoria: t }); setErrors({ ...errors, categoria: '' }); }}
                   dropdownIconColor="#9575CD"
                 >
-                  <Picker.Item label="Selecciona una categoría" value="" color="#aaa" />
+                  <Picker.Item label="Seleccionar" value="" color="#aaa" />
                   {CATEGORIAS.map(cat => (
                     <Picker.Item key={cat} label={cat} value={cat} />
                   ))}
@@ -257,17 +252,6 @@ export default function Crud_ProductosScreen({ setNotAuth }: { setNotAuth?: (v: 
             </View>
             {errors.categoria && <Text style={{ color: 'red', alignSelf: 'flex-start' }}>{errors.categoria}</Text>}
             <View style={{ width: '100%' }}>
-              <TextInput
-                style={[styles.input, { paddingLeft: 36 }]}
-                placeholder="Stock disponible (ej: 10) *"
-                value={editProducto?.stock !== undefined ? editProducto?.stock.toString() : ''}
-                onChangeText={t => {
-                  const val = t.replace(/[^\d]/g, '');
-                  setEditProducto({ ...editProducto, stock: Number(val) });
-                  setErrors({ ...errors, stock: '' });
-                }}
-                keyboardType="number-pad"
-              />
               <MaterialIcons name="inventory" size={22} color="#BA68C8" style={{ position: 'absolute', top: 14, left: 8 }} />
             </View>
             {errors.stock && <Text style={{ color: 'red', alignSelf: 'flex-start' }}>{errors.stock}</Text>}
