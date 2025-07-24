@@ -1,3 +1,4 @@
+import NotAuthorized from "@/components/ui/NotAuthorized";
 import { API_BASE_URL } from '@/constants/ApiConfig';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -5,7 +6,6 @@ import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, Animated, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import NotAuthorized from "@/components/ui/NotAuthorized";
 
 interface Producto {
   id: number;
@@ -146,7 +146,7 @@ export default function Crud_ProductosScreen({ setNotAuth }: { setNotAuth?: (v: 
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#fff', padding: 20 }}>
+    <View style={styles.mainContainer}>
       <Text style={styles.title}>Gestión de Productos</Text>
       <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
         <MaterialIcons name="add" size={24} color="#fff" />
@@ -168,7 +168,7 @@ export default function Crud_ProductosScreen({ setNotAuth }: { setNotAuth?: (v: 
                   <Image source={{ uri: API_BASE_URL + producto.imagen_url }} style={styles.productImageBetter} />
                 )}
                 <View style={styles.productInfoBoxBetter}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', marginBottom: 2 }}>
+            <View style={styles.productHeaderRow}>
                     <Text style={styles.productNameBetter} numberOfLines={1}>{producto.nombre}</Text>
                     <Text style={styles.productPriceBetter}>${producto.precio}</Text>
                   </View>
@@ -197,7 +197,7 @@ export default function Crud_ProductosScreen({ setNotAuth }: { setNotAuth?: (v: 
               <Text style={styles.imagePickerText}>{image ? 'Cambiar imagen' : 'Seleccionar imagen'}</Text>
             </TouchableOpacity>
             {image && <Image source={{ uri: image }} style={styles.modalImage} />}
-            <View style={{ width: '100%' }}>
+            <View style={styles.inputWrapper}>
               <TextInput
                 style={[styles.input, { paddingLeft: 36 }]}
                 placeholder="Nombre del producto"
@@ -206,8 +206,8 @@ export default function Crud_ProductosScreen({ setNotAuth }: { setNotAuth?: (v: 
               />
               <MaterialIcons name="drive-file-rename-outline" size={22} color="#7E57C2" style={{ position: 'absolute', top: 14, left: 8 }} />
             </View>
-            {errors.nombre && <Text style={{ color: 'red', alignSelf: 'flex-start' }}>{errors.nombre}</Text>}
-            <View style={{ width: '100%' }}>
+            {errors.nombre && <Text style={styles.errorText}>{errors.nombre}</Text>}
+            <View style={styles.inputWrapper}>
               <TextInput
                 style={[styles.input, { paddingLeft: 36 }]}
                 placeholder="Descripción del producto"
@@ -217,8 +217,8 @@ export default function Crud_ProductosScreen({ setNotAuth }: { setNotAuth?: (v: 
               />
               <MaterialIcons name="description" size={22} color="#7E57C2" style={{ position: 'absolute', top: 14, left: 8 }} />
             </View>
-            {errors.descripcion && <Text style={{ color: 'red', alignSelf: 'flex-start' }}>{errors.descripcion}</Text>}
-            <View style={{ width: '100%' }}>
+            {errors.descripcion && <Text style={styles.errorText}>{errors.descripcion}</Text>}
+            <View style={styles.inputWrapper}>
               <TextInput
                 style={[styles.input, { paddingLeft: 36 }]}
                 placeholder="Precio en pesos"
@@ -232,14 +232,14 @@ export default function Crud_ProductosScreen({ setNotAuth }: { setNotAuth?: (v: 
               />
               <MaterialIcons name="attach-money" size={22} color="#43A047" style={{ position: 'absolute', top: 14, left: 8 }} />
             </View>
-            {errors.precio && <Text style={{ color: 'red', alignSelf: 'flex-start' }}>{errors.precio}</Text>}
-            <View style={{ width: '100%', marginBottom: 10 }}>
-              <Text style={{ marginLeft: 4, color: '#9575CD', fontWeight: 'bold', marginBottom: 2 }}>Categoría</Text>
-              <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#F8F5FF', borderRadius: 8, borderWidth: 1, borderColor: '#BA68C8' }}>
-                <MaterialIcons name="category" size={22} color="#9575CD" style={{ marginLeft: 10, marginRight: 4 }} />
+            {errors.precio && <Text style={styles.errorText}>{errors.precio}</Text>}
+            <View style={styles.categoriaPickerWrapper}>
+              <Text style={styles.categoriaLabel}>Categoría</Text>
+              <View style={styles.categoriaPickerRow}>
+                <MaterialIcons name="category" size={22} color="#9575CD" style={styles.categoriaIcon} />
                 <Picker
                   selectedValue={editProducto?.categoria}
-                  style={{ flex: 1, height: 50, color: '#5E35B1', backgroundColor: 'transparent' }} 
+                  style={styles.categoriaPicker}
                   onValueChange={t => { setEditProducto({ ...editProducto, categoria: t }); setErrors({ ...errors, categoria: '' }); }}
                   dropdownIconColor="#9575CD"
                 >
@@ -250,11 +250,8 @@ export default function Crud_ProductosScreen({ setNotAuth }: { setNotAuth?: (v: 
                 </Picker>
               </View>
             </View>
-            {errors.categoria && <Text style={{ color: 'red', alignSelf: 'flex-start' }}>{errors.categoria}</Text>}
-            <View style={{ width: '100%' }}>
-              <MaterialIcons name="inventory" size={22} color="#BA68C8" style={{ position: 'absolute', top: 14, left: 8 }} />
-            </View>
-            {errors.stock && <Text style={{ color: 'red', alignSelf: 'flex-start' }}>{errors.stock}</Text>}
+            {errors.categoria && <Text style={styles.errorText}>{errors.categoria}</Text>}
+            {/* Stock eliminado, no se usa */}
             <TouchableOpacity style={styles.saveBtn} onPress={handleSave} disabled={uploading}>
               {uploading ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveBtnText}>Guardar</Text>}
             </TouchableOpacity>
@@ -269,6 +266,53 @@ export default function Crud_ProductosScreen({ setNotAuth }: { setNotAuth?: (v: 
 }
 
 const styles = StyleSheet.create({
+  mainContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+    padding: 20,
+    paddingTop: 40,
+  },
+  productHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 2,
+  },
+  inputWrapper: {
+    width: '100%',
+  },
+  errorText: {
+    color: 'red',
+    alignSelf: 'flex-start',
+  },
+  categoriaPickerWrapper: {
+    width: '100%',
+    marginBottom: 10,
+  },
+  categoriaLabel: {
+    marginLeft: 4,
+    color: '#9575CD',
+    fontWeight: 'bold',
+    marginBottom: 2,
+  },
+  categoriaPickerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8F5FF',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#BA68C8',
+  },
+  categoriaIcon: {
+    marginLeft: 10,
+    marginRight: 4,
+  },
+  categoriaPicker: {
+    flex: 1,
+    height: 50,
+    color: '#5E35B1',
+    backgroundColor: 'transparent',
+  },
   title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20, color: '#7E57C2' },
   addButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#7E57C2', padding: 12, borderRadius: 10, marginBottom: 18, alignSelf: 'flex-start' },
   addButtonText: { color: '#fff', fontWeight: 'bold', marginLeft: 8 },
