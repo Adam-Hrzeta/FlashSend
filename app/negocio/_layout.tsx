@@ -37,14 +37,14 @@ export default function TabLayout() {
       <Tabs.Screen
         name="ordenes_Entrantes"
         options={{
-          title: 'Pedidos Entrantes',
+          title: 'Pedidos',
           tabBarIcon: ({ color, size }) => <Feather name="shopping-cart" color={color} size={size} />,
         }}
       />
       <Tabs.Screen
         name="historial_Ordenes"
         options={{
-          title: 'Historial de Pedidos',
+          title: 'Historial',
           tabBarIcon: ({ color, size }) => <Feather name="clock" color={color} size={size} />,
         }}
       />

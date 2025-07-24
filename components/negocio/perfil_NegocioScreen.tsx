@@ -87,7 +87,7 @@ export default function Perfil_NegocioScreen({ setNotAuth }: { setNotAuth?: (v: 
 
   useEffect(() => {
     if (negocio?.avatar) {
-      setLocalAvatar(null); // Siempre usar la URL remota más reciente
+      setLocalAvatar(null); 
     }
   }, [negocio?.avatar]);
 
@@ -97,7 +97,7 @@ export default function Perfil_NegocioScreen({ setNotAuth }: { setNotAuth?: (v: 
 
   const handleSaveEdit = async () => {
     const token = await AsyncStorage.getItem('access_token');
-    fetch(`${API_BASE_URL}/api/negocio/editarPerfil`, { // CORREGIDO
+    fetch(`${API_BASE_URL}/api/negocio/editarPerfil`, { 
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -113,7 +113,6 @@ export default function Perfil_NegocioScreen({ setNotAuth }: { setNotAuth?: (v: 
         return res.json();
       })
       .then(data => {
-        // Solo actualiza los datos, pero conserva el avatar actual
         setNegocio(prev => prev ? { ...data.negocio, avatar: prev.avatar } : data.negocio);
         setEditModalVisible(false);
         Alert.alert('Perfil actualizado');
@@ -161,7 +160,7 @@ export default function Perfil_NegocioScreen({ setNotAuth }: { setNotAuth?: (v: 
 
       const profileData = await profileRes.json();
       setNegocio(profileData.negocio);
-      setLocalAvatar(null); // Forzar recarga de la imagen
+      setLocalAvatar(null);
 
       Alert.alert('Éxito', 'Foto de perfil actualizada correctamente');
     } catch (error) {
@@ -351,8 +350,6 @@ export default function Perfil_NegocioScreen({ setNotAuth }: { setNotAuth?: (v: 
               isLocation: true
             }, {
               icon: 'info', value: negocio?.descripcion || 'Sin descripción'
-            }, {
-              icon: 'delivery-dining', value: negocio?.tipo_entrega
             }].map((item, idx) => (
               <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: idx === 4 ? 0 : 14 }}>
                 <MaterialIcons name={item.icon as any} size={22} color={'#7E57C2'} />
@@ -388,56 +385,6 @@ export default function Perfil_NegocioScreen({ setNotAuth }: { setNotAuth?: (v: 
 
           {/* Botones principales */}
           <View style={{ width: '100%', marginTop: 28, gap: 0, alignItems: 'center' }}>
-            <TouchableOpacity
-              style={{
-                width: '100%',
-                backgroundColor: '#fff',
-                borderRadius: 16,
-                paddingVertical: 16,
-                alignItems: 'center',
-                elevation: 2,
-                shadowColor: '#7E57C2',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.13,
-                shadowRadius: 4,
-                flexDirection: 'row',
-                justifyContent: 'flex-start',
-                borderWidth: 1.2,
-                borderColor: '#E1BEE7',
-                marginBottom: 16,
-                paddingLeft: 28,
-                minHeight: 54,
-              }}
-              onPress={() => router.push('/negocio/crud_Productos')}
-            >
-              <MaterialIcons name="inventory" size={24} color="#7E57C2" style={{ marginRight: 14 }} />
-              <Text style={{ color: '#7E57C2', fontWeight: 'bold', fontSize: 16, flexShrink: 1, flexWrap: 'wrap' }}>Gestionar productos</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{
-                width: '100%',
-                backgroundColor: '#fff',
-                borderRadius: 16,
-                paddingVertical: 16,
-                alignItems: 'center',
-                elevation: 2,
-                shadowColor: '#7E57C2',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.13,
-                shadowRadius: 4,
-                flexDirection: 'row',
-                justifyContent: 'flex-start',
-                borderWidth: 1.2,
-                borderColor: '#E1BEE7',
-                marginBottom: 16,
-                paddingLeft: 28,
-                minHeight: 54,
-              }}
-              onPress={() => router.push('/negocio/ordenes_Entrantes')}
-            >
-              <MaterialIcons name="assignment" size={24} color="#7E57C2" style={{ marginRight: 14 }} />
-              <Text style={{ color: '#7E57C2', fontWeight: 'bold', fontSize: 16, flexShrink: 1, flexWrap: 'wrap' }}>Ver pedidos</Text>
-            </TouchableOpacity>
             {/* Botón cerrar sesión */}
             <TouchableOpacity
               style={{
