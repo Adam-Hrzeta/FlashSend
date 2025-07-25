@@ -3,7 +3,6 @@ import { useCarrito } from "@/components/context/CarritoContext";
 import { API_BASE_URL } from '@/constants/ApiConfig';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
-import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -39,7 +38,6 @@ interface Producto {
   descripcion: string;
   precio: number | string;
   categoria?: string;
-  stock: number;
   fecha_creacion: string;
   imagen_url?: string;
 }
@@ -154,7 +152,8 @@ export default function Perfil_Publico_NegocioScreen({ negocioId: propNegocioId 
       negocio_id: negocio?.id, // <-- Asegura que el producto lleva el negocio_id
       precio: typeof producto.precio === 'string' ? parseFloat(producto.precio) : producto.precio,
       cantidad: 1,
-      imagen_url: producto.imagen_url ? (producto.imagen_url.startsWith('http') ? producto.imagen_url : `${API_BASE_URL}${producto.imagen_url}`) : undefined
+      imagen_url: producto.imagen_url ? (producto.imagen_url.startsWith('http') ? producto.imagen_url : `${API_BASE_URL}${producto.imagen_url}`) : undefined,
+      stock: typeof (producto as any).stock === 'number' ? (producto as any).stock : 1 // Asume 1 si no hay stock
     });
     if (Platform.OS === 'android') {
       ToastAndroid.show('Producto agregado al carrito', ToastAndroid.SHORT);
@@ -182,10 +181,6 @@ export default function Perfil_Publico_NegocioScreen({ negocioId: propNegocioId 
             <Text style={styles.infoTextResponsive}>{item.categoria}</Text>
           </View>
         )}
-        <View style={styles.infoRowResponsive}>
-          <MaterialIcons name="inventory" size={18} color="#7E57C2" />
-          <Text style={styles.infoTextResponsive}>Stock: {item.stock}</Text>
-        </View>
         <TouchableOpacity style={styles.addToCartButton} onPress={() => agregarAlCarrito(item)}>
           <MaterialIcons name="add-shopping-cart" size={20} color="#fff" />
           <Text style={styles.addToCartText}>Agregar a mi carrito</Text>
@@ -215,16 +210,6 @@ export default function Perfil_Publico_NegocioScreen({ negocioId: propNegocioId 
     <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
       {/* Botón de regresar */}
       <View style={{ width: '100%', alignItems: 'flex-start' }}>
-        <TouchableOpacity
-          onPress={() => router.push('/cliente/negocios_Dashboard')}
-          style={styles.backButtonRow}
-          activeOpacity={0.85}
-          accessibilityLabel="Regresar"
-          accessible
-        >
-          <MaterialIcons name="arrow-back" size={24} color="#7E57C2" />
-          <Text style={styles.backButtonText}>Regresar</Text>
-        </TouchableOpacity>
       </View>
       {/* Eliminar imagen superior */}
       {/* ----------Tarjeta principal horizontal */}
@@ -293,6 +278,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F3EFFF',
+    marginTop: 30, // Ajuste para evitar superposición con la barra de estado
   },
   center: {
     flex: 1,

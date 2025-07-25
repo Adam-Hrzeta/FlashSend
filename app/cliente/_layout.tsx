@@ -37,7 +37,7 @@ export default function TabLayout() {
       <Tabs.Screen
       name="historial_Pedidos"
       options={{
-        title: 'Historial de Pedidos',
+        title: 'Historial',
         tabBarIcon: ({ color, size }) => <Feather name="clock" color={color} size={size} />,    
       }}
       />

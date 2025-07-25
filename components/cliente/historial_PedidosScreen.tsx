@@ -69,8 +69,8 @@ export default function Historial_PedidosScreen({ setNotAuth }: { setNotAuth?: (
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#F3EFFF', padding: 16 }}>
-      <Text style={styles.titulo}>Historial de Pedidos Entregados</Text>
+    <View style={{ flex: 1, backgroundColor: '#F3EFFF', padding: 16, marginTop: 20 }}>
+      <Text style={styles.titulo}>Pedidos Entregados</Text>
       <FlatList
         data={pedidosEntregados}
         keyExtractor={(item) => item.id?.toString() || Math.random().toString()}
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
   titulo: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#388E3C',
+    color: '#a42cc2ff',
     marginBottom: 18,
     textAlign: 'center',
   },
