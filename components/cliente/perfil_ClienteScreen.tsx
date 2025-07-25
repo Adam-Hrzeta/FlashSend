@@ -8,6 +8,7 @@ import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Animated,
   Image,
   Modal,
   Platform,
@@ -49,6 +50,7 @@ interface PedidoHistorial {
 }
 
 export default function Perfil_ClienteScreen({ setNotAuth }: { setNotAuth?: (v: boolean) => void }) {
+  const headerAnim = React.useRef(new Animated.Value(0)).current;
   const [cliente, setCliente] = useState<Cliente | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -142,6 +144,11 @@ export default function Perfil_ClienteScreen({ setNotAuth }: { setNotAuth?: (v: 
     React.useCallback(() => {
       fetchCliente();
       fetchHistorial();
+      Animated.timing(headerAnim, {
+        toValue: 1,
+        duration: 700,
+        useNativeDriver: true,
+      }).start();
     }, [])
   );
 
@@ -287,6 +294,7 @@ export default function Perfil_ClienteScreen({ setNotAuth }: { setNotAuth?: (v: 
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#7E57C2" />
+        <Text style={{ color: '#7E57C2', marginTop: 18, fontWeight: 'bold', fontSize: 18 }}>Cargando perfil...</Text>
       </View>
     );
   }
@@ -294,50 +302,58 @@ export default function Perfil_ClienteScreen({ setNotAuth }: { setNotAuth?: (v: 
   if (error) {
     return (
       <View style={styles.errorContainer}>
+        <MaterialIcons name="error-outline" size={48} color="#C62828" />
         <Text style={styles.errorText}>{error}</Text>
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#F3EFFF', justifyContent: 'center' }}>
-      {/* Selector de imagen para cambiar foto de perfil */}
-      {showImagePicker && (
-        <ImagePickerComponent
-          visible={showImagePicker}
-          onRequestClose={() => setShowImagePicker(false)}
-          onImageSelected={async (uri: string) => {
-            await handleImageSelected(uri);
-            setShowImagePicker(false);
-          }}
-        />
-      )}
-      <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 32 }}>
-        {/* Tarjeta principal */}
+    <View style={{ flex: 1, backgroundColor: '#F3EFFF' }}>
+      {/* Header con degradado y avatar */}
+      <Animated.View style={{
+        height: 260,
+        width: '100%',
+        backgroundColor: 'transparent',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        zIndex: 10,
+        opacity: headerAnim,
+      }}>
         <View style={{
-          width: '92%',
-          backgroundColor: '#fff',
-          borderRadius: 28,
-          paddingTop: 70,
-          paddingBottom: 32,
-          paddingHorizontal: 24,
-          alignItems: 'center',
-          elevation: 8,
-          shadowColor: '#7E57C2',
-          shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: 0.13,
-          shadowRadius: 16,
-          marginTop: 60,
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 260,
+          borderBottomLeftRadius: 40,
+          borderBottomRightRadius: 40,
+          overflow: 'hidden',
         }}>
-          {/* Avatar superpuesto */}
+          <View style={{
+            flex: 1,
+            backgroundColor: '#7E57C2',
+            opacity: 0.92,
+          }} />
           <View style={{
             position: 'absolute',
-            top: -80,
-            alignSelf: 'center',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 260,
+            backgroundColor: 'linear-gradient(180deg, #7E57C2 0%, #F3EFFF 100%)',
+            opacity: 0.18,
+          }} />
+        </View>
+        <View style={{ alignItems: 'center', marginBottom: 12 }}>
+          <View style={{
             backgroundColor: '#fff',
             borderRadius: 90,
-            width: 180,
-            height: 180,
+            width: 150,
+            height: 150,
             justifyContent: 'center',
             alignItems: 'center',
             elevation: 10,
@@ -349,17 +365,17 @@ export default function Perfil_ClienteScreen({ setNotAuth }: { setNotAuth?: (v: 
             {cliente?.avatar && (
               <Image
                 source={{ uri: localAvatar || cliente.avatar + `?t=${Date.now()}` }}
-                style={{ width: 165, height: 165, borderRadius: 82.5 }}
+                style={{ width: 135, height: 135, borderRadius: 67.5 }}
               />
             )}
             <TouchableOpacity
               style={{
                 position: 'absolute',
-                bottom: 14,
-                right: 14,
+                bottom: 10,
+                right: 10,
                 backgroundColor: '#fff',
                 borderRadius: 30,
-                padding: 10,
+                padding: 8,
                 elevation: 4,
                 shadowColor: '#7E57C2',
                 shadowOffset: { width: 0, height: 2 },
@@ -368,97 +384,57 @@ export default function Perfil_ClienteScreen({ setNotAuth }: { setNotAuth?: (v: 
               }}
               onPress={() => !isUpdatingPhoto && setShowImagePicker(true)}
             >
-              <MaterialIcons name="camera-alt" size={28} color="#7E57C2" />
+              <MaterialIcons name="camera-alt" size={24} color="#7E57C2" />
             </TouchableOpacity>
           </View>
+          <Text style={{ fontSize: 26, fontWeight: 'bold', color: '#fff', marginTop: 18, textShadowColor: '#7E57C2', textShadowRadius: 6 }}>{cliente?.nombre}</Text>
+        </View>
+      </Animated.View>
 
-          {/* Nombre */}
-          <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#5E35B1', marginTop: 40 }}>{cliente?.nombre}</Text>
+      {/* Selector de imagen para cambiar foto de perfil */}
+      {showImagePicker && (
+        <ImagePickerComponent
+          visible={showImagePicker}
+          onRequestClose={() => setShowImagePicker(false)}
+          onImageSelected={async (uri: string) => {
+            await handleImageSelected(uri);
+            setShowImagePicker(false);
+          }}
+        />
+      )}
 
-          {/* Datos con iconos */}
-          <View style={{ width: '100%', marginTop: 18, marginBottom: 18 }}>
-            {[{
-              icon: 'email', value: cliente?.correo
-            }, {
-              icon: 'phone', value: cliente?.telefono
-            }, {
-              icon: 'cake', value: formatDate(cliente?.fecha_nacimiento) || 'Sin fecha de nacimiento'
-            }].map((item, idx) => (
-              <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 14 }}>
-                <MaterialIcons name={item.icon as any} size={22} color={'#7E57C2'} />
-                <Text style={{ fontSize: 16, color: '#5E35B1', marginLeft: 14, flex: 1, flexWrap: 'wrap' }}>{item.value}</Text>
-              </View>
-            ))}
-          </View>
-
-          {/* Botones */}
-          <View style={{ flexDirection: 'row', width: '100%', marginTop: 18, gap: 12 }}>
-            <TouchableOpacity
-              style={{
-                flex: 1,
-                backgroundColor: '#fff',
-                borderRadius: 16,
-                paddingVertical: 14,
-                alignItems: 'center',
-                elevation: 2,
-                shadowColor: '#7E57C2',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.13,
-                shadowRadius: 4,
-                flexDirection: 'row',
-                justifyContent: 'center',
-                borderWidth: 1.2,
-                borderColor: '#E1BEE7',
-              }}
-              onPress={handleEdit}
-            >
+      <ScrollView contentContainerStyle={{ flexGrow: 1, paddingTop: 260, alignItems: 'center', paddingBottom: 32 }}>
+        {/* Tarjeta de información personal */}
+        <View style={styles.cardInfoPersonal}>
+          <Text style={styles.cardTitle}>Información personal</Text>
+          <View style={styles.infoRow}><MaterialIcons name="email" size={22} color={'#7E57C2'} /><Text style={styles.infoText}>{cliente?.correo}</Text></View>
+          <View style={styles.infoRow}><MaterialIcons name="phone" size={22} color={'#7E57C2'} /><Text style={styles.infoText}>{cliente?.telefono}</Text></View>
+          <View style={styles.infoRow}><MaterialIcons name="cake" size={22} color={'#7E57C2'} /><Text style={styles.infoText}>{formatDate(cliente?.fecha_nacimiento) || 'Sin fecha de nacimiento'}</Text></View>
+          <View style={styles.buttonRow}>
+            <TouchableOpacity style={styles.editButton} onPress={handleEdit}>
               <MaterialIcons name="edit" size={22} color="#7E57C2" />
-              <Text style={{ color: '#7E57C2', fontWeight: 'bold', marginLeft: 10, fontSize: 16 }}>Editar</Text>
+              <Text style={styles.editButtonText}>Editar</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={{
-                flex: 1,
-                backgroundColor: '#7E57C2',
-                borderRadius: 16,
-                paddingVertical: 14,
-                alignItems: 'center',
-                elevation: 2,
-                shadowColor: '#7E57C2',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.13,
-                shadowRadius: 4,
-                flexDirection: 'row',
-                justifyContent: 'center',
-              }}
-              onPress={handleLogout}
-            >
+            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
               <MaterialIcons name="logout" size={22} color="#fff" />
-              <Text style={{ color: '#fff', fontWeight: 'bold', marginLeft: 10, fontSize: 16 }}>Cerrar sesión</Text>
+              <Text style={styles.logoutButtonText}>Cerrar sesión</Text>
             </TouchableOpacity>
           </View>
         </View>
 
         {/* Sección de historial de pedidos */}
-        <View style={{
-          width: '92%',
-          backgroundColor: '#fff',
-          borderRadius: 28,
-          padding: 24,
-          marginTop: 20,
-          elevation: 8,
-          shadowColor: '#7E57C2',
-          shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: 0.13,
-          shadowRadius: 16,
-        }}>
-          <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#5E35B1', marginBottom: 16 }}>Historial de pedidos</Text>
+        <View style={styles.cardPedidos}>
+          <Text style={styles.cardTitle}>Pedidos activos</Text>
           {loadingHistorial ? (
-            <ActivityIndicator size="small" color="#7E57C2" />
+            <View style={{ alignItems: 'center', paddingVertical: 18 }}>
+              <ActivityIndicator size="small" color="#7E57C2" />
+              <Text style={{ color: '#7E57C2', marginTop: 8 }}>Cargando pedidos...</Text>
+            </View>
           ) : historial.length === 0 ? (
-            <Text style={{ color: '#7E57C2', textAlign: 'center', paddingVertical: 20 }}>No hay pedidos recientes</Text>
+            <Text style={styles.noPedidosText}>No hay pedidos recientes</Text>
           ) : (
             historial.filter(pedido => pedido.estatus !== 'entregado').length === 0 ? (
-              <Text style={{ color: '#7E57C2', textAlign: 'center', paddingVertical: 20 }}>No hay pedidos activos</Text>
+              <Text style={styles.noPedidosText}>No hay pedidos activos</Text>
             ) : (
               historial.filter(pedido => pedido.estatus !== 'entregado').map((pedido) => {
                 const fechaLegible = new Intl.DateTimeFormat('es-MX', {
@@ -466,49 +442,19 @@ export default function Perfil_ClienteScreen({ setNotAuth }: { setNotAuth?: (v: 
                 }).format(new Date(pedido.fecha));
                 const productos = pedido.productos && pedido.productos.length > 0 ? pedido.productos : (pedido.detalles || []);
                 return (
-                  <View key={pedido.id} style={{
-                    marginBottom: 22,
-                    backgroundColor: '#fff',
-                    borderRadius: 20,
-                    padding: 0,
-                    elevation: 6,
-                    shadowColor: '#7E57C2',
-                    shadowOffset: { width: 0, height: 6 },
-                    shadowOpacity: 0.13,
-                    shadowRadius: 12,
-                    overflow: 'hidden',
-                    borderWidth: 1.5,
-                    borderColor: '#E1BEE7',
-                  }}>
-                    {/* Header */}
-                    <View style={{ backgroundColor: '#7E57C2', padding: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18 }}>
-                        <MaterialIcons name="receipt" size={22} color="#fff" /> Pedido #{pedido.id}
-                      </Text>
-                      <Text style={{ color: '#fff', fontSize: 14, fontWeight: '600' }}>
-                        {fechaLegible}
-                      </Text>
+                  <View key={pedido.id} style={styles.pedidoCard}>
+                    <View style={styles.pedidoHeader}>
+                      <Text style={styles.pedidoHeaderText}><MaterialIcons name="receipt" size={20} color="#fff" /> Pedido #{pedido.id}</Text>
+                      <Text style={styles.pedidoHeaderDate}>{fechaLegible}</Text>
                     </View>
-                    {/* Info principal */}
-                    <View style={{ padding: 16, gap: 6 }}>
-                      <Text style={{ color: '#5E35B1', fontWeight: 'bold', fontSize: 16 }}>
-                        <MaterialIcons name="store" size={18} color="#7E57C2" /> {pedido.negocio_nombre || pedido.negocio_id}
-                      </Text>
-                      <Text style={{ color: '#7E57C2', fontSize: 15 }}>
-                        <MaterialIcons name="attach-money" size={18} color="#7E57C2" /> <Text style={{ fontWeight: 'bold' }}>Total:</Text> ${pedido.total}
-                      </Text>
-                      <Text style={{ color: '#7E57C2', fontSize: 15 }}>
-                        <MaterialIcons name="info" size={18} color="#7E57C2" /> <Text style={{ fontWeight: 'bold' }}>Estatus:</Text> {pedido.estatus === 'enviado' ? 'En camino' : pedido.estatus}
-                      </Text>
-                      <Text style={{ color: '#7E57C2', fontSize: 15 }}>
-                        <MaterialIcons name="location-on" size={18} color="#7E57C2" /> <Text style={{ fontWeight: 'bold' }}>Dirección de entrega:</Text> {pedido.direccion_entrega}
-                      </Text>
+                    <View style={styles.pedidoInfo}>
+                      <Text style={styles.pedidoNegocio}><MaterialIcons name="store" size={16} color="#7E57C2" /> {pedido.negocio_nombre || pedido.negocio_id}</Text>
+                      <Text style={styles.pedidoTotal}><MaterialIcons name="attach-money" size={16} color="#7E57C2" /> <Text style={{ fontWeight: 'bold' }}>Total:</Text> ${pedido.total}</Text>
+                      <Text style={styles.pedidoEstatus}><MaterialIcons name="info" size={16} color="#7E57C2" /> <Text style={{ fontWeight: 'bold' }}>Estatus:</Text> {pedido.estatus === 'enviado' ? 'En camino' : pedido.estatus}</Text>
+                      <Text style={styles.pedidoDireccion}><MaterialIcons name="location-on" size={16} color="#7E57C2" /> <Text style={{ fontWeight: 'bold' }}>Dirección:</Text> {pedido.direccion_entrega}</Text>
                     </View>
-                    {/* Productos */}
-                    <View style={{ backgroundColor: '#F3EFFF', paddingHorizontal: 16, paddingBottom: 12, paddingTop: 8 }}>
-                      <Text style={{ color: '#5E35B1', fontWeight: 'bold', fontSize: 15, marginBottom: 2 }}>
-                        <MaterialIcons name="shopping-cart" size={18} color="#7E57C2" /> Productos solicitados:
-                      </Text>
+                    <View style={styles.pedidoProductos}>
+                      <Text style={styles.pedidoProductosTitle}><MaterialIcons name="shopping-cart" size={16} color="#7E57C2" /> Productos:</Text>
                       {productos.length > 0 ? (
                         productos.map((prod, idx) => {
                           const precio = prod.precio_unitario;
@@ -517,18 +463,14 @@ export default function Perfil_ClienteScreen({ setNotAuth }: { setNotAuth?: (v: 
                             precioDisplay = Number(precio).toFixed(2);
                           }
                           return (
-                            <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2, marginLeft: 8 }}>
-                              <MaterialIcons name="check-circle" size={16} color="#7E57C2" />
-                              <Text style={{ color: '#7E57C2', marginLeft: 6, fontSize: 14 }}>
-                                {prod.nombre ? prod.nombre : `Producto ${prod.producto_id}`} <Text style={{ fontWeight: 'bold' }}>x{prod.cantidad}</Text> <Text style={{ color: '#5E35B1' }}>@ ${precioDisplay}</Text>
-                              </Text>
+                            <View key={idx} style={styles.pedidoProductoRow}>
+                              <MaterialIcons name="check-circle" size={14} color="#7E57C2" />
+                              <Text style={styles.pedidoProductoText}>{prod.nombre ? prod.nombre : `Producto ${prod.producto_id}`} <Text style={{ fontWeight: 'bold' }}>x{prod.cantidad}</Text> <Text style={{ color: '#5E35B1' }}>@ ${precioDisplay}</Text></Text>
                             </View>
                           );
                         })
                       ) : (
-                        <Text style={{ color: '#7E57C2', fontStyle: 'italic', marginLeft: 8 }}>
-                          No hay productos asociados a este pedido.
-                        </Text>
+                        <Text style={styles.pedidoProductoEmpty}>No hay productos asociados.</Text>
                       )}
                     </View>
                   </View>
@@ -551,86 +493,13 @@ export default function Perfil_ClienteScreen({ setNotAuth }: { setNotAuth?: (v: 
                 <MaterialIcons name="edit" size={38} color="#fff" />
               </View>
               <Text style={styles.modalTitleCustom}>Editar información</Text>
-
-              <View style={styles.inputRow}>
-                <MaterialIcons name="person" size={20} color="#BA68C8" style={styles.inputIcon} />
-                <TextInput
-                  style={styles.inputCustom}
-                  placeholder="Nombre"
-                  placeholderTextColor="#BA68C8"
-                  value={editData.nombre || ''}
-                  onChangeText={text => setEditData({ ...editData, nombre: text })}
-                />
-              </View>
-
-              <View style={styles.inputRow}>
-                <MaterialIcons name="email" size={20} color="#BA68C8" style={styles.inputIcon} />
-                <TextInput
-                  style={styles.inputCustom}
-                  placeholder="Correo"
-                  placeholderTextColor="#BA68C8"
-                  value={editData.correo || ''}
-                  onChangeText={text => setEditData({ ...editData, correo: text })}
-                  keyboardType="email-address"
-                />
-              </View>
-
-              <View style={styles.inputRow}>
-                <MaterialIcons name="phone" size={20} color="#BA68C8" style={styles.inputIcon} />
-                <TextInput
-                  style={styles.inputCustom}
-                  placeholder="Teléfono"
-                  placeholderTextColor="#BA68C8"
-                  value={editData.telefono || ''}
-                  onChangeText={text => setEditData({ ...editData, telefono: text })}
-                  keyboardType="phone-pad"
-                />
-              </View>
-
-              <TouchableOpacity
-                onPress={() => setShowDatePicker(true)}
-                style={[styles.inputRow, { paddingVertical: 12 }]}
-              >
-                <MaterialIcons name="cake" size={20} color="#BA68C8" style={styles.inputIcon} />
-                <Text style={{ color: '#5E35B1', fontSize: 16 }}>
-                  {editData.fecha_nacimiento
-                    ? formatDate(editData.fecha_nacimiento)
-                    : 'Seleccionar fecha de nacimiento'}
-                </Text>
-              </TouchableOpacity>
-
-              {showDatePicker && (
-                <DateTimePicker
-                  value={editData.fecha_nacimiento ? new Date(editData.fecha_nacimiento) : new Date()}
-                  mode="date"
-                  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                  onChange={(event, selectedDate) => {
-                    setShowDatePicker(false);
-                    if (selectedDate) {
-                      const formattedDate = selectedDate.toISOString().split('T')[0];
-                      setEditData({ ...editData, fecha_nacimiento: formattedDate });
-                    }
-                  }}
-                />
-              )}
-
-              <TouchableOpacity
-                style={styles.modalButton}
-                onPress={handleSaveEdit}
-              >
-                <Text style={styles.modalButtonText}>
-                  <MaterialIcons name="save" size={18} color="#fff" /> Guardar
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.cancelButtonCustom}
-                onPress={() => setEditModalVisible(false)}
-              >
-                <Text style={styles.cancelButtonText}>
-                  <MaterialIcons name="close" size={18} color="#7E57C2" /> Cancelar
-                </Text>
-              </TouchableOpacity>
+              <View style={styles.inputRow}><MaterialIcons name="person" size={20} color="#BA68C8" style={styles.inputIcon} /><TextInput style={styles.inputCustom} placeholder="Nombre" placeholderTextColor="#BA68C8" value={editData.nombre || ''} onChangeText={text => setEditData({ ...editData, nombre: text })} /></View>
+              <View style={styles.inputRow}><MaterialIcons name="email" size={20} color="#BA68C8" style={styles.inputIcon} /><TextInput style={styles.inputCustom} placeholder="Correo" placeholderTextColor="#BA68C8" value={editData.correo || ''} onChangeText={text => setEditData({ ...editData, correo: text })} keyboardType="email-address" /></View>
+              <View style={styles.inputRow}><MaterialIcons name="phone" size={20} color="#BA68C8" style={styles.inputIcon} /><TextInput style={styles.inputCustom} placeholder="Teléfono" placeholderTextColor="#BA68C8" value={editData.telefono || ''} onChangeText={text => setEditData({ ...editData, telefono: text })} keyboardType="phone-pad" /></View>
+              <TouchableOpacity onPress={() => setShowDatePicker(true)} style={[styles.inputRow, { paddingVertical: 12 }]}> <MaterialIcons name="cake" size={20} color="#BA68C8" style={styles.inputIcon} /> <Text style={{ color: '#5E35B1', fontSize: 16 }}>{editData.fecha_nacimiento ? formatDate(editData.fecha_nacimiento) : 'Seleccionar fecha de nacimiento'}</Text> </TouchableOpacity>
+              {showDatePicker && (<DateTimePicker value={editData.fecha_nacimiento ? new Date(editData.fecha_nacimiento) : new Date()} mode="date" display={Platform.OS === 'ios' ? 'spinner' : 'default'} onChange={(event, selectedDate) => { setShowDatePicker(false); if (selectedDate) { const formattedDate = selectedDate.toISOString().split('T')[0]; setEditData({ ...editData, fecha_nacimiento: formattedDate }); } }} />)}
+              <TouchableOpacity style={styles.modalButton} onPress={handleSaveEdit}><Text style={styles.modalButtonText}><MaterialIcons name="save" size={18} color="#fff" /> Guardar</Text></TouchableOpacity>
+              <TouchableOpacity style={styles.cancelButtonCustom} onPress={() => setEditModalVisible(false)}><Text style={styles.cancelButtonText}><MaterialIcons name="close" size={18} color="#7E57C2" /> Cancelar</Text></TouchableOpacity>
             </View>
           </View>
         </Modal>
@@ -657,7 +526,195 @@ const styles = StyleSheet.create({
     color: '#C62828',
     textAlign: 'center',
     fontWeight: 'bold',
+    fontSize: 18,
+    marginTop: 12,
+  },
+  cardInfoPersonal: {
+    width: '92%',
+    backgroundColor: '#fff',
+    borderRadius: 28,
+    padding: 28,
+    marginTop: 18,
+    marginBottom: 18,
+    elevation: 8,
+    shadowColor: '#7E57C2',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.13,
+    shadowRadius: 16,
+    alignItems: 'center',
+  },
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#7E57C2',
+    marginBottom: 18,
+    textAlign: 'center',
+    letterSpacing: 0.7,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 12,
+    backgroundColor: '#F8F5FF',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+  },
+  infoText: {
     fontSize: 16,
+    color: '#5E35B1',
+    marginLeft: 14,
+    flex: 1,
+    flexWrap: 'wrap',
+    fontWeight: '500',
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    width: '100%',
+    marginTop: 18,
+    gap: 12,
+    justifyContent: 'center',
+  },
+  editButton: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    paddingVertical: 14,
+    alignItems: 'center',
+    elevation: 2,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    borderWidth: 1.2,
+    borderColor: '#E1BEE7',
+  },
+  editButtonText: {
+    color: '#7E57C2',
+    fontWeight: 'bold',
+    marginLeft: 10,
+    fontSize: 16,
+  },
+  logoutButton: {
+    flex: 1,
+    backgroundColor: '#7E57C2',
+    borderRadius: 16,
+    paddingVertical: 14,
+    alignItems: 'center',
+    elevation: 2,
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  logoutButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    marginLeft: 10,
+    fontSize: 16,
+  },
+  cardPedidos: {
+    width: '92%',
+    backgroundColor: '#fff',
+    borderRadius: 28,
+    padding: 24,
+    marginTop: 10,
+    elevation: 8,
+    shadowColor: '#7E57C2',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.13,
+    shadowRadius: 16,
+  },
+  noPedidosText: {
+    color: '#7E57C2',
+    textAlign: 'center',
+    paddingVertical: 20,
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  pedidoCard: {
+    marginBottom: 22,
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    elevation: 6,
+    shadowColor: '#7E57C2',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.13,
+    shadowRadius: 12,
+    overflow: 'hidden',
+    borderWidth: 1.5,
+    borderColor: '#E1BEE7',
+  },
+  pedidoHeader: {
+    backgroundColor: '#7E57C2',
+    padding: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  pedidoHeaderText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  pedidoHeaderDate: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  pedidoInfo: {
+    padding: 14,
+    gap: 6,
+  },
+  pedidoNegocio: {
+    color: '#5E35B1',
+    fontWeight: 'bold',
+    fontSize: 15,
+    marginBottom: 2,
+  },
+  pedidoTotal: {
+    color: '#7E57C2',
+    fontSize: 15,
+    marginBottom: 2,
+  },
+  pedidoEstatus: {
+    color: '#7E57C2',
+    fontSize: 15,
+    marginBottom: 2,
+  },
+  pedidoDireccion: {
+    color: '#7E57C2',
+    fontSize: 15,
+    marginBottom: 2,
+  },
+  pedidoProductos: {
+    backgroundColor: '#F3EFFF',
+    paddingHorizontal: 14,
+    paddingBottom: 12,
+    paddingTop: 8,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+  },
+  pedidoProductosTitle: {
+    color: '#5E35B1',
+    fontWeight: 'bold',
+    fontSize: 15,
+    marginBottom: 2,
+  },
+  pedidoProductoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 2,
+    marginLeft: 8,
+  },
+  pedidoProductoText: {
+    color: '#7E57C2',
+    marginLeft: 6,
+    fontSize: 14,
+  },
+  pedidoProductoEmpty: {
+    color: '#7E57C2',
+    fontStyle: 'italic',
+    marginLeft: 8,
   },
   modalContainer: {
     flex: 1,
