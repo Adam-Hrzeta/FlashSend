@@ -324,7 +324,7 @@ export default function Perfil_ClienteScreen({ setNotAuth }: { setNotAuth?: (v: 
     <View style={{ flex: 1, backgroundColor: '#F3EFFF' }}>
       {/* Header con degradado y avatar */}
       <Animated.View style={{
-        height: 260,
+        height: 110,
         width: '100%',
         backgroundColor: 'transparent',
         justifyContent: 'flex-end',
@@ -340,9 +340,9 @@ export default function Perfil_ClienteScreen({ setNotAuth }: { setNotAuth?: (v: 
           top: 0,
           left: 0,
           right: 0,
-          height: 260,
-          borderBottomLeftRadius: 40,
-          borderBottomRightRadius: 40,
+          height: 110,
+          borderBottomLeftRadius: 20,
+          borderBottomRightRadius: 20,
           overflow: 'hidden',
         }}>
           <View style={{
@@ -350,56 +350,67 @@ export default function Perfil_ClienteScreen({ setNotAuth }: { setNotAuth?: (v: 
             backgroundColor: '#7E57C2',
             opacity: 0.92,
           }} />
-          <View style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 260,
-            backgroundColor: 'linear-gradient(180deg, #7E57C2 0%, #F3EFFF 100%)',
-            opacity: 0.18,
-          }} />
         </View>
-        <View style={{ alignItems: 'center', marginBottom: 12 }}>
-          <View style={{
-            backgroundColor: '#fff',
-            borderRadius: 90,
-            width: 150,
-            height: 150,
-            justifyContent: 'center',
-            alignItems: 'center',
-            elevation: 10,
-            shadowColor: '#7E57C2',
-            shadowOffset: { width: 0, height: 8 },
-            shadowOpacity: 0.20,
-            shadowRadius: 18,
-          }}>
-            {cliente?.avatar && (
-              <Image
-                source={{ uri: localAvatar || cliente.avatar + `?t=${Date.now()}` }}
-                style={{ width: 135, height: 135, borderRadius: 67.5 }}
-              />
-            )}
-            <TouchableOpacity
-              style={{
-                position: 'absolute',
-                bottom: 10,
-                right: 10,
-                backgroundColor: '#fff',
-                borderRadius: 30,
-                padding: 8,
-                elevation: 4,
-                shadowColor: '#7E57C2',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.13,
-                shadowRadius: 4,
-              }}
-              onPress={() => !isUpdatingPhoto && setShowImagePicker(true)}
-            >
-              <MaterialIcons name="camera-alt" size={24} color="#7E57C2" />
-            </TouchableOpacity>
+        <View style={{ width: '100%', alignItems: 'center', justifyContent: 'center', marginBottom: 4 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '90%' }}>
+            <View style={{
+              backgroundColor: '#fff',
+              borderRadius: 90,
+              width: 60,
+              height: 60,
+              justifyContent: 'center',
+              alignItems: 'center',
+              elevation: 4,
+              shadowColor: '#7E57C2',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.10,
+              shadowRadius: 4,
+            }}>
+              {cliente?.avatar && (
+                <Image
+                  source={{ uri: localAvatar || cliente.avatar + `?t=${Date.now()}` }}
+                  style={{ width: 50, height: 50, borderRadius: 25 }}
+                />
+              )}
+              <TouchableOpacity
+                style={{
+                  position: 'absolute',
+                  bottom: 2,
+                  right: 2,
+                  backgroundColor: '#fff',
+                  borderRadius: 10,
+                  padding: 3,
+                  elevation: 1,
+                  shadowColor: '#7E57C2',
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.08,
+                  shadowRadius: 1,
+                }}
+                onPress={() => !isUpdatingPhoto && setShowImagePicker(true)}
+              >
+                <MaterialIcons name="camera-alt" size={12} color="#7E57C2" />
+              </TouchableOpacity>
+            </View>
+            <View style={{ flex: 1, marginLeft: 10, justifyContent: 'center', alignItems: 'flex-start', height: 60 }}>
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: 'bold',
+                  color: '#fff',
+                  textShadowColor: '#7E57C2',
+                  textShadowRadius: 4,
+                  flexShrink: 1,
+                  flexWrap: 'wrap',
+                  textAlign: 'left',
+                  maxWidth: '95%',
+                }}
+                numberOfLines={2}
+                ellipsizeMode="tail"
+              >
+                {cliente?.nombre}
+              </Text>
+            </View>
           </View>
-          <Text style={{ fontSize: 26, fontWeight: 'bold', color: '#fff', marginTop: 18, textShadowColor: '#7E57C2', textShadowRadius: 6 }}>{cliente?.nombre}</Text>
         </View>
       </Animated.View>
 
@@ -415,7 +426,7 @@ export default function Perfil_ClienteScreen({ setNotAuth }: { setNotAuth?: (v: 
         />
       )}
 
-      <ScrollView contentContainerStyle={{ flexGrow: 1, paddingTop: 260, alignItems: 'center', paddingBottom: 32 }}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1, paddingTop: 110, alignItems: 'center', paddingBottom: 20 }}>
         {/* Tarjeta de información personal */}
         <View style={styles.cardInfoPersonal}>
           <Text style={styles.cardTitle}>Información personal</Text>
@@ -542,36 +553,36 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   cardInfoPersonal: {
-    width: '92%',
+    width: '95%',
     backgroundColor: '#fff',
-    borderRadius: 28,
-    padding: 28,
-    marginTop: 18,
-    marginBottom: 18,
-    elevation: 8,
+    borderRadius: 20,
+    padding: 16,
+    marginTop: 10,
+    marginBottom: 10,
+    elevation: 6,
     shadowColor: '#7E57C2',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.13,
-    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.10,
+    shadowRadius: 10,
     alignItems: 'center',
   },
   cardTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#7E57C2',
-    marginBottom: 18,
+    marginBottom: 10,
     textAlign: 'center',
-    letterSpacing: 0.7,
+    letterSpacing: 0.5,
   },
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
     width: '100%',
-    marginBottom: 12,
+    marginBottom: 6,
     backgroundColor: '#F8F5FF',
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
   },
   infoText: {
     fontSize: 16,
@@ -584,55 +595,55 @@ const styles = StyleSheet.create({
   buttonRow: {
     flexDirection: 'row',
     width: '100%',
-    marginTop: 18,
-    gap: 12,
+    marginTop: 10,
+    gap: 8,
     justifyContent: 'center',
   },
   editButton: {
     flex: 1,
     backgroundColor: '#fff',
-    borderRadius: 16,
-    paddingVertical: 14,
+    borderRadius: 12,
+    paddingVertical: 10,
     alignItems: 'center',
-    elevation: 2,
+    elevation: 1,
     flexDirection: 'row',
     justifyContent: 'center',
-    borderWidth: 1.2,
+    borderWidth: 1,
     borderColor: '#E1BEE7',
   },
   editButtonText: {
     color: '#7E57C2',
     fontWeight: 'bold',
-    marginLeft: 10,
-    fontSize: 16,
+    marginLeft: 8,
+    fontSize: 15,
   },
   logoutButton: {
     flex: 1,
     backgroundColor: '#7E57C2',
-    borderRadius: 16,
-    paddingVertical: 14,
+    borderRadius: 12,
+    paddingVertical: 10,
     alignItems: 'center',
-    elevation: 2,
+    elevation: 1,
     flexDirection: 'row',
     justifyContent: 'center',
   },
   logoutButtonText: {
     color: '#fff',
     fontWeight: 'bold',
-    marginLeft: 10,
-    fontSize: 16,
+    marginLeft: 8,
+    fontSize: 15,
   },
   cardPedidos: {
-    width: '92%',
+    width: '95%',
     backgroundColor: '#fff',
-    borderRadius: 28,
-    padding: 24,
-    marginTop: 10,
-    elevation: 8,
+    borderRadius: 20,
+    padding: 14,
+    marginTop: 6,
+    elevation: 6,
     shadowColor: '#7E57C2',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.13,
-    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.10,
+    shadowRadius: 10,
   },
   noPedidosText: {
     color: '#7E57C2',
@@ -642,26 +653,26 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   pedidoCard: {
-    marginBottom: 22,
+    marginBottom: 12,
     backgroundColor: '#fff',
-    borderRadius: 20,
-    elevation: 6,
+    borderRadius: 14,
+    elevation: 3,
     shadowColor: '#7E57C2',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.13,
-    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
     overflow: 'hidden',
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: '#E1BEE7',
   },
   pedidoHeader: {
     backgroundColor: '#7E57C2',
-    padding: 12,
+    padding: 8,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: 14,
+    borderTopRightRadius: 14,
   },
   pedidoHeaderText: {
     color: '#fff',
@@ -674,8 +685,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   pedidoInfo: {
-    padding: 14,
-    gap: 6,
+    padding: 8,
+    gap: 4,
   },
   pedidoNegocio: {
     color: '#5E35B1',
@@ -700,33 +711,33 @@ const styles = StyleSheet.create({
   },
   pedidoProductos: {
     backgroundColor: '#F3EFFF',
-    paddingHorizontal: 14,
-    paddingBottom: 12,
-    paddingTop: 8,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    paddingHorizontal: 8,
+    paddingBottom: 8,
+    paddingTop: 4,
+    borderBottomLeftRadius: 14,
+    borderBottomRightRadius: 14,
   },
   pedidoProductosTitle: {
     color: '#5E35B1',
     fontWeight: 'bold',
-    fontSize: 15,
-    marginBottom: 2,
+    fontSize: 14,
+    marginBottom: 1,
   },
   pedidoProductoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 2,
-    marginLeft: 8,
+    marginBottom: 1,
+    marginLeft: 4,
   },
   pedidoProductoText: {
     color: '#7E57C2',
-    marginLeft: 6,
-    fontSize: 14,
+    marginLeft: 4,
+    fontSize: 13,
   },
   pedidoProductoEmpty: {
     color: '#7E57C2',
     fontStyle: 'italic',
-    marginLeft: 8,
+    marginLeft: 4,
   },
   modalContainer: {
     flex: 1,
@@ -736,15 +747,15 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   modalContentCustom: {
-    width: '90%',
+    width: '95%',
     backgroundColor: '#fff',
-    padding: 28,
-    borderRadius: 20,
-    elevation: 12,
+    padding: 14,
+    borderRadius: 14,
+    elevation: 6,
     shadowColor: '#7E57C2',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.22,
-    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.10,
+    shadowRadius: 10,
     alignItems: 'center',
   },
   modalIconCircle: {
@@ -762,64 +773,64 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
   },
   modalTitleCustom: {
-    fontSize: 20,
+    fontSize: 17,
     fontWeight: 'bold',
     color: '#7E57C2',
-    marginBottom: 18,
+    marginBottom: 10,
     textAlign: 'center',
-    letterSpacing: 0.7,
+    letterSpacing: 0.5,
   },
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
     width: '100%',
-    marginBottom: 10,
+    marginBottom: 6,
     backgroundColor: '#F8F5FF',
-    borderRadius: 10,
-    paddingHorizontal: 8,
+    borderRadius: 8,
+    paddingHorizontal: 6,
   },
   inputIcon: {
     marginRight: 8,
   },
   inputCustom: {
     flex: 1,
-    borderBottomWidth: 1.7,
+    borderBottomWidth: 1.2,
     borderBottomColor: '#BA68C8',
-    padding: 10,
-    fontSize: 17,
+    padding: 6,
+    fontSize: 15,
     color: '#5E35B1',
     fontWeight: '500',
     backgroundColor: 'transparent',
   },
   modalButton: {
     backgroundColor: '#7E57C2',
-    paddingVertical: 14,
-    paddingHorizontal: 32,
-    borderRadius: 16,
-    marginTop: 18,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    marginTop: 10,
     alignItems: 'center',
-    elevation: 4,
+    elevation: 2,
     width: '100%',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   modalButtonText: {
     color: '#fff',
     fontWeight: '800',
-    fontSize: 17,
-    letterSpacing: 0.7,
+    fontSize: 15,
+    letterSpacing: 0.5,
     textAlign: 'center',
   },
   cancelButtonCustom: {
     marginTop: 0,
-    paddingVertical: 10,
+    paddingVertical: 6,
     width: '100%',
     alignItems: 'center',
-    borderRadius: 12,
+    borderRadius: 8,
   },
   cancelButtonText: {
     color: '#7E57C2',
     fontWeight: '700',
-    fontSize: 16,
-    letterSpacing: 0.5,
+    fontSize: 14,
+    letterSpacing: 0.3,
   },
 });
