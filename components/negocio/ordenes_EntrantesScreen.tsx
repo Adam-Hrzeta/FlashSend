@@ -1,10 +1,10 @@
+import NotAuthorized from "@/components/ui/NotAuthorized";
 import { API_BASE_URL } from '@/constants/ApiConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Alert, Button, FlatList, Modal, StyleSheet, Text, TouchableHighlight, TouchableOpacity, View } from "react-native";
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import NotAuthorized from "@/components/ui/NotAuthorized";
 
 interface DetallePedido {
   producto_id: number;
@@ -215,7 +215,7 @@ export default function ordenes_EntrantesScreen({ setNotAuth }: { setNotAuth?: (
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#F3EFFF', padding: 16 }}>
+    <View style={styles.mainContainer}>
       {/* Modal para seleccionar repartidor aliado */}
       <Modal
         visible={modalVisible}
@@ -223,9 +223,9 @@ export default function ordenes_EntrantesScreen({ setNotAuth }: { setNotAuth?: (
         animationType="slide"
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.3)' }}>
-          <View style={{ backgroundColor: '#fff', padding: 24, borderRadius: 16, width: 320, maxHeight: 400 }}>
-            <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 12 }}>Selecciona un repartidor aliado</Text>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>Selecciona un repartidor aliado</Text>
             {loadingRepartidores ? (
               <ActivityIndicator color="#7E57C2" />
             ) : (
@@ -235,21 +235,16 @@ export default function ordenes_EntrantesScreen({ setNotAuth }: { setNotAuth?: (
                 renderItem={({ item }) => (
                   <TouchableHighlight
                     underlayColor="#E1BEE7"
-                    style={{
-                      padding: 10,
-                      borderRadius: 8,
-                      backgroundColor: repartidorSeleccionado?.repartidor_id === item.repartidor_id ? '#7E57C2' : '#F3EFFF',
-                      marginBottom: 6,
-                    }}
+                    style={[styles.repartidorItem, repartidorSeleccionado?.repartidor_id === item.repartidor_id && styles.repartidorItemSelected]}
                     onPress={() => setRepartidorSeleccionado(item)}
                   >
-                    <Text style={{ color: repartidorSeleccionado?.repartidor_id === item.repartidor_id ? '#fff' : '#7E57C2', fontWeight: 'bold' }}>
+                    <Text style={[styles.repartidorText, repartidorSeleccionado?.repartidor_id === item.repartidor_id && styles.repartidorTextSelected]}>
                       {item.repartidor_nombre} (ID: {item.repartidor_id})
                     </Text>
                   </TouchableHighlight>
                 )}
-                ListEmptyComponent={<Text style={{ color: '#7E57C2', textAlign: 'center', marginTop: 10 }}>No hay repartidores aliados disponibles.</Text>}
-                style={{ marginBottom: 16, maxHeight: 200 }}
+                ListEmptyComponent={<Text style={styles.emptyRepartidorText}>No hay repartidores aliados disponibles.</Text>}
+                style={styles.repartidorList}
               />
             )}
             <Button
@@ -276,45 +271,32 @@ export default function ordenes_EntrantesScreen({ setNotAuth }: { setNotAuth?: (
           const detalles: DetallePedido[] = item.productos && item.productos.length > 0 ? item.productos : (item.detalles || []);
           const fechaLegible = formatearFecha(item.fecha);
           return (
-            <View style={{
-              marginBottom: 22,
-              backgroundColor: '#fff',
-              borderRadius: 20,
-              padding: 0,
-              elevation: 6,
-              shadowColor: '#7E57C2',
-              shadowOffset: { width: 0, height: 6 },
-              shadowOpacity: 0.13,
-              shadowRadius: 12,
-              overflow: 'hidden',
-              borderWidth: 1.5,
-              borderColor: '#E1BEE7',
-            }}>
+            <View style={styles.card}>
               {/* Header */}
-              <View style={{ backgroundColor: '#7E57C2', padding: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18 }}>
-                  <MaterialIcons name="assignment" size={22} color="#fff" /> Pedido #{item.id}
+              <View style={styles.cardHeader}>
+                <Text style={styles.cardHeaderText}>
+                  <MaterialIcons name="assignment" size={22} color="#fff" /> Pedido {item.id}
                 </Text>
-                <Text style={{ color: '#fff', fontSize: 14, fontWeight: '600' }}>{fechaLegible}</Text>
+                <Text style={styles.cardHeaderDate}>{fechaLegible}</Text>
               </View>
               {/* Info principal */}
-              <View style={{ padding: 16, gap: 6 }}>
-                <Text style={{ color: '#5E35B1', fontWeight: 'bold', fontSize: 16 }}>
+              <View style={styles.cardInfoBox}>
+                <Text style={styles.cardInfoCliente}>
                   <MaterialIcons name="person" size={18} color="#7E57C2" /> {item.cliente_nombre ? item.cliente_nombre : (clientes[item.cliente_id] ? clientes[item.cliente_id] : `ID: ${item.cliente_id}`)}
                 </Text>
-                <Text style={{ color: '#7E57C2', fontSize: 15 }}>
-                  <MaterialIcons name="location-on" size={18} color="#7E57C2" /> <Text style={{ fontWeight: 'bold' }}>Dirección de entrega:</Text> {item.direccion_entrega || 'No disponible'}
+                <Text style={styles.cardInfoText}>
+                  <MaterialIcons name="location-on" size={18} color="#7E57C2" /> <Text style={styles.label}>Dirección de entrega:</Text> {item.direccion_entrega || 'No disponible'}
                 </Text>
-                <Text style={{ color: '#7E57C2', fontSize: 15 }}>
-                  <MaterialIcons name="attach-money" size={18} color="#7E57C2" /> <Text style={{ fontWeight: 'bold' }}>Total:</Text> ${item.total}
+                <Text style={styles.cardInfoText}>
+                  <MaterialIcons name="attach-money" size={18} color="#7E57C2" /> <Text style={styles.label}>Total:</Text> ${item.total}
                 </Text>
-                <Text style={{ color: '#7E57C2', fontSize: 15 }}>
-                  <MaterialIcons name="info" size={18} color="#7E57C2" /> <Text style={{ fontWeight: 'bold' }}>Estatus:</Text> {item.estatus || 'Pendiente'}
+                <Text style={styles.cardInfoText}>
+                  <MaterialIcons name="info" size={18} color="#7E57C2" /> <Text style={styles.label}>Estatus:</Text> {item.estatus || 'Pendiente'}
                 </Text>
               </View>
               {/* Productos */}
-              <View style={{ backgroundColor: '#F3EFFF', paddingHorizontal: 16, paddingBottom: 12, paddingTop: 8 }}>
-                <Text style={{ color: '#5E35B1', fontWeight: 'bold', fontSize: 15, marginBottom: 2 }}>
+              <View style={styles.cardProductosBox}>
+                <Text style={styles.cardProductosTitle}>
                   <MaterialIcons name="shopping-cart" size={18} color="#7E57C2" /> Productos solicitados:
                 </Text>
                 {detalles.length > 0 ? (
@@ -325,16 +307,16 @@ export default function ordenes_EntrantesScreen({ setNotAuth }: { setNotAuth?: (
                       precioDisplay = Number(precio).toFixed(2);
                     }
                     return (
-                      <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2, marginLeft: 8 }}>
+                      <View key={idx} style={styles.productoRow}>
                         <MaterialIcons name="check-circle" size={16} color="#7E57C2" />
-                        <Text style={{ color: '#7E57C2', marginLeft: 6, fontSize: 14 }}>
-                          {detalle.nombre ? detalle.nombre : `Producto ${detalle.producto_id}`} <Text style={{ fontWeight: 'bold' }}>x{detalle.cantidad}</Text> <Text style={{ color: '#5E35B1' }}>@ ${precioDisplay}</Text>
+                        <Text style={styles.productoText}>
+                          {detalle.nombre ? detalle.nombre : `Producto ${detalle.producto_id}`} <Text style={styles.label}>x{detalle.cantidad}</Text> <Text style={styles.productoPrecio}>${precioDisplay}</Text>
                         </Text>
                       </View>
                     );
                   })
                 ) : (
-                  <Text style={{ color: '#7E57C2', fontStyle: 'italic', marginLeft: 8 }}>
+                  <Text style={styles.productoEmptyText}>
                     No hay productos asociados a este pedido.
                   </Text>
                 )}
@@ -352,19 +334,19 @@ export default function ordenes_EntrantesScreen({ setNotAuth }: { setNotAuth?: (
                 </TouchableOpacity>
               )}
               {item.estatus === 'enviado' && (
-                <TouchableOpacity style={[styles.boton, { backgroundColor: '#BDBDBD' }]} disabled>
+                <TouchableOpacity style={[styles.boton, styles.botonDisabled]} disabled>
                   <MaterialIcons name="local-shipping" size={18} color="#fff" />
                   <Text style={styles.botonTexto}>En reparto</Text>
                 </TouchableOpacity>
               )}
               {item.estatus === 'en_camino' && (
-                <TouchableOpacity style={[styles.boton, { backgroundColor: '#BDBDBD' }]} disabled>
+                <TouchableOpacity style={[styles.boton, styles.botonDisabled]} disabled>
                   <MaterialIcons name="done" size={18} color="#fff" />
                   <Text style={styles.botonTexto}>En camino</Text>
                 </TouchableOpacity>
               )}
               {item.estatus === 'entregado' && (
-                <TouchableOpacity style={[styles.boton, { backgroundColor: '#388E3C' }]} disabled>
+                <TouchableOpacity style={[styles.boton, styles.botonEntregado]} disabled>
                   <MaterialIcons name="check" size={18} color="#fff" />
                   <Text style={styles.botonTexto}>Entregado</Text>
                 </TouchableOpacity>
@@ -394,6 +376,55 @@ function formatearFecha(fecha: string) {
 }
 
 const styles = StyleSheet.create({
+  mainContainer: {
+    flex: 1,
+    backgroundColor: '#F3EFFF',
+    padding: 16,
+    marginTop: 25,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.3)',
+  },
+  modalBox: {
+    backgroundColor: '#fff',
+    padding: 24,
+    borderRadius: 16,
+    width: 320,
+    maxHeight: 400,
+  },
+  modalTitle: {
+    fontWeight: 'bold',
+    fontSize: 18,
+    marginBottom: 12,
+  },
+  repartidorList: {
+    marginBottom: 16,
+    maxHeight: 200,
+  },
+  repartidorItem: {
+    padding: 10,
+    borderRadius: 8,
+    backgroundColor: '#F3EFFF',
+    marginBottom: 6,
+  },
+  repartidorItemSelected: {
+    backgroundColor: '#7E57C2',
+  },
+  repartidorText: {
+    color: '#7E57C2',
+    fontWeight: 'bold',
+  },
+  repartidorTextSelected: {
+    color: '#fff',
+  },
+  emptyRepartidorText: {
+    color: '#7E57C2',
+    textAlign: 'center',
+    marginTop: 10,
+  },
   titulo: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -402,24 +433,83 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   card: {
+    marginBottom: 22,
     backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 18,
-    marginBottom: 16,
-    elevation: 3,
+    borderRadius: 20,
+    padding: 0,
+    elevation: 6,
     shadowColor: '#7E57C2',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.13,
-    shadowRadius: 4,
+    shadowRadius: 12,
+    overflow: 'hidden',
+    borderWidth: 1.5,
+    borderColor: '#E1BEE7',
   },
-  info: {
-    fontSize: 16,
+  cardHeader: {
+    backgroundColor: '#7E57C2',
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  cardHeaderText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
+  cardHeaderDate: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  cardInfoBox: {
+    padding: 16,
+    gap: 6,
+  },
+  cardInfoCliente: {
     color: '#5E35B1',
-    marginBottom: 6,
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  cardInfoText: {
+    color: '#7E57C2',
+    fontSize: 15,
   },
   label: {
     fontWeight: 'bold',
     color: '#7E57C2',
+  },
+  cardProductosBox: {
+    backgroundColor: '#F3EFFF',
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    paddingTop: 8,
+  },
+  cardProductosTitle: {
+    color: '#5E35B1',
+    fontWeight: 'bold',
+    fontSize: 15,
+    marginBottom: 2,
+  },
+  productoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 2,
+    marginLeft: 8,
+  },
+  productoText: {
+    color: '#7E57C2',
+    marginLeft: 6,
+    fontSize: 14,
+  },
+  productoPrecio: {
+    color: '#5E35B1',
+  },
+  productoEmptyText: {
+    color: '#7E57C2',
+    fontStyle: 'italic',
+    marginLeft: 8,
   },
   boton: {
     backgroundColor: '#7E57C2',
@@ -427,6 +517,15 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     marginTop: 10,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  botonDisabled: {
+    backgroundColor: '#BDBDBD',
+  },
+  botonEntregado: {
+    backgroundColor: '#388E3C',
   },
   botonTexto: {
     color: '#fff',

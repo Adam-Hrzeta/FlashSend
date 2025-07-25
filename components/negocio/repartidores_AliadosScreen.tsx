@@ -1,16 +1,15 @@
+import NotAuthorized from "@/components/ui/NotAuthorized";
 import { API_BASE_URL } from '@/constants/ApiConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import NotAuthorized from "@/components/ui/NotAuthorized";
 
 interface SolicitudAliado {
   id: number;
   repartidor_id: number;
   repartidor_nombre: string;
   estatus: string;
-  fecha: string;
 }
 
 export default function Repartidores_AliadosScreen({ setNotAuth }: { setNotAuth?: (v: boolean) => void }) {
@@ -61,7 +60,7 @@ export default function Repartidores_AliadosScreen({ setNotAuth }: { setNotAuth?
     fetchSolicitudes();
   }, []);
 
-  const handleAccion = async (id: number, accion: 'aceptar' | 'rechazar') => {
+  const handleAccion = async (id: number, accion: 'aceptar' | 'rechazar' | 'eliminar') => {
     try {
       const token = await AsyncStorage.getItem('access_token');
       const res = await fetch(`${API_BASE_URL}/api/negocio/solicitud_aliado/${id}/${accion}`, {
@@ -77,8 +76,8 @@ export default function Repartidores_AliadosScreen({ setNotAuth }: { setNotAuth?
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#F3EFFF', padding: 16 }}>
-      <Text style={{ fontSize: 22, fontWeight: 'bold', color: '#7E57C2', marginBottom: 18 }}>Solicitudes de Aliados</Text>
+    <View style={styles.mainContainer}>
+      <Text style={styles.titulo}>Repartidores de Negocio</Text>
       {loading ? <ActivityIndicator color="#7E57C2" /> : (
         <FlatList
           data={solicitudes}
@@ -86,23 +85,30 @@ export default function Repartidores_AliadosScreen({ setNotAuth }: { setNotAuth?
           renderItem={({ item }) => (
             <View style={styles.card}>
               <Text style={styles.info}><MaterialIcons name="person" size={18} color="#7E57C2" /> {item.repartidor_nombre}</Text>
-              <Text style={styles.info}><MaterialIcons name="event" size={18} color="#7E57C2" /> {item.fecha}</Text>
               <Text style={styles.info}><MaterialIcons name="info" size={18} color="#7E57C2" /> Estatus: {item.estatus}</Text>
               {item.estatus === 'pendiente' && (
-                <View style={{ flexDirection: 'row', gap: 10, marginTop: 10 }}>
-                  <TouchableOpacity style={[styles.boton, { backgroundColor: '#43A047' }]} onPress={() => handleAccion(item.id, 'aceptar')}>
+                <View style={styles.accionRow}>
+                  <TouchableOpacity style={[styles.boton, styles.botonAceptar]} onPress={() => handleAccion(item.id, 'aceptar')}>
                     <MaterialIcons name="check" size={18} color="#fff" />
                     <Text style={styles.botonTexto}>Aceptar</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={[styles.boton, { backgroundColor: '#C62828' }]} onPress={() => handleAccion(item.id, 'rechazar')}>
+                  <TouchableOpacity style={[styles.boton, styles.botonRechazar]} onPress={() => handleAccion(item.id, 'rechazar')}>
                     <MaterialIcons name="close" size={18} color="#fff" />
                     <Text style={styles.botonTexto}>Rechazar</Text>
                   </TouchableOpacity>
                 </View>
               )}
+              {item.estatus === 'aceptado' && (
+                <View style={styles.accionRow}>
+                  <TouchableOpacity style={[styles.boton, styles.botonEliminar]} onPress={() => handleAccion(item.id, 'eliminar')}>
+                    <MaterialIcons name="delete" size={18} color="#fff" />
+                    <Text style={styles.botonTexto}>Eliminar</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
           )}
-          ListEmptyComponent={<Text style={{ color: '#7E57C2', textAlign: 'center', marginTop: 40 }}>No hay solicitudes pendientes</Text>}
+          ListEmptyComponent={<Text style={styles.emptyText}>No hay solicitudes pendientes</Text>}
         />
       )}
     </View>
@@ -110,6 +116,18 @@ export default function Repartidores_AliadosScreen({ setNotAuth }: { setNotAuth?
 }
 
 const styles = StyleSheet.create({
+  mainContainer: {
+    flex: 1,
+    backgroundColor: '#F3EFFF',
+    padding: 16,
+    marginTop: 25,
+  },
+  titulo: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#7E57C2',
+    marginBottom: 18,
+  },
   card: {
     backgroundColor: '#fff',
     borderRadius: 16,
@@ -126,6 +144,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 4,
   },
+  accionRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 10,
+  },
   boton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -135,10 +158,24 @@ const styles = StyleSheet.create({
     marginRight: 8,
     gap: 6,
   },
+  botonAceptar: {
+    backgroundColor: '#43A047',
+  },
+  botonRechazar: {
+    backgroundColor: '#C62828',
+  },
+  botonEliminar: {
+    backgroundColor: '#E57373',
+  },
   botonTexto: {
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 15,
     marginLeft: 4,
+  },
+  emptyText: {
+    color: '#7E57C2',
+    textAlign: 'center',
+    marginTop: 40,
   },
 });

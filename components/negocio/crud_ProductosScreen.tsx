@@ -15,6 +15,7 @@ interface Producto {
   categoria?: string;
   fecha_creacion: string;
   imagen_url?: string;
+  disponible?: boolean;
 }
 
 const CATEGORIAS = [
@@ -58,9 +59,19 @@ export default function Crud_ProductosScreen({ setNotAuth }: { setNotAuth?: (v: 
       return;
     }
     if (res.ok) {
-      setProductos(await res.json());
+      setProductos((await res.json()).filter((p: Producto) => p));
     }
     setLoading(false);
+  };
+  // Marcar producto como no disponible
+  const handleToggleDisponible = async (id: number, disponible: boolean) => {
+    const token = await AsyncStorage.getItem('access_token');
+    await fetch(`${API_BASE_URL}/api/productos/${id}/disponible`, {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ disponible }),
+    });
+    fetchProductos();
   };
 
   useEffect(() => {
@@ -168,7 +179,7 @@ export default function Crud_ProductosScreen({ setNotAuth }: { setNotAuth?: (v: 
                   <Image source={{ uri: API_BASE_URL + producto.imagen_url }} style={styles.productImageBetter} />
                 )}
                 <View style={styles.productInfoBoxBetter}>
-            <View style={styles.productHeaderRow}>
+                  <View style={styles.productHeaderRow}>
                     <Text style={styles.productNameBetter} numberOfLines={1}>{producto.nombre}</Text>
                     <Text style={styles.productPriceBetter}>${producto.precio}</Text>
                   </View>
@@ -180,6 +191,13 @@ export default function Crud_ProductosScreen({ setNotAuth }: { setNotAuth?: (v: 
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => handleDelete(producto.id)} style={styles.deleteBtn}>
                       <MaterialIcons name="delete" size={20} color="#fff" />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.toggleBtn, { backgroundColor: producto.disponible === false ? '#BDBDBD' : '#43A047' }]}
+                      onPress={() => handleToggleDisponible(producto.id, false)}
+                    >
+                      <MaterialIcons name="block" size={18} color="#fff" />
+                      <Text style={styles.toggleBtnText}>No disponible</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -380,6 +398,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginTop: 4,
     justifyContent: 'flex-start',
+    gap: 8,
+  },
+  toggleBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    marginLeft: 4,
+    gap: 6,
+  },
+  toggleBtnText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 14,
+    marginLeft: 4,
   },
   editBtn: { marginRight: 12, backgroundColor: '#fff', borderRadius: 8, padding: 6, borderWidth: 1, borderColor: '#7E57C2' },
   deleteBtn: { backgroundColor: '#E57373', borderRadius: 8, padding: 6 },

@@ -1,9 +1,9 @@
+import NotAuthorized from "@/components/ui/NotAuthorized";
 import { API_BASE_URL } from '@/constants/ApiConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import NotAuthorized from "@/components/ui/NotAuthorized";
 
 interface DetallePedido {
   producto_id: number;
@@ -66,7 +66,7 @@ export default function Historial_OrdenesScreen({ setNotAuth }: { setNotAuth?: (
   const pedidosEntregados = pedidos.filter(p => p.estatus === 'entregado');
 
   if (loading) {
-    return <ActivityIndicator size="large" color="#7E57C2" style={{ marginTop: 40 }} />;
+    return <ActivityIndicator size="large" color="#7E57C2" style={styles.loadingIndicator} />;
   }
 
   if (notAuthState) {
@@ -74,12 +74,12 @@ export default function Historial_OrdenesScreen({ setNotAuth }: { setNotAuth?: (
   }
 
   if (!pedidosEntregados.length) {
-    return <Text style={{ textAlign: 'center', marginTop: 40 }}>No hay pedidos entregados</Text>;
+    return <Text style={styles.emptyText}>No hay pedidos entregados</Text>;
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#F3EFFF', padding: 16 }}>
-      <Text style={styles.titulo}>Historial de Pedidos Entregados</Text>
+    <View style={styles.mainContainer}>
+      <Text style={styles.titulo}>Pedidos Entregados</Text>
       <FlatList
         data={pedidosEntregados}
         keyExtractor={(item) => item.id?.toString() || Math.random().toString()}
@@ -93,45 +93,32 @@ export default function Historial_OrdenesScreen({ setNotAuth }: { setNotAuth?: (
           const detalles: DetallePedido[] = item.productos && item.productos.length > 0 ? item.productos : (item.detalles || []);
           const fechaLegible = formatearFecha(item.fecha);
           return (
-            <View style={{
-              marginBottom: 22,
-              backgroundColor: '#fff',
-              borderRadius: 20,
-              padding: 0,
-              elevation: 6,
-              shadowColor: '#7E57C2',
-              shadowOffset: { width: 0, height: 6 },
-              shadowOpacity: 0.13,
-              shadowRadius: 12,
-              overflow: 'hidden',
-              borderWidth: 1.5,
-              borderColor: '#E1BEE7',
-            }}>
+            <View style={styles.card}>
               {/* Header */}
-              <View style={{ backgroundColor: '#388E3C', padding: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 18 }}>
-                  <MaterialIcons name="assignment" size={22} color="#fff" /> Pedido #{item.id}
+              <View style={styles.cardHeader}>
+                <Text style={styles.cardHeaderText}>
+                  <MaterialIcons name="assignment" size={22} color="#fff" /> Pedido {item.id}
                 </Text>
-                <Text style={{ color: '#fff', fontSize: 14, fontWeight: '600' }}>{fechaLegible}</Text>
+                <Text style={styles.cardHeaderDate}>{fechaLegible}</Text>
               </View>
               {/* Info principal */}
-              <View style={{ padding: 16, gap: 6 }}>
-                <Text style={{ color: '#5E35B1', fontWeight: 'bold', fontSize: 16 }}>
-                  <MaterialIcons name="person" size={18} color="#7E57C2" /> {item.cliente_nombre ? item.cliente_nombre : `ID: ${item.cliente_id}`}
+              <View style={styles.cardInfoBox}>
+                <Text style={styles.cardInfoCliente}>
+                  <MaterialIcons name="person" size={18} color="#7E57C2" /> {item.cliente_nombre || 'Cliente'}
                 </Text>
-                <Text style={{ color: '#7E57C2', fontSize: 15 }}>
-                  <MaterialIcons name="location-on" size={18} color="#7E57C2" /> <Text style={{ fontWeight: 'bold' }}>Dirección de entrega:</Text> {item.direccion_entrega || 'No disponible'}
+                <Text style={styles.cardInfoText}>
+                  <MaterialIcons name="location-on" size={18} color="#7E57C2" /> <Text style={styles.bold}>Dirección de entrega:</Text> {item.direccion_entrega || 'No disponible'}
                 </Text>
-                <Text style={{ color: '#7E57C2', fontSize: 15 }}>
-                  <MaterialIcons name="attach-money" size={18} color="#7E57C2" /> <Text style={{ fontWeight: 'bold' }}>Total:</Text> ${item.total}
+                <Text style={styles.cardInfoText}>
+                  <MaterialIcons name="attach-money" size={18} color="#7E57C2" /> <Text style={styles.bold}>Total:</Text> ${item.total}
                 </Text>
-                <Text style={{ color: '#388E3C', fontSize: 15 }}>
-                  <MaterialIcons name="check" size={18} color="#388E3C" /> <Text style={{ fontWeight: 'bold' }}>Estatus:</Text> Entregado
+                <Text style={styles.cardInfoStatus}>
+                  <MaterialIcons name="check" size={18} color="#388E3C" /> <Text style={styles.bold}>Estatus:</Text> Entregado
                 </Text>
               </View>
               {/* Productos */}
-              <View style={{ backgroundColor: '#F3EFFF', paddingHorizontal: 16, paddingBottom: 12, paddingTop: 8 }}>
-                <Text style={{ color: '#5E35B1', fontWeight: 'bold', fontSize: 15, marginBottom: 2 }}>
+              <View style={styles.cardProductosBox}>
+                <Text style={styles.cardProductosTitle}>
                   <MaterialIcons name="shopping-cart" size={18} color="#7E57C2" /> Productos solicitados:
                 </Text>
                 {detalles.length > 0 ? (
@@ -142,16 +129,16 @@ export default function Historial_OrdenesScreen({ setNotAuth }: { setNotAuth?: (
                       precioDisplay = Number(precio).toFixed(2);
                     }
                     return (
-                      <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2, marginLeft: 8 }}>
+                      <View key={idx} style={styles.productoRow}>
                         <MaterialIcons name="check-circle" size={16} color="#7E57C2" />
-                        <Text style={{ color: '#7E57C2', marginLeft: 6, fontSize: 14 }}>
-                          {detalle.nombre ? detalle.nombre : `Producto ${detalle.producto_id}`} <Text style={{ fontWeight: 'bold' }}>x{detalle.cantidad}</Text> <Text style={{ color: '#5E35B1' }}>@ ${precioDisplay}</Text>
+                        <Text style={styles.productoText}>
+                          {detalle.nombre ? detalle.nombre : `Producto ${detalle.producto_id}`} <Text style={styles.bold}>x{detalle.cantidad}</Text> <Text style={styles.productoPrecio}>${precioDisplay}</Text>
                         </Text>
                       </View>
                     );
                   })
                 ) : (
-                  <Text style={{ color: '#7E57C2', fontStyle: 'italic', marginLeft: 8 }}>
+                  <Text style={styles.productoEmptyText}>
                     No hay productos asociados a este pedido.
                   </Text>
                 )}
@@ -181,11 +168,108 @@ function formatearFecha(fecha: string) {
 }
 
 const styles = StyleSheet.create({
+  mainContainer: {
+    flex: 1,
+    backgroundColor: '#F3EFFF',
+    padding: 16,
+    marginTop: 25,
+  },
+  loadingIndicator: {
+    marginTop: 40,
+  },
+  emptyText: {
+    textAlign: 'center',
+    marginTop: 40,
+    color: '#7E57C2',
+    fontSize: 16,
+  },
   titulo: {
-    fontSize: 24,
+    fontSize: 25,
     fontWeight: 'bold',
-    color: '#388E3C',
+    color: '#7E57C2',
     marginBottom: 18,
     textAlign: 'center',
+  },
+  card: {
+    marginBottom: 22,
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 0,
+    elevation: 6,
+    shadowColor: '#7E57C2',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.13,
+    shadowRadius: 12,
+    overflow: 'hidden',
+    borderWidth: 1.5,
+    borderColor: '#E1BEE7',
+  },
+  cardHeader: {
+    backgroundColor: '#f548a7ff',
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  cardHeaderText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
+  cardHeaderDate: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  cardInfoBox: {
+    padding: 16,
+    gap: 6,
+  },
+  cardInfoCliente: {
+    color: '#5E35B1',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  cardInfoText: {
+    color: '#7E57C2',
+    fontSize: 15,
+  },
+  cardInfoStatus: {
+    color: '#388E3C',
+    fontSize: 15,
+  },
+  bold: {
+    fontWeight: 'bold',
+  },
+  cardProductosBox: {
+    backgroundColor: '#F3EFFF',
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    paddingTop: 8,
+  },
+  cardProductosTitle: {
+    color: '#5E35B1',
+    fontWeight: 'bold',
+    fontSize: 15,
+    marginBottom: 2,
+  },
+  productoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 2,
+    marginLeft: 8,
+  },
+  productoText: {
+    color: '#7E57C2',
+    marginLeft: 6,
+    fontSize: 14,
+  },
+  productoPrecio: {
+    color: '#5E35B1',
+  },
+  productoEmptyText: {
+    color: '#7E57C2',
+    fontStyle: 'italic',
+    marginLeft: 8,
   },
 });
