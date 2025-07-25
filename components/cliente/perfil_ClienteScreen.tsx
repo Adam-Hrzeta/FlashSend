@@ -165,6 +165,15 @@ export default function Perfil_ClienteScreen({ setNotAuth }: { setNotAuth?: (v: 
       fechaModificada = fecha.toISOString().split('T')[0];
     }
 
+    // Solo enviar los campos permitidos
+    const { nombre, correo, telefono, fecha_nacimiento } = editData;
+    const payload = {
+      nombre,
+      correo,
+      telefono,
+      fecha_nacimiento: fechaModificada,
+    };
+
     try {
       const token = await AsyncStorage.getItem('access_token');
       const response = await fetch(`${API_BASE_URL}/api/perfilCliente/editarPerfil`, {
@@ -173,7 +182,7 @@ export default function Perfil_ClienteScreen({ setNotAuth }: { setNotAuth?: (v: 
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ...editData, fecha_nacimiento: fechaModificada }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -182,7 +191,10 @@ export default function Perfil_ClienteScreen({ setNotAuth }: { setNotAuth?: (v: 
       }
 
       const data = await response.json();
-      setCliente(data.cliente);
+      // Si el avatar viene vacío, null, o es una cadena muy corta, conservar el anterior
+      // Al editar datos personales, siempre conservar el avatar anterior
+      let newCliente = { ...data.cliente, avatar: cliente?.avatar };
+      setCliente(newCliente);
       setEditModalVisible(false);
       Alert.alert('Perfil actualizado');
     } catch (error) {
