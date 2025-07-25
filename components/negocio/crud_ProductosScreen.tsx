@@ -66,12 +66,22 @@ export default function Crud_ProductosScreen({ setNotAuth }: { setNotAuth?: (v: 
   // Marcar producto como no disponible
   const handleToggleDisponible = async (id: number, disponible: boolean) => {
     const token = await AsyncStorage.getItem('access_token');
-    await fetch(`${API_BASE_URL}/api/productos/${id}/disponible`, {
-      method: 'PUT',
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ disponible }),
-    });
-    fetchProductos();
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/productos/${id}/disponible`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ disponible }),
+      });
+      if (res.ok) {
+        Alert.alert('Éxito', disponible ? 'Producto marcado como disponible' : 'Producto marcado como no disponible');
+        fetchProductos();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        Alert.alert('Error', data?.mensaje || 'No se pudo actualizar la disponibilidad');
+      }
+    } catch (e) {
+      Alert.alert('Error', 'No se pudo conectar al servidor');
+    }
   };
 
   useEffect(() => {
@@ -152,6 +162,17 @@ export default function Crud_ProductosScreen({ setNotAuth }: { setNotAuth?: (v: 
     setUploading(false);
   };
 
+function isProductoDisponible(producto: Producto): boolean {
+  const val = producto.disponible;
+  if (typeof val === 'boolean') return val;
+  if (typeof val === 'number') return val === 1;
+  if (typeof val === 'string') {
+    const strVal = String(val).toLowerCase();
+    return val === '1' || strVal === 'true';
+  }
+  return false;
+}
+
   if (notAuthState) {
     return <NotAuthorized message="No autorizado: solo negocios pueden acceder a este panel." />;
   }
@@ -193,11 +214,11 @@ export default function Crud_ProductosScreen({ setNotAuth }: { setNotAuth?: (v: 
                       <MaterialIcons name="delete" size={20} color="#fff" />
                     </TouchableOpacity>
                     <TouchableOpacity
-                      style={[styles.toggleBtn, { backgroundColor: producto.disponible === false ? '#BDBDBD' : '#43A047' }]}
-                      onPress={() => handleToggleDisponible(producto.id, false)}
+                      style={[styles.toggleBtn, { backgroundColor: isProductoDisponible(producto) ? '#43A047' : '#BDBDBD' }]}
+                      onPress={() => handleToggleDisponible(producto.id, !isProductoDisponible(producto))}
                     >
-                      <MaterialIcons name="block" size={18} color="#fff" />
-                      <Text style={styles.toggleBtnText}>No disponible</Text>
+                      <MaterialIcons name={isProductoDisponible(producto) ? 'check-circle' : 'block'} size={18} color="#fff" />
+                      <Text style={styles.toggleBtnText}>{isProductoDisponible(producto) ? 'Disponible' : 'No disponible'}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>

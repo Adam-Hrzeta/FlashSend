@@ -162,35 +162,10 @@ export default function ordenes_EntrantesScreen({ setNotAuth }: { setNotAuth?: (
     setPedidoAEnviar(null);
   };
 
-  // Obtener nombre de cliente por id
-  const [clientes, setClientes] = useState<{ [key: number]: string }>({});
-  const fetchClienteNombre = async (clienteId: number) => {
-    if (clientes[clienteId]) return clientes[clienteId];
-    try {
-      const token = await AsyncStorage.getItem('access_token');
-      const res = await fetch(`${API_BASE_URL}/api/perfilCliente/perfilCliente?id=${clienteId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await res.json();
-      if (data.cliente && data.cliente.nombre) {
-        setClientes(prev => ({ ...prev, [clienteId]: data.cliente.nombre }));
-        return data.cliente.nombre;
-      }
-    } catch { }
-    return clienteId;
-  };
+  // El nombre del cliente ya viene en cliente_nombre desde el backend
 
   // Cargar nombres de clientes para los pedidos
-  useEffect(() => {
-    (async () => {
-      for (const pedido of pedidos) {
-        if (pedido.cliente_id && !clientes[pedido.cliente_id]) {
-          await fetchClienteNombre(pedido.cliente_id);
-        }
-      }
-    })();
-    // eslint-disable-next-line
-  }, [pedidos]);
+  // Eliminado: ya no es necesario buscar el nombre del cliente, viene en cliente_nombre
 
   // Elimina el refresco automático, solo actualiza al enfocar o al hacer pull-to-refresh
   useFocusEffect(
@@ -282,7 +257,7 @@ export default function ordenes_EntrantesScreen({ setNotAuth }: { setNotAuth?: (
               {/* Info principal */}
               <View style={styles.cardInfoBox}>
                 <Text style={styles.cardInfoCliente}>
-                  <MaterialIcons name="person" size={18} color="#7E57C2" /> {item.cliente_nombre ? item.cliente_nombre : (clientes[item.cliente_id] ? clientes[item.cliente_id] : `ID: ${item.cliente_id}`)}
+                  <MaterialIcons name="person" size={18} color="#7E57C2" /> {item.cliente_nombre ? item.cliente_nombre : `ID: ${item.cliente_id}`}
                 </Text>
                 <Text style={styles.cardInfoText}>
                   <MaterialIcons name="location-on" size={18} color="#7E57C2" /> <Text style={styles.label}>Dirección de entrega:</Text> {item.direccion_entrega || 'No disponible'}

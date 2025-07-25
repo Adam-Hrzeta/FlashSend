@@ -71,6 +71,11 @@ export default function Perfil_ClienteScreen({ setNotAuth }: { setNotAuth?: (v: 
         setLoading(false);
         return;
       }
+      // Evitar llamadas repetidas si ya se tiene el cliente
+      if (cliente) {
+        setLoading(false);
+        return;
+      }
       const response = await fetch(`${API_BASE_URL}/api/perfilCliente/perfilCliente`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -205,24 +210,27 @@ export default function Perfil_ClienteScreen({ setNotAuth }: { setNotAuth?: (v: 
         const data = await uploadResponse.json().catch(() => ({}));
         throw new Error(data?.mensaje || 'Error al actualizar la foto');
       }
-
-      const profileRes = await fetch(
-        `${API_BASE_URL}/api/perfilCliente/perfilCliente`,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
+        if (!uploadResponse.ok) {
+          const data = await uploadResponse.json().catch(() => ({}));
+          throw new Error(data?.mensaje || 'Error al actualizar la foto');
         }
-      );
-
-      if (!profileRes.ok) {
-        throw new Error('Error al refrescar perfil');
-      }
-
-      const profileData = await profileRes.json();
-      setCliente(profileData.cliente);
-      setLocalAvatar(null);
+        // Solo refresca si hay token y no error previo
+        if (token) {
+          const profileRes = await fetch(
+            `${API_BASE_URL}/api/perfilCliente/perfilCliente`,
+            {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+          if (!profileRes.ok) {
+            throw new Error('Error al refrescar perfil');
+          }
+          const profileData = await profileRes.json();
+          setCliente(profileData.cliente);
+        }
 
       Alert.alert('Éxito', 'Foto de perfil actualizada correctamente');
     } catch (error) {
@@ -256,7 +264,9 @@ export default function Perfil_ClienteScreen({ setNotAuth }: { setNotAuth?: (v: 
     if (token) {
       await fetch(`${API_BASE_URL}/api/auth/logout`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
       });
     }
     await AsyncStorage.removeItem('access_token');
