@@ -1,10 +1,10 @@
+import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
 import { API_BASE_URL } from "@/constants/ApiConfig";
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, FlatList, Modal, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
-import { ThemedView } from '@/components/ThemedView';
-import { ThemedText } from '@/components/ThemedText';
 
 interface Usuario {
   id: number;
@@ -108,7 +108,7 @@ export default function Crud_UsuariosScreen({ setNotAuth }: { setNotAuth?: (v: b
       const token = await AsyncStorage.getItem('access_token');
       const body = { nombre, correo, tipo, ...(contrasena ? { contrasena } : {}) };
       if (editUser) {
-        await fetch(`${API_BASE_URL}/api/dashboard_admin/usuarios/${editUser.id}`, {
+        await fetch(`${API_BASE_URL}/api/dashboard_admin/usuarios/${editUser.tipo}/${editUser.id}`, {
           method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify(body)
         });
       } else {
