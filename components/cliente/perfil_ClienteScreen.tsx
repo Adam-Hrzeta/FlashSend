@@ -6,18 +6,18 @@ import * as ImagePicker from 'expo-image-picker';
 import { router, useFocusEffect } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Animated,
-    Image,
-    Modal,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Animated,
+  Image,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import ImagePickerComponent from '../cliente/modal-foto/imagenpiker';
 
@@ -512,17 +512,85 @@ export default function Perfil_ClienteScreen({ setNotAuth }: { setNotAuth?: (v: 
         >
           <View style={styles.modalContainer}>
             <View style={styles.modalContentCustom}>
+              {/* Icon and Title */}
               <View style={styles.modalIconCircle}>
                 <MaterialIcons name="edit" size={38} color="#fff" />
               </View>
               <Text style={styles.modalTitleCustom}>Editar información</Text>
-              <View style={styles.inputRow}><MaterialIcons name="person" size={20} color="#BA68C8" style={styles.inputIcon} /><TextInput style={styles.inputCustom} placeholder="Nombre" placeholderTextColor="#BA68C8" value={editData.nombre || ''} onChangeText={text => setEditData({ ...editData, nombre: text })} /></View>
-              <View style={styles.inputRow}><MaterialIcons name="email" size={20} color="#BA68C8" style={styles.inputIcon} /><TextInput style={styles.inputCustom} placeholder="Correo" placeholderTextColor="#BA68C8" value={editData.correo || ''} onChangeText={text => setEditData({ ...editData, correo: text })} keyboardType="email-address" /></View>
-              <View style={styles.inputRow}><MaterialIcons name="phone" size={20} color="#BA68C8" style={styles.inputIcon} /><TextInput style={styles.inputCustom} placeholder="Teléfono" placeholderTextColor="#BA68C8" value={editData.telefono || ''} onChangeText={text => setEditData({ ...editData, telefono: text })} keyboardType="phone-pad" /></View>
-              <TouchableOpacity onPress={() => setShowDatePicker(true)} style={[styles.inputRow, { paddingVertical: 12 }]}> <MaterialIcons name="cake" size={20} color="#BA68C8" style={styles.inputIcon} /> <Text style={{ color: '#5E35B1', fontSize: 16 }}>{editData.fecha_nacimiento ? formatDate(editData.fecha_nacimiento) : 'Seleccionar fecha de nacimiento'}</Text> </TouchableOpacity>
-              {showDatePicker && (<DateTimePicker value={editData.fecha_nacimiento ? new Date(editData.fecha_nacimiento) : new Date()} mode="date" display={Platform.OS === 'ios' ? 'spinner' : 'default'} onChange={(event, selectedDate) => { setShowDatePicker(false); if (selectedDate) { const formattedDate = selectedDate.toISOString().split('T')[0]; setEditData({ ...editData, fecha_nacimiento: formattedDate }); } }} />)}
-              <TouchableOpacity style={styles.modalButton} onPress={handleSaveEdit}><Text style={styles.modalButtonText}><MaterialIcons name="save" size={18} color="#fff" /> Guardar</Text></TouchableOpacity>
-              <TouchableOpacity style={styles.cancelButtonCustom} onPress={() => setEditModalVisible(false)}><Text style={styles.cancelButtonText}><MaterialIcons name="close" size={18} color="#7E57C2" /> Cancelar</Text></TouchableOpacity>
+
+              {/* Input Fields */}
+              <View style={styles.inputRow}>
+                <MaterialIcons name="person" size={20} color="#BA68C8" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.inputCustom}
+                  placeholder="Nombre"
+                  placeholderTextColor="#BA68C8"
+                  value={editData.nombre || ''}
+                  onChangeText={text => setEditData({ ...editData, nombre: text })}
+                />
+              </View>
+              <View style={styles.inputRow}>
+                <MaterialIcons name="email" size={20} color="#BA68C8" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.inputCustom}
+                  placeholder="Correo"
+                  placeholderTextColor="#BA68C8"
+                  value={editData.correo || ''}
+                  onChangeText={text => setEditData({ ...editData, correo: text })}
+                  keyboardType="email-address"
+                />
+              </View>
+              <View style={styles.inputRow}>
+                <MaterialIcons name="phone" size={20} color="#BA68C8" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.inputCustom}
+                  placeholder="Teléfono"
+                  placeholderTextColor="#BA68C8"
+                  value={editData.telefono || ''}
+                  onChangeText={text => setEditData({ ...editData, telefono: text })}
+                  keyboardType="phone-pad"
+                />
+              </View>
+              <TouchableOpacity
+                onPress={() => setShowDatePicker(true)}
+                style={[styles.inputRow, { paddingVertical: 12 }]}
+              >
+                <MaterialIcons name="cake" size={20} color="#BA68C8" style={styles.inputIcon} />
+                <Text style={{ color: '#5E35B1', fontSize: 16 }}>
+                  {editData.fecha_nacimiento ? formatDate(editData.fecha_nacimiento) : 'Seleccionar fecha de nacimiento'}
+                </Text>
+              </TouchableOpacity>
+              {showDatePicker && (
+                <DateTimePicker
+                  value={editData.fecha_nacimiento ? new Date(editData.fecha_nacimiento) : new Date()}
+                  mode="date"
+                  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                  onChange={(event, selectedDate) => {
+                    setShowDatePicker(false);
+                    if (selectedDate) {
+                      const formattedDate = selectedDate.toISOString().split('T')[0];
+                      setEditData({ ...editData, fecha_nacimiento: formattedDate });
+                    }
+                  }}
+                />
+              )}
+
+              {/* Buttons */}
+              <TouchableOpacity style={styles.modalButton} onPress={handleSaveEdit}>
+                <Text style={styles.modalButtonText}>
+                  <MaterialIcons name="save" size={18} color="#fff" />
+                  <Text> Guardar</Text>
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.cancelButtonCustom}
+                onPress={() => setEditModalVisible(false)}
+              >
+                <Text style={styles.cancelButtonText}>
+                  <MaterialIcons name="close" size={18} color="#7E57C2" />
+                  <Text> Cancelar</Text>
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
         </Modal>
@@ -834,3 +902,25 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
 });
+
+// Reusable button component for the modal with TypeScript types
+type MaterialIconName = React.ComponentProps<typeof MaterialIcons>["name"];
+
+interface ModalButtonProps {
+  onPress: () => void;
+  style: object;
+  textStyle: object;
+  iconName: MaterialIconName;
+  iconColor: string;
+  iconSize: number;
+  text: string;
+}
+
+const ModalButton: React.FC<ModalButtonProps> = ({ onPress, style, textStyle, iconName, iconColor, iconSize, text }) => (
+  <TouchableOpacity style={style} onPress={onPress}>
+    <Text style={textStyle}>
+      <MaterialIcons name={iconName} size={iconSize} color={iconColor} />
+      <Text> {text}</Text>
+    </Text>
+  </TouchableOpacity>
+);
