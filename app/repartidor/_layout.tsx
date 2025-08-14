@@ -38,6 +38,15 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="historial_Pedidos_Asignados"
+        options={{
+          title: 'historial de pedidos asignados',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="time" color={color} size={size} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

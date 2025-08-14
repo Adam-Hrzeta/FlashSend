@@ -54,7 +54,7 @@ const Pedidos_AsignadosScreen = ({ setNotAuth }: { setNotAuth?: (v: boolean) => 
         return;
       }
       const data = await res.json();
-      setPedidos(data.pedidos || []);
+      setPedidos((data.pedidos || []).filter((pedido: Pedido) => pedido.estatus !== 'entregado'));
     } catch (e) {
       Alert.alert('Error', 'No se pudieron cargar los pedidos');
     } finally {
@@ -196,10 +196,6 @@ const Pedidos_AsignadosScreen = ({ setNotAuth }: { setNotAuth?: (v: boolean) => 
           )}
         />
       )}
-      <TouchableOpacity style={styles.botonVolver} onPress={() => router.push('/repartidor/perfil_Repartidor')}>
-        <MaterialIcons name="arrow-back" size={22} color="#fff" />
-        <Text style={styles.textoBoton}>Volver al perfil</Text>
-      </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -212,6 +208,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3E5F5',
     paddingHorizontal: 16,
     paddingTop: 10,
+    marginTop: 35,
   },
   titulo: {
     fontSize: 24,

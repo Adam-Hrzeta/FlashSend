@@ -289,54 +289,18 @@ export default function Perfil_RepartidorScreen({ setNotAuth }: { setNotAuth?: (
       )}
       <View style={styles.headerRow}>
         <View style={styles.avatarCircle}>
-          <Image
-            source={{
-              uri: repartidor?.avatar ? `${repartidor.avatar}&t=${Date.now()}` : undefined
-            }}
-            style={styles.avatar}
-          />
-          {/* Botón de cambio de foto con ImagePickerComponent */}
-          <View style={{
-            position: 'absolute',
-            top: -80,
-            alignSelf: 'center',
-            backgroundColor: '#fff',
-            borderRadius: 90,
-            width: 180,
-            height: 180,
-            justifyContent: 'center',
-            alignItems: 'center',
-            elevation: 10,
-            shadowColor: '#7E57C2',
-            shadowOffset: { width: 0, height: 8 },
-            shadowOpacity: 0.20,
-            shadowRadius: 18,
-          }}>
-            {repartidor?.avatar && (
-              <Image
-                source={{ uri: repartidor.avatar + `?t=${Date.now()}` }}
-                style={{ width: 165, height: 165, borderRadius: 82.5 }}
-              />
-            )}
-            <TouchableOpacity
-              style={{
-                position: 'absolute',
-                bottom: 14,
-                right: 14,
-                backgroundColor: '#fff',
-                borderRadius: 30,
-                padding: 10,
-                elevation: 4,
-                shadowColor: '#7E57C2',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.13,
-                shadowRadius: 4,
-              }}
-              onPress={() => !isUpdatingPhoto && setShowImagePicker(true)}
-            >
-              <MaterialIcons name="camera-alt" size={28} color="#7E57C2" />
-            </TouchableOpacity>
-          </View>
+          {repartidor?.avatar && (
+            <Image
+              source={{ uri: `${repartidor.avatar}&t=${Date.now()}` }}
+              style={styles.avatar}
+            />
+          )}
+          <TouchableOpacity
+            style={styles.changePhotoButton}
+            onPress={() => !isUpdatingPhoto && setShowImagePicker(true)}
+          >
+            <MaterialIcons name="camera-alt" size={28} color="#ffffffff" />
+          </TouchableOpacity>
         </View>
         <View style={styles.infoSide}>
           <Text style={styles.nameOnly}>
@@ -351,14 +315,6 @@ export default function Perfil_RepartidorScreen({ setNotAuth }: { setNotAuth?: (
       <TouchableOpacity style={styles.editButton} onPress={handleEdit}>
         <MaterialIcons name="edit" size={20} color="#7E57C2" />
         <Text style={styles.editButtonText}>Editar información</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={[styles.editButton, { marginTop: 8, backgroundColor: '#BA68C8', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }]}
-        onPress={() => router.push('/repartidor/pedidos_Asignados')}
-      >
-        <MaterialIcons name="assignment" size={20} color="#fff" />
-        <Text style={[styles.editButtonText, { color: '#fff', marginLeft: 6 }]}>Ver pedidos asignados</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -582,6 +538,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F8F5FF',
     padding: 0,
+    marginTop: 35,
   },
   changePhotoButton: {
     position: 'absolute',
