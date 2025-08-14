@@ -144,7 +144,7 @@ export default function ordenes_EntrantesScreen({ setNotAuth }: { setNotAuth?: (
       const res = await fetch(`${API_BASE_URL}/api/pedidos_negocio/enviar_pedido/${pedidoAEnviar}`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ repartidor_id: repartidorSeleccionado.repartidor_id })
+        body: JSON.stringify({ repartidor_id: repartidorSeleccionado.repartidor_id, estatus: 'esperando confirmación de repartidor' })
       });
       const data = await res.json();
       if (res.ok) {

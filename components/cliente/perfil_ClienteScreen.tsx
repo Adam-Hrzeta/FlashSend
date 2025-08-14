@@ -473,7 +473,10 @@ export default function Perfil_ClienteScreen({ setNotAuth }: { setNotAuth?: (v: 
                     <View style={styles.pedidoInfo}>
                       <Text style={styles.pedidoNegocio}><MaterialIcons name="store" size={16} color="#7E57C2" /> {pedido.negocio_nombre || pedido.negocio_id}</Text>
                       <Text style={styles.pedidoTotal}><MaterialIcons name="attach-money" size={16} color="#7E57C2" /> <Text style={{ fontWeight: 'bold' }}>Total:</Text> ${pedido.total}</Text>
-                      <Text style={styles.pedidoEstatus}><MaterialIcons name="info" size={16} color="#7E57C2" /> <Text style={{ fontWeight: 'bold' }}>Estatus:</Text> {pedido.estatus === 'enviado' ? 'En camino' : pedido.estatus}</Text>
+                      <Text style={styles.pedidoEstatus}>
+                        <MaterialIcons name="info" size={16} color="#7E57C2" />
+                        <Text style={{ fontWeight: 'bold' }}>Estatus:</Text> {pedido.estatus === 'enviado' ? 'Asignando repartidor' : pedido.estatus === 'en_camino' ? 'En camino' : pedido.estatus}
+                      </Text>
                       <Text style={styles.pedidoDireccion}><MaterialIcons name="location-on" size={16} color="#7E57C2" /> <Text style={{ fontWeight: 'bold' }}>Dirección:</Text> {pedido.direccion_entrega}</Text>
                     </View>
                     <View style={styles.pedidoProductos}>

@@ -156,7 +156,9 @@ const Pedidos_AsignadosScreen = ({ setNotAuth }: { setNotAuth?: (v: boolean) => 
               <Text style={styles.text}>
                 Total: ${item.total !== undefined && !isNaN(Number(item.total)) ? Number(item.total).toFixed(2) : 'N/A'}
               </Text>
-              <Text style={styles.text}>Estatus: {item.estatus}</Text>
+              <Text style={styles.text}>
+                Estatus: {item.estatus === 'enviado' ? 'Asignando repartidor' : item.estatus === 'en_camino' ? 'En camino' : item.estatus}
+              </Text>
               <Text style={styles.subtitulo}>🛒 Productos</Text>
               {item.productos && item.productos.length > 0 ? (
                 item.productos.map((prod, idx) => (
