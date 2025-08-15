@@ -22,6 +22,7 @@ interface PedidoEntrante {
   direccion_entrega?: string;
   estatus?: string;
   cliente_nombre?: string;
+  comentario?: string; // Agregado para mostrar el comentario
   productos?: DetallePedido[];
   detalles?: DetallePedido[]; // <- para compatibilidad y evitar error TS
 }
@@ -268,6 +269,11 @@ export default function ordenes_EntrantesScreen({ setNotAuth }: { setNotAuth?: (
                 <Text style={styles.cardInfoText}>
                   <MaterialIcons name="info" size={18} color="#7E57C2" /> <Text style={styles.label}>Estatus:</Text> {item.estatus || 'Pendiente'}
                 </Text>
+                {item.comentario && (
+                  <Text style={styles.cardInfoText}>
+                    <MaterialIcons name="comment" size={18} color="#7E57C2" /> <Text style={styles.label}>Comentario:</Text> {item.comentario}
+                  </Text>
+                )}
               </View>
               {/* Productos */}
               <View style={styles.cardProductosBox}>

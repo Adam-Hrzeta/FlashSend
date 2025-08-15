@@ -19,6 +19,7 @@ interface PedidoHistorial {
   fecha: string;
   estatus: string;
   direccion_entrega: string;
+  comentario?: string; // Agregado para mostrar el comentario
   productos?: DetallePedido[];
   detalles?: DetallePedido[];
 }
@@ -119,6 +120,11 @@ export default function Historial_PedidosScreen({ setNotAuth }: { setNotAuth?: (
                 <Text style={{ color: '#388E3C', fontSize: 15 }}>
                   <MaterialIcons name="check" size={18} color="#388E3C" /> <Text style={{ fontWeight: 'bold' }}>Estatus:</Text> Entregado
                 </Text>
+                {item.comentario && (
+                  <Text style={{ color: '#7E57C2', fontSize: 15 }}>
+                    <MaterialIcons name="comment" size={18} color="#7E57C2" /> <Text style={{ fontWeight: 'bold' }}>Comentario:</Text> {item.comentario}
+                  </Text>
+                )}
               </View>
               {/* Productos */}
               <View style={{ backgroundColor: '#F3EFFF', paddingHorizontal: 16, paddingBottom: 12, paddingTop: 8 }}>

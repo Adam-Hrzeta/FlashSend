@@ -14,6 +14,8 @@ export default function Carrito_ComprasScreen() {
   const [obteniendoUbicacion, setObteniendoUbicacion] = useState(false);
   const [direccionManual, setDireccionManual] = useState("");
   const [seleccionUbicacion, setSeleccionUbicacion] = useState<"actual"|"manual"|null>(null);
+  const [comentario, setComentario] = useState("");
+  const [comentarioModalVisible, setComentarioModalVisible] = useState(false);
 
   const solicitarUbicacion = async () => {
     setObteniendoUbicacion(true);
@@ -42,6 +44,15 @@ export default function Carrito_ComprasScreen() {
     } finally {
       setObteniendoUbicacion(false);
     }
+  };
+
+  const solicitarComentario = () => {
+    setComentarioModalVisible(true);
+  };
+
+  const confirmarComentario = () => {
+    setComentarioModalVisible(false);
+    setModalVisible(true); // Mostrar modal para seleccionar ubicación
   };
 
   const realizarPedido = async () => {
@@ -78,7 +89,8 @@ export default function Carrito_ComprasScreen() {
           productos: productos.map(p => ({ id: p.id, cantidad: p.cantidad, precio: p.precio })),
           total,
           negocio_id,
-          direccion_entrega: direccionFinal
+          direccion_entrega: direccionFinal,
+          comentario // Enviar el comentario al backend
         })
       });
       const data = await res.json();
@@ -88,6 +100,7 @@ export default function Carrito_ComprasScreen() {
         setDireccionEntrega(null);
         setDireccionManual("");
         setSeleccionUbicacion(null);
+        setComentario(""); // Limpiar el comentario
       } else {
         Alert.alert("Error", data.message || "No se pudo realizar el pedido.");
       }
@@ -135,9 +148,10 @@ export default function Carrito_ComprasScreen() {
       <TouchableOpacity style={styles.clearBtn} onPress={limpiarCarrito}>
         <Text style={styles.clearText}>Vaciar carrito</Text>
       </TouchableOpacity>
+      {/* Botón para iniciar el flujo de pedido */}
       <TouchableOpacity
         style={[styles.clearBtn, { backgroundColor: '#7E57C2', marginTop: 12 }]}
-        onPress={() => setModalVisible(true)}
+        onPress={solicitarComentario}
         disabled={productos.length === 0 || loading || obteniendoUbicacion}
       >
         <Text style={[styles.clearText, { color: '#fff' }]}>{loading ? 'Enviando...' : obteniendoUbicacion ? 'Obteniendo ubicación...' : 'Realizar pedido'}</Text>
@@ -187,6 +201,32 @@ export default function Carrito_ComprasScreen() {
                 setModalVisible(false);
                 setSeleccionUbicacion(null);
               }}
+            >
+              <Text style={{ color: '#fff', fontWeight: 'bold' }}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+      {/* Modal para ingresar comentario */}
+      <Modal visible={comentarioModalVisible} transparent animationType="slide">
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.3)' }}>
+          <View style={{ backgroundColor: '#fff', padding: 24, borderRadius: 16, width: 320 }}>
+            <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 12 }}>Agrega un comentario para tu pedido</Text>
+            <TextInput
+              style={{ borderWidth: 1, borderColor: '#7E57C2', borderRadius: 8, padding: 8, marginBottom: 12 }}
+              placeholder="Escribe un comentario (opcional)"
+              value={comentario}
+              onChangeText={setComentario}
+            />
+            <TouchableOpacity
+              style={{ backgroundColor: '#7E57C2', padding: 12, borderRadius: 8, marginBottom: 8 }}
+              onPress={confirmarComentario}
+            >
+              <Text style={{ color: '#fff', fontWeight: 'bold' }}>Confirmar comentario</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{ backgroundColor: '#BDBDBD', padding: 12, borderRadius: 8 }}
+              onPress={() => setComentarioModalVisible(false)}
             >
               <Text style={{ color: '#fff', fontWeight: 'bold' }}>Cancelar</Text>
             </TouchableOpacity>
