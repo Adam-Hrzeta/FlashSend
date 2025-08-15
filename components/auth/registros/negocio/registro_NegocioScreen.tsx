@@ -482,7 +482,6 @@ export default function Registro_NegocioScreen() {
 }
 
 const styles = StyleSheet.create({
-  // ...tus estilos existentes...
   gradient: {
     flex: 1,
     justifyContent: 'center',
@@ -491,12 +490,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    paddingHorizontal: 8,
   },
   card: {
     backgroundColor: 'rgba(255,255,255,0.98)',
     borderRadius: 26,
-    padding: 22,
+    padding: 20,
     shadowColor: '#7E57C2',
     shadowOffset: { width: 0, height: 16 },
     shadowOpacity: 0.38,
@@ -505,6 +503,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(126, 87, 194, 0.16)',
     alignItems: 'center',
+    marginTop: 40,
   },
   logoCircle: {
     width: 74,
